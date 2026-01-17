@@ -474,6 +474,82 @@ const contentDatabase: ContentItem[] = [
 ];
 
 // ============================================================================
+// DEMO PERSONAS (for demos, onboarding, and investor pitches)
+// ============================================================================
+
+interface DemoPersona {
+  id: string;
+  name: string;
+  age: number;
+  goal: string;
+  profile: string;
+  activeProgram: string;
+  activeProgramId: number;
+  weeklyGoalMinutes: number;
+  studyFocus: string[];
+  painPoints: string[];
+  narrative: string;
+  avatar: string;
+}
+
+const DEMO_PERSONAS: DemoPersona[] = [
+  {
+    id: "bacen",
+    name: "Lucas Almeida",
+    age: 27,
+    goal: "Aprovação no concurso do BACEN",
+    profile: "Concursos Públicos",
+    activeProgram: "BACEN",
+    activeProgramId: 1,
+    weeklyGoalMinutes: 600,
+    studyFocus: ["Economia", "Sistema Financeiro", "Raciocínio Lógico"],
+    painPoints: [
+      "Dificuldade em manter constância",
+      "Muitos conteúdos dispersos",
+      "Pouco feedback de progresso"
+    ],
+    narrative: "O Lucas usa o StudAI para transformar um edital complexo em um plano semanal executável.",
+    avatar: "LA"
+  },
+  {
+    id: "data",
+    name: "Mariana Costa",
+    age: 29,
+    goal: "Primeira vaga como Data Analyst",
+    profile: "Transição de Carreira",
+    activeProgram: "Data Analyst",
+    activeProgramId: 6,
+    weeklyGoalMinutes: 480,
+    studyFocus: ["SQL", "Python", "Estatística"],
+    painPoints: [
+      "Não sabe o que estudar primeiro",
+      "Quer comprovar progresso",
+      "Quer estudar com foco em empregabilidade"
+    ],
+    narrative: "A Mariana usa o StudAI como um roadmap guiado para entrar em dados, com recomendações baseadas em objetivos reais.",
+    avatar: "MC"
+  },
+  {
+    id: "cfa",
+    name: "Rafael Santos",
+    age: 31,
+    goal: "Aprovação no CFA Level I",
+    profile: "Certificações Profissionais",
+    activeProgram: "CFA Level I",
+    activeProgramId: 3,
+    weeklyGoalMinutes: 420,
+    studyFocus: ["Ethics", "Financial Reporting", "Quantitative Methods"],
+    painPoints: [
+      "Conteúdo extenso em inglês",
+      "Precisa conciliar com trabalho",
+      "Quer acompanhar progresso por tópico"
+    ],
+    narrative: "O Rafael usa o StudAI para organizar seu estudo do CFA em blocos semanais, com revisões espaçadas.",
+    avatar: "RS"
+  }
+];
+
+// ============================================================================
 // GOALS (Professional Goals)
 // ============================================================================
 
@@ -873,6 +949,7 @@ const Dashboard = () => {
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [selectedAreaFilter, setSelectedAreaFilter] = useState<AreaId | "all">("all");
+  const [selectedPersona, setSelectedPersona] = useState<DemoPersona | null>(null);
 
   // Global search
   const [globalSearchQuery, setGlobalSearchQuery] = useState("");
@@ -1065,15 +1142,23 @@ const Dashboard = () => {
     setBookmarks([]);
     setPlanItems([]);
     setReviews([]);
+    setSelectedPersona(null);
     addToast({ message: "Dados restaurados", type: "success" });
   };
 
-  const generateDemoData = () => {
+  const generateDemoDataForPersona = (persona: DemoPersona) => {
     const random = seededRandom(42);
     const newSessions: Session[] = [];
-    const topics = ["Ethics & Standards", "Quantitative Methods", "SQL Avançado", "Python Pandas", "Economia Brasileira", "Financial Reporting", "Business Writing", "Valuation", "Gestão de Riscos"];
+    
+    // Topics based on persona's study focus
+    const topicsMap: Record<string, string[]> = {
+      bacen: ["Política Monetária", "Sistema Financeiro Nacional", "Economia Brasileira", "Raciocínio Lógico", "Matemática Financeira", "Direito Administrativo"],
+      data: ["SQL Avançado - Joins", "Python Pandas", "Estatística Descritiva", "Visualização de Dados", "Machine Learning Intro", "Git & GitHub"],
+      cfa: ["Ethics & Standards", "Quantitative Methods", "Financial Reporting", "Corporate Finance", "Equity Valuation", "Fixed Income", "Derivatives"]
+    };
+    
+    const topics = topicsMap[persona.id] || topicsMap.cfa;
     const types: Session["type"][] = ["Conceitual", "Exercícios", "Simulado", "Revisão", "Projeto"];
-    const programIds = [1, 3, 5, 6, 10];
     
     for (let i = 0; i < 60; i++) {
       const d = new Date();
@@ -1087,18 +1172,48 @@ const Dashboard = () => {
             date: d.toISOString().split("T")[0],
             createdAt: d.getTime() - j * 3600000,
             topic: topics[Math.floor(random() * topics.length)],
-            programId: programIds[Math.floor(random() * programIds.length)],
+            programId: persona.activeProgramId,
             duration: Math.floor(random() * 60) + 15,
             type: types[Math.floor(random() * types.length)],
             result: random() > 0.5 ? `Quiz ${Math.floor(random() * 4) + 6}/10` : "",
             notes: "",
-            tags: [],
+            tags: persona.studyFocus.map(s => s.toLowerCase().replace(/\s/g, "-")),
           });
         }
       }
     }
+    
+    // Update goals based on persona
+    const newGoals: Goals = {
+      ...defaultGoals,
+      weeklyGoal: persona.weeklyGoalMinutes,
+      dailyGoal: Math.round(persona.weeklyGoalMinutes / 5),
+      activeProgramId: persona.activeProgramId,
+      weeklyPlan: defaultGoals.weeklyPlan.map((day, i) => ({
+        ...day,
+        target: i < 5 ? Math.round(persona.weeklyGoalMinutes / 5) : i === 5 ? 30 : 0,
+        completed: random() > 0.4 ? Math.floor(random() * day.target) + Math.floor(day.target * 0.5) : 0
+      }))
+    };
+    
+    // Update active program progress
+    const updatedPrograms = (programs || defaultPrograms).map(p => 
+      p.id === persona.activeProgramId 
+        ? { ...p, progress: Math.floor(random() * 30) + 35, status: "Em andamento" as const, enrolledAt: Date.now() - 90 * 86400000 }
+        : p
+    );
+    
     setSessions(sortSessions(newSessions));
-    addToast({ message: "60 dias de dados gerados", type: "success" });
+    setGoals(newGoals);
+    setPrograms(updatedPrograms);
+    setStreak(Math.floor(random() * 20) + 5);
+    setSelectedPersona(persona);
+    addToast({ message: `Dados de ${persona.name} gerados`, type: "success" });
+  };
+
+  const generateDemoData = () => {
+    // Default to first persona if none selected
+    generateDemoDataForPersona(DEMO_PERSONAS[0]);
   };
 
   const openNewSessionModal = (prefilledDate?: string) => {
@@ -2649,16 +2764,48 @@ const Dashboard = () => {
               </div>
 
               <div className="bg-card border rounded-2xl p-5">
-                <h2 className="font-semibold text-card-foreground mb-4">Dados de demonstração</h2>
-                <p className="text-sm text-muted-foreground mb-4">Use estas opções para testar o dashboard com diferentes cenários</p>
-                <div className="flex flex-wrap gap-3">
-                  <button
-                    onClick={generateDemoData}
-                    className="flex items-center gap-2 px-4 py-2.5 text-sm font-medium bg-accent/10 text-accent rounded-xl hover:bg-accent/20 transition-colors"
-                  >
-                    <Download size={16} />
-                    Gerar 60 dias de dados
-                  </button>
+                <h2 className="font-semibold text-card-foreground mb-2">Demo Personas</h2>
+                <p className="text-sm text-muted-foreground mb-4">Selecione uma persona para gerar dados realistas de demonstração</p>
+                
+                <div className="grid gap-4 mb-6">
+                  {DEMO_PERSONAS.map((persona) => (
+                    <button
+                      key={persona.id}
+                      onClick={() => generateDemoDataForPersona(persona)}
+                      className={`text-left p-4 rounded-xl border-2 transition-all hover:shadow-md ${
+                        selectedPersona?.id === persona.id 
+                          ? "border-accent bg-accent/5" 
+                          : "border-border hover:border-accent/50"
+                      }`}
+                    >
+                      <div className="flex items-start gap-4">
+                        <div className="w-12 h-12 rounded-full bg-gradient-to-br from-primary to-accent flex items-center justify-center text-white font-bold text-sm shrink-0">
+                          {persona.avatar}
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center gap-2 mb-1">
+                            <h3 className="font-semibold text-card-foreground">{persona.name}</h3>
+                            <span className="text-xs text-muted-foreground">{persona.age} anos</span>
+                          </div>
+                          <p className="text-sm font-medium text-accent mb-1">{persona.goal}</p>
+                          <p className="text-xs text-muted-foreground mb-2">{persona.profile} • {persona.activeProgram}</p>
+                          <p className="text-xs text-muted-foreground italic">"{persona.narrative}"</p>
+                          <div className="flex flex-wrap gap-1 mt-2">
+                            {persona.studyFocus.map((focus) => (
+                              <span key={focus} className="text-[10px] px-1.5 py-0.5 rounded bg-muted text-muted-foreground">{focus}</span>
+                            ))}
+                          </div>
+                        </div>
+                        {selectedPersona?.id === persona.id && (
+                          <Badge variant="accent">Ativo</Badge>
+                        )}
+                      </div>
+                    </button>
+                  ))}
+                </div>
+
+                <div className="border-t pt-4">
+                  <p className="text-xs text-muted-foreground mb-3">Ou restaure para os dados padrão</p>
                   <button
                     onClick={resetDemo}
                     className="flex items-center gap-2 px-4 py-2.5 text-sm font-medium bg-muted text-muted-foreground rounded-xl hover:bg-secondary transition-colors"
