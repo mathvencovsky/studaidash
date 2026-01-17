@@ -139,11 +139,16 @@ interface ContentItem {
   id: number;
   title: string;
   summary: string;
-  tags: string[];
-  programId: number;
+  area: 
+    | "Concursos Públicos"
+    | "Certificações Profissionais"
+    | "Tecnologia & Dados"
+    | "Negócios & Finanças";
+  program: string;
   competency: string;
-  level: "Iniciante" | "Intermediário" | "Avançado";
-  duration: string;
+  difficulty: "Iniciante" | "Intermediário" | "Avançado";
+  estimatedMinutes: number;
+  tags: string[];
 }
 
 interface Goals {
@@ -246,35 +251,226 @@ const defaultSessions: Session[] = [
 ];
 
 // ============================================================================
-// CONTENT DATABASE (Professional Content)
+// CONTENT DATABASE (Professional Content - Objetivo-oriented)
 // ============================================================================
 
 const contentDatabase: ContentItem[] = [
-  // CFA
-  { id: 1, title: "CFA Ethics: Standards of Practice", summary: "Código de ética e padrões de conduta profissional do CFA Institute.", tags: ["cfa", "ethics", "compliance"], programId: 3, competency: "Ethics", level: "Intermediário", duration: "2h" },
-  { id: 2, title: "Time Value of Money", summary: "Conceitos fundamentais de valor presente, futuro e taxas de desconto.", tags: ["cfa", "quant", "tvm"], programId: 3, competency: "Quantitative Methods", level: "Iniciante", duration: "3h" },
-  { id: 3, title: "DCF Valuation", summary: "Análise de fluxo de caixa descontado para avaliação de empresas.", tags: ["cfa", "equity", "valuation"], programId: 3, competency: "Equity", level: "Avançado", duration: "4h" },
-  
-  // Data Analyst
-  { id: 4, title: "SQL: Consultas Avançadas", summary: "Joins, subqueries, window functions e otimização de queries.", tags: ["sql", "data", "database"], programId: 6, competency: "SQL", level: "Intermediário", duration: "3h" },
-  { id: 5, title: "Python para Análise de Dados", summary: "Pandas, NumPy e manipulação de datasets.", tags: ["python", "pandas", "numpy"], programId: 6, competency: "Python", level: "Intermediário", duration: "4h" },
-  { id: 6, title: "Visualização com Python", summary: "Matplotlib, Seaborn e criação de dashboards.", tags: ["python", "viz", "seaborn"], programId: 6, competency: "Visualização", level: "Intermediário", duration: "2h" },
-  
-  // BACEN
-  { id: 7, title: "Política Monetária", summary: "Instrumentos de política monetária e o papel do Banco Central.", tags: ["bacen", "economia", "monetária"], programId: 1, competency: "Economia", level: "Intermediário", duration: "3h" },
-  { id: 8, title: "Sistema Financeiro Nacional", summary: "Estrutura e funcionamento do SFN.", tags: ["bacen", "sfn", "regulação"], programId: 1, competency: "Economia", level: "Iniciante", duration: "2h" },
-  
-  // PMP
-  { id: 9, title: "PMBOK: Áreas de Conhecimento", summary: "As 10 áreas de conhecimento do gerenciamento de projetos.", tags: ["pmp", "pmbok", "gestão"], programId: 5, competency: "Planejamento", level: "Iniciante", duration: "4h" },
-  { id: 10, title: "Gestão de Riscos", summary: "Identificação, análise e resposta a riscos em projetos.", tags: ["pmp", "risco", "gestão"], programId: 5, competency: "Monitoramento", level: "Intermediário", duration: "3h" },
-  
-  // English
-  { id: 11, title: "Business Email Writing", summary: "Estrutura e tom para emails profissionais em inglês.", tags: ["english", "writing", "business"], programId: 10, competency: "Technical Writing", level: "Iniciante", duration: "1h" },
-  { id: 12, title: "Presentation Skills", summary: "Como conduzir apresentações eficazes em inglês.", tags: ["english", "presentations", "speaking"], programId: 10, competency: "Presentations", level: "Intermediário", duration: "2h" },
-  
-  // Tech Transition
-  { id: 13, title: "Lógica de Programação", summary: "Fundamentos de algoritmos e pensamento computacional.", tags: ["logica", "algoritmos", "iniciante"], programId: 8, competency: "Lógica de Programação", level: "Iniciante", duration: "3h" },
-  { id: 14, title: "Git Essentials", summary: "Controle de versão com Git e GitHub.", tags: ["git", "github", "devops"], programId: 8, competency: "Git", level: "Iniciante", duration: "2h" },
+  // ================= CFA =================
+  {
+    id: 1,
+    title: "Ethical and Professional Standards",
+    summary: "Fundamentos éticos exigidos pelo CFA Institute, com estudos de caso.",
+    area: "Certificações Profissionais",
+    program: "CFA Level I",
+    competency: "Ethics",
+    difficulty: "Intermediário",
+    estimatedMinutes: 45,
+    tags: ["cfa", "ethics", "finance"]
+  },
+  {
+    id: 2,
+    title: "Quantitative Methods: Time Value of Money",
+    summary: "Conceitos de valor do dinheiro no tempo aplicados a finanças.",
+    area: "Certificações Profissionais",
+    program: "CFA Level I",
+    competency: "Quantitative Methods",
+    difficulty: "Avançado",
+    estimatedMinutes: 60,
+    tags: ["cfa", "quantitative", "tvom"]
+  },
+  {
+    id: 3,
+    title: "Financial Reporting and Analysis",
+    summary: "Análise de demonstrações financeiras e métricas-chave.",
+    area: "Certificações Profissionais",
+    program: "CFA Level I",
+    competency: "Financial Reporting",
+    difficulty: "Avançado",
+    estimatedMinutes: 90,
+    tags: ["cfa", "fra", "accounting"]
+  },
+  {
+    id: 4,
+    title: "Equity Valuation: DCF Models",
+    summary: "Avaliação de empresas usando fluxo de caixa descontado.",
+    area: "Certificações Profissionais",
+    program: "CFA Level I",
+    competency: "Equity",
+    difficulty: "Avançado",
+    estimatedMinutes: 75,
+    tags: ["cfa", "equity", "valuation", "dcf"]
+  },
+
+  // ================= CONCURSOS =================
+  {
+    id: 5,
+    title: "Sistema Financeiro Nacional",
+    summary: "Estrutura e funcionamento do SFN para concursos do BACEN.",
+    area: "Concursos Públicos",
+    program: "BACEN",
+    competency: "Economia",
+    difficulty: "Intermediário",
+    estimatedMinutes: 40,
+    tags: ["bacen", "economia", "sfn"]
+  },
+  {
+    id: 6,
+    title: "Política Monetária e Cambial",
+    summary: "Instrumentos de política monetária utilizados pelo Banco Central.",
+    area: "Concursos Públicos",
+    program: "BACEN",
+    competency: "Economia",
+    difficulty: "Avançado",
+    estimatedMinutes: 55,
+    tags: ["bacen", "economia", "política monetária"]
+  },
+  {
+    id: 7,
+    title: "Raciocínio Lógico Matemático",
+    summary: "Técnicas de lógica aplicadas a provas objetivas.",
+    area: "Concursos Públicos",
+    program: "Carreiras Fiscais",
+    competency: "Lógica",
+    difficulty: "Iniciante",
+    estimatedMinutes: 30,
+    tags: ["logica", "concursos", "raciocinio"]
+  },
+  {
+    id: 8,
+    title: "Direito Tributário: Princípios",
+    summary: "Princípios constitucionais tributários para Auditor-Fiscal.",
+    area: "Concursos Públicos",
+    program: "Receita Federal",
+    competency: "Direito Tributário",
+    difficulty: "Intermediário",
+    estimatedMinutes: 50,
+    tags: ["receita", "tributário", "direito"]
+  },
+
+  // ================= TECH / DATA =================
+  {
+    id: 9,
+    title: "SQL para Análise de Dados",
+    summary: "Consultas SQL aplicadas a análise de dados reais.",
+    area: "Tecnologia & Dados",
+    program: "Data Analyst",
+    competency: "SQL",
+    difficulty: "Intermediário",
+    estimatedMinutes: 50,
+    tags: ["sql", "data", "analytics"]
+  },
+  {
+    id: 10,
+    title: "Python para Data Analysis",
+    summary: "Manipulação de dados com pandas e numpy.",
+    area: "Tecnologia & Dados",
+    program: "Data Analyst",
+    competency: "Python",
+    difficulty: "Intermediário",
+    estimatedMinutes: 60,
+    tags: ["python", "data", "pandas"]
+  },
+  {
+    id: 11,
+    title: "Estatística Descritiva e Inferencial",
+    summary: "Fundamentos estatísticos para análise de dados.",
+    area: "Tecnologia & Dados",
+    program: "Data Analyst",
+    competency: "Estatística",
+    difficulty: "Intermediário",
+    estimatedMinutes: 45,
+    tags: ["estatística", "data", "análise"]
+  },
+  {
+    id: 12,
+    title: "Visualização de Dados com Python",
+    summary: "Criação de gráficos e dashboards com Matplotlib e Seaborn.",
+    area: "Tecnologia & Dados",
+    program: "Data Analyst",
+    competency: "Visualização",
+    difficulty: "Iniciante",
+    estimatedMinutes: 40,
+    tags: ["python", "viz", "seaborn", "matplotlib"]
+  },
+  {
+    id: 13,
+    title: "Introdução ao Machine Learning",
+    summary: "Conceitos básicos de aprendizado de máquina supervisionado.",
+    area: "Tecnologia & Dados",
+    program: "Data Analyst",
+    competency: "Machine Learning Básico",
+    difficulty: "Avançado",
+    estimatedMinutes: 90,
+    tags: ["ml", "data", "scikit-learn"]
+  },
+  {
+    id: 14,
+    title: "Git e Controle de Versão",
+    summary: "Fundamentos de versionamento de código com Git e GitHub.",
+    area: "Tecnologia & Dados",
+    program: "Transição para Tech",
+    competency: "Git",
+    difficulty: "Iniciante",
+    estimatedMinutes: 35,
+    tags: ["git", "github", "devops"]
+  },
+  {
+    id: 15,
+    title: "Lógica de Programação",
+    summary: "Fundamentos de algoritmos e pensamento computacional.",
+    area: "Tecnologia & Dados",
+    program: "Transição para Tech",
+    competency: "Lógica de Programação",
+    difficulty: "Iniciante",
+    estimatedMinutes: 40,
+    tags: ["logica", "algoritmos", "programação"]
+  },
+
+  // ================= BUSINESS =================
+  {
+    id: 16,
+    title: "Valuation: Fluxo de Caixa Descontado",
+    summary: "Avaliação de empresas utilizando DCF.",
+    area: "Negócios & Finanças",
+    program: "Investment Analyst",
+    competency: "Valuation",
+    difficulty: "Avançado",
+    estimatedMinutes: 70,
+    tags: ["valuation", "finance", "dcf"]
+  },
+  {
+    id: 17,
+    title: "Análise de Demonstrações Financeiras",
+    summary: "Interpretação de balanço, DRE e fluxo de caixa.",
+    area: "Negócios & Finanças",
+    program: "Investment Analyst",
+    competency: "Análise Financeira",
+    difficulty: "Intermediário",
+    estimatedMinutes: 55,
+    tags: ["contabilidade", "finance", "análise"]
+  },
+  {
+    id: 18,
+    title: "PMBOK: Áreas de Conhecimento",
+    summary: "As 10 áreas de conhecimento do gerenciamento de projetos.",
+    area: "Negócios & Finanças",
+    program: "PMP Certification",
+    competency: "Planejamento",
+    difficulty: "Iniciante",
+    estimatedMinutes: 60,
+    tags: ["pmp", "pmbok", "gestão"]
+  },
+  {
+    id: 19,
+    title: "Gestão de Riscos em Projetos",
+    summary: "Identificação, análise e resposta a riscos.",
+    area: "Negócios & Finanças",
+    program: "PMP Certification",
+    competency: "Monitoramento",
+    difficulty: "Intermediário",
+    estimatedMinutes: 45,
+    tags: ["pmp", "risco", "gestão"]
+  },
 ];
 
 // ============================================================================
@@ -478,8 +674,7 @@ function globalSearch(query: string, programs: Program[], sessions: Session[], c
   
   contents.forEach((c) => {
     if (c.title.toLowerCase().includes(q) || c.tags.some((t) => t.includes(q))) {
-      const program = programs.find((p) => p.id === c.programId);
-      results.push({ type: "content", id: c.id, title: c.title, subtitle: program?.name || c.competency, viewId: "conteudos" });
+      results.push({ type: "content", id: c.id, title: c.title, subtitle: c.program || c.competency, viewId: "conteudos" });
     }
   });
   
@@ -830,10 +1025,10 @@ const Dashboard = () => {
   const filteredContent = useMemo(() => {
     let results = contentDatabase;
     if (contentFilters.programId !== "all") {
-      results = results.filter((c) => c.programId === parseInt(contentFilters.programId));
+      results = results.filter((c) => c.program === contentFilters.programId);
     }
     if (contentFilters.level !== "all") {
-      results = results.filter((c) => c.level === contentFilters.level);
+      results = results.filter((c) => c.difficulty === contentFilters.level);
     }
     if (contentFilters.search.trim()) {
       const q = contentFilters.search.toLowerCase();
@@ -1032,7 +1227,7 @@ const Dashboard = () => {
       id: Date.now().toString(),
       contentId: content.id,
       topic: content.title,
-      programId: content.programId,
+      programId: 0, // Legacy field - using content.program now
       nextReview: tomorrow.toISOString().split("T")[0],
       interval: 1,
       completedReviews: 0,
@@ -1094,10 +1289,10 @@ const Dashboard = () => {
       results = results.filter((c) => c.title.toLowerCase().includes(q) || c.summary.toLowerCase().includes(q) || c.tags.some((t) => t.includes(q)));
     }
     if (aiFilters.programId !== "all") {
-      results = results.filter((c) => c.programId === parseInt(aiFilters.programId));
+      results = results.filter((c) => c.program === aiFilters.programId);
     }
     if (aiFilters.level !== "all") {
-      results = results.filter((c) => c.level === aiFilters.level);
+      results = results.filter((c) => c.difficulty === aiFilters.level);
     }
     setAiResults(results);
     setAiLoading(false);
@@ -1106,7 +1301,7 @@ const Dashboard = () => {
   // Get AI recommendations
   const getAiRecommendations = useCallback(() => {
     if (!activeProgram) return [];
-    return contentDatabase.filter((c) => c.programId === activeProgram.id).slice(0, 5);
+    return contentDatabase.filter((c) => c.program === activeProgram.name).slice(0, 5);
   }, [activeProgram]);
 
   // Loading state
@@ -1949,7 +2144,6 @@ const Dashboard = () => {
                     {(planItems || []).map((item) => {
                       const content = contentDatabase.find((c) => c.id === item.contentId);
                       if (!content) return null;
-                      const program = (programs || []).find((p) => p.id === content.programId);
                       return (
                         <div key={item.id} className={`flex items-center gap-4 p-4 rounded-xl ${item.completed ? "bg-muted/50" : "bg-accent/5"}`}>
                           <input
@@ -1962,7 +2156,7 @@ const Dashboard = () => {
                             <p className={`font-medium ${item.completed ? "line-through text-muted-foreground" : "text-card-foreground"}`}>
                               {content.title}
                             </p>
-                            <p className="text-xs text-muted-foreground">{program?.name}</p>
+                            <p className="text-xs text-muted-foreground">{content.program}</p>
                           </div>
                           <button onClick={() => removePlanItem(item.id)} className="p-2 hover:bg-muted rounded-lg" aria-label="Remover do plano">
                             <X size={16} className="text-muted-foreground" />
@@ -2097,7 +2291,6 @@ const Dashboard = () => {
               ) : (
                 <div className="grid gap-4">
                   {filteredContent.map((content) => {
-                    const program = (programs || []).find((p) => p.id === content.programId);
                     return (
                       <div key={content.id} className="bg-card border rounded-2xl p-5 hover:shadow-md transition-shadow">
                         <div className="flex items-start gap-4">
@@ -2108,9 +2301,9 @@ const Dashboard = () => {
                             <h3 className="font-semibold text-card-foreground mb-1">{content.title}</h3>
                             <p className="text-sm text-muted-foreground mb-3">{content.summary}</p>
                             <div className="flex flex-wrap gap-2">
-                              <Badge>{program?.name || content.competency}</Badge>
-                              <Badge variant="outline">{content.level}</Badge>
-                              <Badge variant="muted">{content.duration}</Badge>
+                              <Badge>{content.program}</Badge>
+                              <Badge variant="outline">{content.difficulty}</Badge>
+                              <Badge variant="muted">{content.estimatedMinutes}min</Badge>
                             </div>
                           </div>
                           <div className="flex items-center gap-2 flex-wrap">
@@ -2255,15 +2448,14 @@ const Dashboard = () => {
                     ) : (
                       <div className="space-y-3">
                         {aiResults.map((content) => {
-                          const program = (programs || []).find((p) => p.id === content.programId);
                           return (
                             <div key={content.id} className="flex items-start gap-4 p-4 bg-muted/50 rounded-xl hover:bg-muted transition-colors">
                               <div className="flex-1 min-w-0">
                                 <h3 className="font-medium text-card-foreground mb-1">{content.title}</h3>
                                 <p className="text-sm text-muted-foreground mb-2">{content.summary}</p>
                                 <div className="flex gap-2">
-                                  <Badge>{program?.name || content.competency}</Badge>
-                                  <Badge variant="outline">{content.level}</Badge>
+                                  <Badge>{content.program}</Badge>
+                                  <Badge variant="outline">{content.difficulty}</Badge>
                                 </div>
                               </div>
                               <div className="flex items-center gap-1">
@@ -2315,8 +2507,8 @@ const Dashboard = () => {
                               <h3 className="font-medium text-card-foreground mb-1">{content.title}</h3>
                               <p className="text-sm text-muted-foreground mb-2">{content.summary}</p>
                               <div className="flex gap-2">
-                                <Badge variant="outline">{content.level}</Badge>
-                                <Badge variant="muted">{content.duration}</Badge>
+                                <Badge variant="outline">{content.difficulty}</Badge>
+                                <Badge variant="muted">{content.estimatedMinutes}min</Badge>
                               </div>
                             </div>
                             <button
@@ -2375,7 +2567,6 @@ const Dashboard = () => {
               ) : (
                 <div className="grid gap-4">
                   {(bookmarks || []).map((b) => {
-                    const program = (programs || []).find((p) => p.id === b.content.programId);
                     return (
                       <div key={b.id} className="bg-card border rounded-2xl p-5 hover:shadow-md transition-shadow">
                         <div className="flex items-start gap-4">
@@ -2386,8 +2577,8 @@ const Dashboard = () => {
                             <h3 className="font-semibold text-card-foreground mb-1">{b.content.title}</h3>
                             <p className="text-sm text-muted-foreground mb-3">{b.content.summary}</p>
                             <div className="flex gap-2">
-                              <Badge>{program?.name || b.content.competency}</Badge>
-                              <Badge variant="outline">{b.content.level}</Badge>
+                              <Badge>{b.content.program}</Badge>
+                              <Badge variant="outline">{b.content.difficulty}</Badge>
                             </div>
                           </div>
                           <div className="flex items-center gap-2">
