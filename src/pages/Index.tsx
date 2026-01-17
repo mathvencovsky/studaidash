@@ -89,7 +89,7 @@ const ToastProvider = ({ children }: { children: React.ReactNode }) => {
 // TYPES - Professional Learning Platform
 // ============================================================================
 
-type ViewId = "dashboard" | "programas" | "conteudos" | "ia" | "sessoes" | "calendario" | "metas" | "revisoes" | "salvos" | "relatorios" | "roi" | "engajamento" | "config";
+type ViewId = "dashboard" | "programas" | "conteudos" | "ia" | "sessoes" | "calendario" | "metas" | "revisoes" | "salvos" | "relatorios" | "roi" | "engajamento" | "trilha" | "config";
 
 type AreaId = "concursos" | "certificacoes" | "tech" | "negocios" | "idiomas" | "fundamentos" | "cognitivo";
 
@@ -583,6 +583,7 @@ const NAV_SECTIONS = [
 const createNavItems = (bookmarkCount: number, planCount: number, reviewCount: number): NavItem[] => [
   // Aprender
   { id: "dashboard", label: "Dashboard", icon: LayoutDashboard, section: "aprender" },
+  { id: "trilha", label: "Visão da Trilha", icon: Layers, section: "aprender" },
   { id: "programas", label: "Programas", icon: GraduationCap, section: "aprender" },
   { id: "conteudos", label: "Conteúdos", icon: FolderOpen, section: "aprender" },
   { id: "ia", label: "Assistente IA", icon: Bot, section: "aprender" },
@@ -2722,6 +2723,373 @@ const Dashboard = () => {
                     );
                   })}
                 </div>
+              )}
+            </div>
+          )}
+
+          {/* ====== TRILHA VIEW (Trail Overview) ====== */}
+          {activeView === "trilha" && (
+            <div className="space-y-6 max-w-5xl mx-auto">
+              {/* Header */}
+              <div>
+                <h1 className="text-2xl font-bold text-card-foreground">Visão Geral da Trilha</h1>
+                <p className="text-muted-foreground">
+                  {activeProgram ? `Acompanhe seu progresso em ${activeProgram.name}` : "Selecione um programa para começar"}
+                </p>
+              </div>
+
+              {!activeProgram ? (
+                <EmptyState 
+                  icon={GraduationCap} 
+                  title="Nenhum programa ativo" 
+                  description="Defina um programa ativo para ver a visão geral da sua trilha de estudos"
+                  action={{ label: "Ver programas", onClick: () => navigate("programas") }}
+                />
+              ) : (
+                <>
+                  {/* Trail calculations */}
+                  {(() => {
+                    // TODO API: Fetch trail data from backend
+                    const trailStartDate = activeProgram.enrolledAt 
+                      ? new Date(activeProgram.enrolledAt) 
+                      : new Date(Date.now() - 90 * 86400000);
+                    
+                    // Parse duration (e.g., "6 meses" -> 180 days)
+                    const durationMatch = activeProgram.duration.match(/(\d+)\s*(mês|meses|semanas?)/i);
+                    let totalDays = 180; // Default 6 months
+                    if (durationMatch) {
+                      const num = parseInt(durationMatch[1]);
+                      if (durationMatch[2].includes("semana")) {
+                        totalDays = num * 7;
+                      } else {
+                        totalDays = num * 30;
+                      }
+                    }
+                    
+                    const trailEndDate = new Date(trailStartDate.getTime() + totalDays * 86400000);
+                    const today = new Date();
+                    const daysPassed = Math.floor((today.getTime() - trailStartDate.getTime()) / 86400000);
+                    const daysRemaining = Math.max(0, Math.floor((trailEndDate.getTime() - today.getTime()) / 86400000));
+                    const temporalProgress = Math.min(100, Math.round((daysPassed / totalDays) * 100));
+                    
+                    // Get program content
+                    const programContents = contentDatabase.filter(c => c.program === activeProgram.name);
+                    const totalMinutes = programContents.reduce((acc, c) => acc + c.estimatedMinutes, 0);
+                    const completedMinutes = Math.round(totalMinutes * (activeProgram.progress / 100));
+                    const remainingMinutes = totalMinutes - completedMinutes;
+                    
+                    // Sessions from last 7 days for this program
+                    const last7Sessions = (sessions || []).filter(s => {
+                      const d = new Date(s.date);
+                      const diff = (today.getTime() - d.getTime()) / 86400000;
+                      return diff <= 7 && s.programId === activeProgram.id;
+                    });
+                    const avgMinutesPerDay = Math.round(last7Sessions.reduce((acc, s) => acc + s.duration, 0) / 7);
+                    
+                    // Required rhythm to complete on time
+                    const requiredMinutesPerDay = daysRemaining > 0 ? Math.ceil(remainingMinutes / daysRemaining) : 0;
+                    
+                    // Status color
+                    let rhythmStatus: "success" | "warning" | "danger" = "success";
+                    let rhythmMessage = "Ritmo suficiente";
+                    if (avgMinutesPerDay < requiredMinutesPerDay * 0.7) {
+                      rhythmStatus = "danger";
+                      rhythmMessage = "Risco de atraso";
+                    } else if (avgMinutesPerDay < requiredMinutesPerDay) {
+                      rhythmStatus = "warning";
+                      rhythmMessage = "Atenção ao ritmo";
+                    }
+                    
+                    // Completion projection
+                    const projectedDaysToComplete = avgMinutesPerDay > 0 
+                      ? Math.ceil(remainingMinutes / avgMinutesPerDay) 
+                      : null;
+                    
+                    // Group by competency
+                    const competencyProgress: Record<string, { total: number; completed: number }> = {};
+                    activeProgram.competencies.forEach(comp => {
+                      const compContents = programContents.filter(c => c.competency === comp);
+                      const total = compContents.length;
+                      // Mock completed based on overall progress
+                      const completed = Math.floor(total * (activeProgram.progress / 100));
+                      competencyProgress[comp] = { total, completed };
+                    });
+
+                    const rhythmColors = {
+                      success: "text-green-600 bg-green-100",
+                      warning: "text-amber-600 bg-amber-100",
+                      danger: "text-red-600 bg-red-100"
+                    };
+
+                    return (
+                      <>
+                        {/* Timeline Card */}
+                        <div className="bg-card border rounded-2xl p-6">
+                          <div className="flex items-center gap-3 mb-5">
+                            <div className="w-10 h-10 rounded-xl bg-accent/10 flex items-center justify-center">
+                              <Calendar size={20} className="text-accent" />
+                            </div>
+                            <div>
+                              <h2 className="font-semibold text-card-foreground">Linha do Tempo</h2>
+                              <p className="text-sm text-muted-foreground">Progresso temporal da trilha</p>
+                            </div>
+                          </div>
+
+                          {/* Desktop: Horizontal Timeline */}
+                          <div className="hidden md:block">
+                            <div className="flex items-center justify-between mb-2 text-sm">
+                              <div className="text-left">
+                                <p className="font-medium text-card-foreground">Início</p>
+                                <p className="text-muted-foreground">{trailStartDate.toLocaleDateString("pt-BR")}</p>
+                              </div>
+                              <div className="text-center">
+                                <p className="font-medium text-accent">{daysPassed} dias</p>
+                                <p className="text-muted-foreground text-xs">decorridos</p>
+                              </div>
+                              <div className="text-right">
+                                <p className="font-medium text-card-foreground">Término</p>
+                                <p className="text-muted-foreground">{trailEndDate.toLocaleDateString("pt-BR")}</p>
+                              </div>
+                            </div>
+                            <div className="relative h-3 bg-muted rounded-full overflow-hidden">
+                              <div 
+                                className="absolute left-0 top-0 h-full bg-gradient-to-r from-primary to-accent rounded-full transition-all duration-500"
+                                style={{ width: `${temporalProgress}%` }}
+                              />
+                              <div 
+                                className="absolute top-1/2 -translate-y-1/2 w-4 h-4 bg-accent rounded-full border-2 border-white shadow-md transition-all duration-500"
+                                style={{ left: `calc(${temporalProgress}% - 8px)` }}
+                              />
+                            </div>
+                            <div className="flex justify-between mt-2 text-xs text-muted-foreground">
+                              <span>0%</span>
+                              <span className="font-medium text-accent">{temporalProgress}% do tempo</span>
+                              <span>100%</span>
+                            </div>
+                          </div>
+
+                          {/* Mobile: Vertical Timeline */}
+                          <div className="md:hidden space-y-4">
+                            <div className="flex items-center gap-4">
+                              <div className="w-4 h-4 rounded-full bg-accent flex-shrink-0" />
+                              <div>
+                                <p className="font-medium text-card-foreground">Início</p>
+                                <p className="text-sm text-muted-foreground">{trailStartDate.toLocaleDateString("pt-BR")}</p>
+                              </div>
+                            </div>
+                            <div className="ml-[7px] w-0.5 h-12 bg-gradient-to-b from-accent to-muted" />
+                            <div className="flex items-center gap-4">
+                              <div className="w-4 h-4 rounded-full bg-accent/50 border-2 border-accent flex-shrink-0" />
+                              <div>
+                                <p className="font-medium text-accent">Hoje • {daysPassed} dias</p>
+                                <p className="text-sm text-muted-foreground">{temporalProgress}% do tempo decorrido</p>
+                              </div>
+                            </div>
+                            <div className="ml-[7px] w-0.5 h-12 bg-muted" />
+                            <div className="flex items-center gap-4">
+                              <div className="w-4 h-4 rounded-full bg-muted flex-shrink-0" />
+                              <div>
+                                <p className="font-medium text-card-foreground">Término previsto</p>
+                                <p className="text-sm text-muted-foreground">{trailEndDate.toLocaleDateString("pt-BR")} • {daysRemaining} dias restantes</p>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* Study Rhythm + Progress Cards */}
+                        <div className="grid md:grid-cols-2 gap-4">
+                          {/* Rhythm Card */}
+                          <div className="bg-card border rounded-2xl p-6">
+                            <div className="flex items-center gap-3 mb-5">
+                              <div className="w-10 h-10 rounded-xl bg-accent/10 flex items-center justify-center">
+                                <TrendingUp size={20} className="text-accent" />
+                              </div>
+                              <div>
+                                <h2 className="font-semibold text-card-foreground">Ritmo de Estudo</h2>
+                                <p className="text-sm text-muted-foreground">Média dos últimos 7 dias</p>
+                              </div>
+                            </div>
+
+                            <div className="space-y-4">
+                              <div className="flex items-end justify-between">
+                                <div>
+                                  <p className="text-3xl font-bold text-card-foreground">{avgMinutesPerDay}</p>
+                                  <p className="text-sm text-muted-foreground">min/dia atual</p>
+                                </div>
+                                <div className="text-right">
+                                  <p className="text-xl font-semibold text-muted-foreground">{requiredMinutesPerDay}</p>
+                                  <p className="text-sm text-muted-foreground">min/dia necessário</p>
+                                </div>
+                              </div>
+
+                              {/* Progress comparison bar */}
+                              <div className="space-y-2">
+                                <div className="flex justify-between text-xs text-muted-foreground">
+                                  <span>Ritmo atual</span>
+                                  <span>{Math.round((avgMinutesPerDay / Math.max(requiredMinutesPerDay, 1)) * 100)}%</span>
+                                </div>
+                                <div className="h-3 bg-muted rounded-full overflow-hidden">
+                                  <div 
+                                    className={`h-full rounded-full transition-all ${
+                                      rhythmStatus === "success" ? "bg-green-500" :
+                                      rhythmStatus === "warning" ? "bg-amber-500" : "bg-red-500"
+                                    }`}
+                                    style={{ width: `${Math.min(100, (avgMinutesPerDay / Math.max(requiredMinutesPerDay, 1)) * 100)}%` }}
+                                  />
+                                </div>
+                              </div>
+
+                              <div className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-sm font-medium ${rhythmColors[rhythmStatus]}`}>
+                                {rhythmStatus === "success" && <CheckCircle2 size={16} />}
+                                {rhythmStatus === "warning" && <Flame size={16} />}
+                                {rhythmStatus === "danger" && <ArrowDownRight size={16} />}
+                                {rhythmMessage}
+                              </div>
+                            </div>
+                          </div>
+
+                          {/* Progress Card */}
+                          <div className="bg-card border rounded-2xl p-6">
+                            <div className="flex items-center gap-3 mb-5">
+                              <div className="w-10 h-10 rounded-xl bg-accent/10 flex items-center justify-center">
+                                <Target size={20} className="text-accent" />
+                              </div>
+                              <div>
+                                <h2 className="font-semibold text-card-foreground">Progresso da Trilha</h2>
+                                <p className="text-sm text-muted-foreground">Visão geral do andamento</p>
+                              </div>
+                            </div>
+
+                            <div className="flex items-center gap-6 mb-4">
+                              <div className="relative">
+                                <ProgressRing progress={activeProgram.progress} size={100} strokeWidth={8} />
+                                <div className="absolute inset-0 flex items-center justify-center">
+                                  <span className="text-2xl font-bold text-card-foreground">{activeProgram.progress}%</span>
+                                </div>
+                              </div>
+                              <div className="flex-1 space-y-2">
+                                <div className="flex justify-between text-sm">
+                                  <span className="text-muted-foreground">Tempo estudado</span>
+                                  <span className="font-medium text-card-foreground">{Math.round(completedMinutes / 60)}h {completedMinutes % 60}min</span>
+                                </div>
+                                <div className="flex justify-between text-sm">
+                                  <span className="text-muted-foreground">Tempo restante</span>
+                                  <span className="font-medium text-card-foreground">{Math.round(remainingMinutes / 60)}h {remainingMinutes % 60}min</span>
+                                </div>
+                                <div className="flex justify-between text-sm">
+                                  <span className="text-muted-foreground">Conteúdos</span>
+                                  <span className="font-medium text-card-foreground">
+                                    {Math.floor(programContents.length * (activeProgram.progress / 100))}/{programContents.length}
+                                  </span>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* Content Map */}
+                        <div className="bg-card border rounded-2xl p-6">
+                          <div className="flex items-center gap-3 mb-5">
+                            <div className="w-10 h-10 rounded-xl bg-accent/10 flex items-center justify-center">
+                              <Layers size={20} className="text-accent" />
+                            </div>
+                            <div>
+                              <h2 className="font-semibold text-card-foreground">Mapa de Conteúdos</h2>
+                              <p className="text-sm text-muted-foreground">Competências e status de cada área</p>
+                            </div>
+                          </div>
+
+                          <div className="space-y-3">
+                            {activeProgram.competencies.map((comp, idx) => {
+                              const progress = competencyProgress[comp] || { total: 0, completed: 0 };
+                              const percent = progress.total > 0 ? Math.round((progress.completed / progress.total) * 100) : 0;
+                              let status: "done" | "progress" | "todo" = "todo";
+                              if (percent === 100) status = "done";
+                              else if (percent > 0) status = "progress";
+                              
+                              const statusConfig = {
+                                done: { label: "Concluído", color: "bg-green-100 text-green-700", icon: CheckCircle2 },
+                                progress: { label: "Em andamento", color: "bg-accent/10 text-accent", icon: Play },
+                                todo: { label: "A iniciar", color: "bg-muted text-muted-foreground", icon: Clock }
+                              };
+                              const config = statusConfig[status];
+                              const StatusIcon = config.icon;
+
+                              return (
+                                <div key={idx} className="p-4 rounded-xl bg-muted/30 hover:bg-muted/50 transition-colors">
+                                  <div className="flex items-center justify-between mb-2">
+                                    <div className="flex items-center gap-3">
+                                      <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${config.color}`}>
+                                        <StatusIcon size={16} />
+                                      </div>
+                                      <div>
+                                        <p className="font-medium text-card-foreground">{comp}</p>
+                                        <p className="text-xs text-muted-foreground">
+                                          {progress.completed}/{progress.total} conteúdos
+                                        </p>
+                                      </div>
+                                    </div>
+                                    <div className={`px-3 py-1 rounded-full text-xs font-medium ${config.color}`}>
+                                      {config.label}
+                                    </div>
+                                  </div>
+                                  <div className="h-2 bg-muted rounded-full overflow-hidden">
+                                    <div 
+                                      className={`h-full rounded-full transition-all ${
+                                        status === "done" ? "bg-green-500" : "bg-accent"
+                                      }`}
+                                      style={{ width: `${percent}%` }}
+                                    />
+                                  </div>
+                                </div>
+                              );
+                            })}
+                          </div>
+                        </div>
+
+                        {/* Smart Projection */}
+                        <div className="bg-gradient-to-r from-primary to-accent rounded-2xl p-6 text-white">
+                          <div className="flex items-center gap-3 mb-4">
+                            <div className="w-10 h-10 rounded-xl bg-white/20 flex items-center justify-center">
+                              <Sparkles size={20} />
+                            </div>
+                            <div>
+                              <h2 className="font-semibold">Projeção Inteligente</h2>
+                              <p className="text-sm opacity-80">Baseada no seu ritmo atual</p>
+                            </div>
+                          </div>
+
+                          <div className="space-y-3">
+                            {projectedDaysToComplete !== null && avgMinutesPerDay > 0 ? (
+                              <>
+                                <p className="text-lg font-medium">
+                                  {projectedDaysToComplete <= daysRemaining ? (
+                                    <>✅ Mantendo o ritmo atual, você conclui esta trilha em <span className="font-bold">{projectedDaysToComplete} dias</span></>
+                                  ) : (
+                                    <>⚠️ Com o ritmo atual, você concluirá em <span className="font-bold">{projectedDaysToComplete} dias</span> ({projectedDaysToComplete - daysRemaining} dias após o prazo)</>
+                                  )}
+                                </p>
+                                {avgMinutesPerDay < requiredMinutesPerDay && (
+                                  <p className="text-sm opacity-90">
+                                    💡 Para concluir no prazo, aumente seu ritmo em <span className="font-bold">{requiredMinutesPerDay - avgMinutesPerDay} min/dia</span>
+                                  </p>
+                                )}
+                              </>
+                            ) : (
+                              <p className="text-lg font-medium">
+                                📊 Registre sessões de estudo para ver sua projeção personalizada
+                              </p>
+                            )}
+                          </div>
+
+                          <p className="text-xs opacity-60 mt-4">
+                            * Projeção recalculada automaticamente a cada nova sessão registrada
+                          </p>
+                        </div>
+                      </>
+                    );
+                  })()}
+                </>
               )}
             </div>
           )}
