@@ -1227,6 +1227,17 @@ const Dashboard = () => {
   const [selectedAreaFilter, setSelectedAreaFilter] = useState<AreaId | "all">("all");
   const [selectedPersona, setSelectedPersona] = useState<DemoPersona | null>(null);
   
+  // AI Copilot state
+  const [aiStudySessionOpen, setAiStudySessionOpen] = useState(false);
+  const [aiStudyStep, setAiStudyStep] = useState<"intro" | "content" | "exercise" | "quiz" | "checkpoint">("intro");
+  const [aiStudyContext, setAiStudyContext] = useState<{
+    label: string;
+    program: string;
+    competency: string;
+    difficulty: string;
+    estimatedMinutes: number;
+  } | null>(null);
+  
   // Trail modals
   const [editDatesModalOpen, setEditDatesModalOpen] = useState(false);
   const [editDatesForm, setEditDatesForm] = useState({ startDate: "", targetEndDate: "" });
@@ -1400,6 +1411,120 @@ const Dashboard = () => {
     if (selectedAreaFilter === "all") return programs || [];
     return (programs || []).filter((p) => p.areaId === selectedAreaFilter);
   }, [programs, selectedAreaFilter]);
+
+  // ============ AI COPILOT LOGIC ============
+
+  // TODO API: This function should fetch AI-powered recommendations from backend
+  const getNextAIStudyAction = useCallback(() => {
+    if (!activeProgram) return null;
+    
+    // Priority 1: Last content with status "in_progress"
+    const currentTrailData = trailData.find(t => t.programId === activeProgram.id);
+    const trailContents = currentTrailData?.contents || [];
+    
+    // Find in-progress content
+    const inProgressContent = trailContents.find(c => c.status === "in_progress");
+    if (inProgressContent) {
+      return {
+        label: inProgressContent.title,
+        program: activeProgram.name,
+        competency: inProgressContent.competency,
+        difficulty: "Intermediário",
+        estimatedMinutes: inProgressContent.estimatedMinutes - inProgressContent.completedMinutes,
+      };
+    }
+    
+    // Priority 2: First content with status "not_started"
+    const notStartedContent = trailContents.find(c => c.status === "not_started");
+    if (notStartedContent) {
+      return {
+        label: notStartedContent.title,
+        program: activeProgram.name,
+        competency: notStartedContent.competency,
+        difficulty: "Intermediário",
+        estimatedMinutes: notStartedContent.estimatedMinutes,
+      };
+    }
+    
+    // Priority 3: Most recurrent topic in last 3 sessions
+    const recentSessions = (sessions || [])
+      .filter(s => s.programId === activeProgram.id)
+      .slice(0, 3);
+    
+    if (recentSessions.length > 0) {
+      const lastTopic = recentSessions[0].topic;
+      return {
+        label: lastTopic,
+        program: activeProgram.name,
+        competency: activeProgram.competencies[0] || "Geral",
+        difficulty: "Intermediário",
+        estimatedMinutes: 30,
+      };
+    }
+    
+    // Priority 4: Default recommendation based on competencies
+    const firstCompetency = activeProgram.competencies[0];
+    if (firstCompetency) {
+      return {
+        label: `Introdução a ${firstCompetency}`,
+        program: activeProgram.name,
+        competency: firstCompetency,
+        difficulty: "Iniciante",
+        estimatedMinutes: 45,
+      };
+    }
+    
+    return null;
+  }, [activeProgram, trailData, sessions]);
+
+  // Start AI Study Session
+  const startAIStudySession = useCallback(() => {
+    const nextAction = getNextAIStudyAction();
+    if (nextAction) {
+      setAiStudyContext(nextAction);
+      setAiStudyStep("intro");
+      setAiStudySessionOpen(true);
+    } else {
+      addToast({ message: "Defina um programa ativo para começar", type: "info" });
+    }
+  }, [getNextAIStudyAction, addToast]);
+
+  // Record AI Study Session
+  const recordAIStudySession = useCallback((minutes: number) => {
+    if (!aiStudyContext || !activeProgram) return;
+    
+    const newSession: Session = {
+      id: `ai_${Date.now()}`,
+      date: new Date().toISOString().split("T")[0],
+      createdAt: Date.now(),
+      topic: aiStudyContext.label,
+      programId: activeProgram.id,
+      duration: minutes,
+      type: "Conceitual",
+      result: "Sessão com IA",
+      notes: `Estudo guiado pela IA: ${aiStudyContext.competency}`,
+      tags: ["ia", aiStudyContext.competency.toLowerCase().replace(/\s+/g, "-")],
+    };
+    
+    setSessions(prev => sortSessions([newSession, ...(prev || [])]));
+    
+    // Update goals
+    const today = new Date().toISOString().split("T")[0];
+    if (newSession.date === today) {
+      setGoals(prev => ({ ...prev, completed: Math.min(prev.dailyGoal, prev.completed + minutes) }));
+    }
+    
+    // Update program progress
+    setPrograms(prev => (prev || []).map(p => {
+      if (p.id === activeProgram.id) {
+        const newProgress = Math.min(100, p.progress + 1);
+        return { ...p, progress: newProgress, status: newProgress === 100 ? "Concluído" : "Em andamento" };
+      }
+      return p;
+    }));
+    
+    addToast({ message: `Sessão de ${minutes}min registrada com sucesso!`, type: "success" });
+  }, [aiStudyContext, activeProgram, addToast]);
 
   // ============ ACTIONS ============
 
@@ -1952,45 +2077,145 @@ const Dashboard = () => {
 
         {/* ============ CONTENT ============ */}
         <main className="flex-1 p-4 lg:p-6 pb-24 lg:pb-6 overflow-y-auto">
-          {/* ====== DASHBOARD VIEW ====== */}
+          {/* ====== DASHBOARD VIEW - AI Copilot First ====== */}
           {activeView === "dashboard" && (
             <div className="space-y-6 max-w-6xl mx-auto">
-              <div>
-                <h1 className="text-2xl font-bold text-card-foreground">Olá, {userData.name.split(" ")[0]}</h1>
-                <p className="text-muted-foreground">Continue de onde parou</p>
-              </div>
-
-              {/* Active Program Card */}
-              {activeProgram && (
-                <div className="bg-gradient-to-br from-primary to-accent rounded-2xl p-6 text-white">
-                  <div className="flex items-start justify-between flex-wrap gap-4">
-                    <div className="flex-1 min-w-[200px]">
-                      <p className="text-sm opacity-80 mb-1">Programa ativo</p>
-                      <h2 className="text-xl font-bold mb-2">{activeProgram.name}</h2>
-                      <p className="text-sm opacity-90 mb-4">{activeProgram.description}</p>
-                      <div className="flex items-center gap-4 text-sm">
-                        <span className="flex items-center gap-1.5">
-                          <TrendUp size={16} />
-                          {activeProgram.progress}% concluído
-                        </span>
-                        {activeProgram.enrolledAt && (
-                          <span className="opacity-75">
-                            Conclusão estimada: {estimateCompletion(activeProgram.progress, Math.floor((Date.now() - activeProgram.enrolledAt) / 86400000))}
-                          </span>
-                        )}
+              {/* AI Copilot CTA - PRIMEIRO E MAIS IMPORTANTE */}
+              {(() => {
+                const nextAction = getNextAIStudyAction();
+                
+                return (
+                  <div className="bg-gradient-to-br from-primary via-primary to-accent rounded-2xl p-6 md:p-8 text-white shadow-lg relative overflow-hidden">
+                    {/* Background pattern */}
+                    <div className="absolute inset-0 opacity-10">
+                      <div className="absolute top-0 right-0 w-64 h-64 bg-white rounded-full blur-3xl -translate-y-1/2 translate-x-1/2" />
+                      <div className="absolute bottom-0 left-0 w-48 h-48 bg-white rounded-full blur-3xl translate-y-1/2 -translate-x-1/2" />
+                    </div>
+                    
+                    <div className="relative z-10">
+                      <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
+                        <div className="flex-1">
+                          <div className="flex items-center gap-2 mb-3">
+                            <div className="w-10 h-10 rounded-xl bg-white/20 backdrop-blur-sm flex items-center justify-center">
+                              <Bot size={22} />
+                            </div>
+                            <span className="text-xs font-semibold uppercase tracking-wider opacity-80">Copiloto de Estudos</span>
+                          </div>
+                          
+                          <h2 className="text-2xl md:text-3xl font-bold mb-3">Estudar com IA agora</h2>
+                          
+                          {nextAction ? (
+                            <div className="space-y-2">
+                              <p className="text-white/90 text-base md:text-lg">
+                                <span className="opacity-80">A IA recomenda continuar por:</span>{" "}
+                                <span className="font-semibold">{nextAction.label}</span>
+                              </p>
+                              <div className="flex flex-wrap items-center gap-3">
+                                <span className="inline-flex items-center gap-1.5 px-3 py-1 bg-white/20 rounded-full text-sm font-medium">
+                                  <Clock size={14} />
+                                  ~{nextAction.estimatedMinutes} min
+                                </span>
+                                <span className="inline-flex items-center gap-1.5 px-3 py-1 bg-white/20 rounded-full text-sm font-medium">
+                                  <GraduationCap size={14} />
+                                  {nextAction.program}
+                                </span>
+                                <span className="text-xs opacity-70">• Recomendado pela IA</span>
+                              </div>
+                            </div>
+                          ) : (
+                            <p className="text-white/80">
+                              Defina um programa ativo para receber recomendações personalizadas da IA
+                            </p>
+                          )}
+                        </div>
+                        
+                        <div className="flex flex-col sm:flex-row gap-3 shrink-0">
+                          <button
+                            onClick={startAIStudySession}
+                            disabled={!nextAction}
+                            className="px-6 py-3.5 bg-white text-primary font-semibold rounded-xl hover:bg-white/95 transition-all duration-200 shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 text-base"
+                          >
+                            <Play size={18} />
+                            Começar com IA
+                          </button>
+                          <button
+                            onClick={() => navigate("trilha")}
+                            className="px-5 py-3 bg-white/20 backdrop-blur-sm text-white font-medium rounded-xl hover:bg-white/30 transition-all duration-200 flex items-center justify-center gap-2"
+                          >
+                            <Layers size={16} />
+                            Ver trilha completa
+                          </button>
+                        </div>
                       </div>
                     </div>
-                    <div className="relative">
-                      <ProgressRing progress={activeProgram.progress} size={100} strokeWidth={8} />
-                      <div className="absolute inset-0 flex items-center justify-center">
-                        <span className="text-2xl font-bold">{activeProgram.progress}%</span>
+                  </div>
+                );
+              })()}
+
+              {/* Quick Trail Overview - Resumo rápido do progresso */}
+              {activeProgram && (
+                <div className="bg-card border rounded-2xl p-5 shadow-sm">
+                  <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+                    <div className="flex items-center gap-4">
+                      <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
+                        <Target size={24} className="text-primary" />
                       </div>
+                      <div>
+                        <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Projeção otimizada pela IA</p>
+                        <p className="text-base font-medium text-card-foreground mt-0.5">
+                          {activeProgram.name} • <span className="text-primary font-bold">{activeProgram.progress}%</span> concluído
+                        </p>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-4">
+                      {/* Mini metrics */}
+                      {(() => {
+                        const currentTrailData = trailData.find(t => t.programId === activeProgram.id);
+                        const trailContents = currentTrailData?.contents || [];
+                        const metrics = calculateTrailMetrics(activeProgram, sessions || [], trailContents.length > 0 ? trailContents : []);
+                        
+                        return (
+                          <>
+                            <div className="text-center px-3">
+                              <p className="text-2xl font-bold text-card-foreground">{metrics.remainingDays}</p>
+                              <p className="text-xs text-muted-foreground">dias restantes</p>
+                            </div>
+                            <div className="w-px h-10 bg-border" />
+                            <div className="text-center px-3">
+                              <p className={`text-2xl font-bold ${metrics.status === "on_track" ? "text-success" : metrics.status === "attention" ? "text-warning" : "text-destructive"}`}>
+                                {metrics.currentDailyAvgMin}
+                              </p>
+                              <p className="text-xs text-muted-foreground">min/dia atual</p>
+                            </div>
+                            <div className="w-px h-10 bg-border hidden sm:block" />
+                            <div className="text-center px-3 hidden sm:block">
+                              <p className="text-2xl font-bold text-primary">{metrics.requiredDailyMin}</p>
+                              <p className="text-xs text-muted-foreground">min/dia meta</p>
+                            </div>
+                          </>
+                        );
+                      })()}
+                      <button
+                        onClick={() => navigate("trilha")}
+                        className="px-4 py-2 text-sm font-medium bg-secondary rounded-xl hover:bg-secondary/80 transition-colors flex items-center gap-2"
+                      >
+                        Ver detalhes
+                        <ChevronRight size={16} />
+                      </button>
                     </div>
                   </div>
                 </div>
               )}
 
-              {/* Stats */}
+              {/* Greeting */}
+              <div className="flex items-center justify-between">
+                <div>
+                  <h1 className="text-xl md:text-2xl font-bold text-card-foreground">Olá, {userData.name.split(" ")[0]}</h1>
+                  <p className="text-muted-foreground text-sm">Continue de onde parou • Ritmo ajustado pela IA</p>
+                </div>
+              </div>
+
+              {/* Stats - Métricas secundárias */}
               <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
                 <StatCard 
                   icon={<Flame size={20} className="text-accent" />} 
@@ -2074,26 +2299,26 @@ const Dashboard = () => {
                   </div>
                 </div>
 
-                {/* Quick Links */}
+                {/* Quick Links - AI-Focused */}
                 <div className="space-y-4">
                   <div className="bg-card border rounded-2xl p-5">
                     <h3 className="font-semibold text-card-foreground mb-4">Ações rápidas</h3>
                     <div className="space-y-2">
                       {[
-                        { icon: Plus, label: "Nova sessão", onClick: () => openNewSessionModal() },
+                        { icon: Bot, label: "Perguntar à IA", onClick: () => navigate("ia"), highlight: true },
+                        { icon: Plus, label: "Nova sessão manual", onClick: () => openNewSessionModal() },
                         { icon: GraduationCap, label: "Ver programas", onClick: () => navigate("programas") },
-                        { icon: Bot, label: "Perguntar à IA", onClick: () => navigate("ia") },
                         { icon: RotateCw, label: "Iniciar revisão", onClick: () => navigate("revisoes") },
                       ].map((action, i) => (
                         <button
                           key={i}
                           onClick={action.onClick}
-                          className="w-full flex items-center gap-3 p-3 rounded-xl hover:bg-muted transition-colors text-left"
+                          className={`w-full flex items-center gap-3 p-3 rounded-xl transition-colors text-left ${action.highlight ? "bg-accent/10 hover:bg-accent/20" : "hover:bg-muted"}`}
                         >
-                          <div className="w-10 h-10 rounded-xl bg-accent/10 flex items-center justify-center">
+                          <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${action.highlight ? "bg-accent/20" : "bg-accent/10"}`}>
                             <action.icon size={18} className="text-accent" />
                           </div>
-                          <span className="font-medium text-card-foreground">{action.label}</span>
+                          <span className={`font-medium ${action.highlight ? "text-accent" : "text-card-foreground"}`}>{action.label}</span>
                         </button>
                       ))}
                     </div>
@@ -2125,20 +2350,24 @@ const Dashboard = () => {
                   <EmptyState 
                     icon={Clock} 
                     title="Nenhuma sessão registrada" 
-                    description="Comece registrando sua primeira sessão"
-                    action={{ label: "Iniciar sessão", onClick: () => openNewSessionModal() }}
+                    description="Comece estudando com a IA ou registre manualmente"
+                    action={{ label: "Estudar com IA", onClick: startAIStudySession }}
                   />
                 ) : (
                   <div className="space-y-2">
                     {(sortedSessions || []).slice(0, 5).map((s) => {
                       const program = (programs || []).find((p) => p.id === s.programId);
+                      const isAISession = s.tags?.includes("ia");
                       return (
                         <div key={s.id} className="flex items-center gap-4 p-4 bg-muted/50 rounded-xl hover:bg-muted transition-colors">
-                          <div className="w-10 h-10 rounded-xl bg-accent/10 flex items-center justify-center">
-                            <BookOpen size={18} className="text-accent" />
+                          <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${isAISession ? "bg-primary/10" : "bg-accent/10"}`}>
+                            {isAISession ? <Bot size={18} className="text-primary" /> : <BookOpen size={18} className="text-accent" />}
                           </div>
                           <div className="flex-1 min-w-0">
-                            <p className="font-medium text-card-foreground truncate">{s.topic}</p>
+                            <p className="font-medium text-card-foreground truncate">
+                              {s.topic}
+                              {isAISession && <span className="ml-2 text-xs text-primary font-normal">• com IA</span>}
+                            </p>
                             <p className="text-xs text-muted-foreground">{program?.name} • {s.duration}min • {s.type}</p>
                           </div>
                           <p className="text-sm text-muted-foreground">{formatDateBR(s.date)}</p>
@@ -2150,8 +2379,6 @@ const Dashboard = () => {
               </div>
             </div>
           )}
-
-          {/* ====== PROGRAMAS VIEW ====== */}
           {activeView === "programas" && (
             <div className="space-y-6 max-w-5xl mx-auto">
               <div>
@@ -4497,6 +4724,291 @@ const Dashboard = () => {
             >
               Excluir
             </button>
+          </div>
+        </div>
+      </Modal>
+
+      {/* AI Study Session Modal - Copilot Experience */}
+      <Modal
+        open={aiStudySessionOpen}
+        onClose={() => {
+          setAiStudySessionOpen(false);
+          setAiStudyStep("intro");
+        }}
+        title=""
+        size="lg"
+      >
+        <div className="relative -m-5">
+          {/* Header */}
+          <div className="bg-gradient-to-br from-primary to-accent px-6 py-5 text-white">
+            <div className="flex items-center gap-3 mb-2">
+              <div className="w-10 h-10 rounded-xl bg-white/20 backdrop-blur-sm flex items-center justify-center">
+                <Bot size={22} />
+              </div>
+              <div>
+                <p className="text-xs font-semibold uppercase tracking-wider opacity-80">Sessão de Estudo com IA</p>
+                <h2 className="font-bold text-lg">{aiStudyContext?.label || "Carregando..."}</h2>
+              </div>
+            </div>
+            {aiStudyContext && (
+              <div className="flex flex-wrap gap-2 mt-3">
+                <span className="inline-flex items-center gap-1 px-2.5 py-1 bg-white/20 rounded-full text-xs font-medium">
+                  <GraduationCap size={12} />
+                  {aiStudyContext.program}
+                </span>
+                <span className="inline-flex items-center gap-1 px-2.5 py-1 bg-white/20 rounded-full text-xs font-medium">
+                  <BookOpen size={12} />
+                  {aiStudyContext.competency}
+                </span>
+                <span className="inline-flex items-center gap-1 px-2.5 py-1 bg-white/20 rounded-full text-xs font-medium">
+                  <Clock size={12} />
+                  ~{aiStudyContext.estimatedMinutes}min
+                </span>
+              </div>
+            )}
+          </div>
+
+          {/* Content */}
+          <div className="p-6 space-y-6">
+            {/* Step: Intro */}
+            {aiStudyStep === "intro" && aiStudyContext && (
+              <>
+                <div className="bg-accent/5 border border-accent/20 rounded-xl p-4">
+                  <p className="text-sm text-card-foreground">
+                    <span className="font-semibold text-primary">Vamos continuar de onde você parou</span> em <strong>{aiStudyContext.label}</strong>.
+                  </p>
+                  <p className="text-sm text-muted-foreground mt-2">
+                    A IA vai guiar seu estudo passo a passo, ajudando você a absorver o conteúdo de forma mais eficiente.
+                  </p>
+                </div>
+
+                {/* TODO API: This content would come from AI-generated explanations */}
+                <div className="space-y-4">
+                  <div>
+                    <h3 className="font-semibold text-card-foreground mb-2">📌 Contextualização</h3>
+                    <p className="text-sm text-muted-foreground leading-relaxed">
+                      Nesta sessão, vamos explorar os conceitos fundamentais de <strong>{aiStudyContext.competency}</strong>. 
+                      Este é um tópico essencial para {aiStudyContext.program} e frequentemente aparece em avaliações práticas.
+                    </p>
+                  </div>
+
+                  <div>
+                    <h3 className="font-semibold text-card-foreground mb-2">🎯 O que você vai aprender</h3>
+                    <ul className="text-sm text-muted-foreground space-y-1">
+                      <li className="flex items-start gap-2">
+                        <CheckCircle2 size={14} className="text-accent mt-0.5 shrink-0" />
+                        <span>Conceitos fundamentais e terminologia</span>
+                      </li>
+                      <li className="flex items-start gap-2">
+                        <CheckCircle2 size={14} className="text-accent mt-0.5 shrink-0" />
+                        <span>Aplicações práticas e casos de uso</span>
+                      </li>
+                      <li className="flex items-start gap-2">
+                        <CheckCircle2 size={14} className="text-accent mt-0.5 shrink-0" />
+                        <span>Exercícios para fixação do conteúdo</span>
+                      </li>
+                    </ul>
+                  </div>
+                </div>
+
+                <div className="pt-2">
+                  <p className="text-xs text-muted-foreground mb-3 text-center">Escolha como quer estudar:</p>
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                    <button
+                      onClick={() => setAiStudyStep("content")}
+                      className="p-4 bg-accent/10 hover:bg-accent/20 border-2 border-accent/30 rounded-xl transition-all text-center group"
+                    >
+                      <BookOpen size={24} className="text-accent mx-auto mb-2 group-hover:scale-110 transition-transform" />
+                      <p className="font-medium text-card-foreground text-sm">Ver explicação</p>
+                      <p className="text-xs text-muted-foreground mt-0.5">Conceitos teóricos</p>
+                    </button>
+                    <button
+                      onClick={() => setAiStudyStep("exercise")}
+                      className="p-4 bg-secondary hover:bg-secondary/80 border-2 border-transparent rounded-xl transition-all text-center group"
+                    >
+                      <Brain size={24} className="text-primary mx-auto mb-2 group-hover:scale-110 transition-transform" />
+                      <p className="font-medium text-card-foreground text-sm">Treinar com exercício</p>
+                      <p className="text-xs text-muted-foreground mt-0.5">Prática guiada</p>
+                    </button>
+                    <button
+                      onClick={() => setAiStudyStep("quiz")}
+                      className="p-4 bg-secondary hover:bg-secondary/80 border-2 border-transparent rounded-xl transition-all text-center group"
+                    >
+                      <Trophy size={24} className="text-accent mx-auto mb-2 group-hover:scale-110 transition-transform" />
+                      <p className="font-medium text-card-foreground text-sm">Testar com quiz</p>
+                      <p className="text-xs text-muted-foreground mt-0.5">Verificar conhecimento</p>
+                    </button>
+                  </div>
+                </div>
+              </>
+            )}
+
+            {/* Step: Content - AI-guided explanation */}
+            {aiStudyStep === "content" && aiStudyContext && (
+              <>
+                <div className="prose prose-sm max-w-none">
+                  {/* TODO API: This would be AI-generated content */}
+                  <h3 className="text-lg font-semibold text-card-foreground mb-3">
+                    Entendendo {aiStudyContext.label}
+                  </h3>
+                  <p className="text-muted-foreground leading-relaxed mb-4">
+                    {aiStudyContext.competency} é uma área fundamental em {aiStudyContext.program}. 
+                    Vamos começar pelos conceitos mais importantes que você precisa dominar.
+                  </p>
+                  
+                  <div className="bg-primary/5 border-l-4 border-primary p-4 rounded-r-lg mb-4">
+                    <p className="text-sm text-card-foreground font-medium mb-1">💡 Conceito-chave</p>
+                    <p className="text-sm text-muted-foreground">
+                      O domínio deste tópico requer prática constante e revisões espaçadas para consolidação na memória de longo prazo.
+                    </p>
+                  </div>
+                  
+                  <p className="text-muted-foreground leading-relaxed">
+                    À medida que você avança, a IA ajustará o conteúdo com base no seu ritmo e desempenho nos exercícios.
+                  </p>
+                </div>
+
+                <div className="flex gap-3 pt-4">
+                  <button
+                    onClick={() => setAiStudyStep("intro")}
+                    className="px-4 py-2.5 text-sm font-medium border rounded-xl hover:bg-muted transition-colors"
+                  >
+                    Voltar
+                  </button>
+                  <button
+                    onClick={() => setAiStudyStep("exercise")}
+                    className="flex-1 px-4 py-2.5 text-sm font-medium bg-accent text-accent-foreground rounded-xl hover:opacity-90 transition-opacity flex items-center justify-center gap-2"
+                  >
+                    <Brain size={16} />
+                    Praticar agora
+                  </button>
+                </div>
+              </>
+            )}
+
+            {/* Step: Exercise */}
+            {aiStudyStep === "exercise" && aiStudyContext && (
+              <>
+                <div className="bg-accent/5 border border-accent/20 rounded-xl p-5">
+                  <p className="text-xs font-semibold uppercase tracking-wider text-accent mb-2">Exercício guiado</p>
+                  {/* TODO API: AI-generated exercise */}
+                  <p className="text-card-foreground font-medium mb-4">
+                    Considere o cenário abaixo relacionado a {aiStudyContext.competency}:
+                  </p>
+                  <p className="text-sm text-muted-foreground bg-secondary/50 p-3 rounded-lg">
+                    "Um profissional precisa aplicar os conceitos de {aiStudyContext.label} em uma situação prática. 
+                    Descreva os passos que ele deveria seguir para garantir o melhor resultado."
+                  </p>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-card-foreground mb-2">Sua resposta</label>
+                  <textarea
+                    className="w-full px-4 py-3 bg-secondary border-0 rounded-xl text-sm resize-none"
+                    rows={4}
+                    placeholder="Digite sua resposta aqui... A IA vai analisar e dar feedback"
+                  />
+                </div>
+
+                <div className="flex gap-3 pt-2">
+                  <button
+                    onClick={() => setAiStudyStep("intro")}
+                    className="px-4 py-2.5 text-sm font-medium border rounded-xl hover:bg-muted transition-colors"
+                  >
+                    Voltar
+                  </button>
+                  <button
+                    onClick={() => setAiStudyStep("checkpoint")}
+                    className="flex-1 px-4 py-2.5 text-sm font-medium bg-primary text-primary-foreground rounded-xl hover:opacity-90 transition-opacity"
+                  >
+                    Verificar resposta
+                  </button>
+                </div>
+              </>
+            )}
+
+            {/* Step: Quiz */}
+            {aiStudyStep === "quiz" && aiStudyContext && (
+              <>
+                <div className="bg-accent/5 border border-accent/20 rounded-xl p-5">
+                  <p className="text-xs font-semibold uppercase tracking-wider text-accent mb-2">Quiz rápido • Questão 1 de 3</p>
+                  {/* TODO API: AI-generated quiz */}
+                  <p className="text-card-foreground font-medium">
+                    Qual das alternativas melhor descreve o conceito principal de {aiStudyContext.competency}?
+                  </p>
+                </div>
+
+                <div className="space-y-2">
+                  {[
+                    "A) Aplicação prática em cenários corporativos",
+                    "B) Framework teórico para análise estruturada",
+                    "C) Metodologia de avaliação e mensuração",
+                    "D) Conjunto de boas práticas do mercado",
+                  ].map((option, i) => (
+                    <button
+                      key={i}
+                      className="w-full p-4 text-left bg-secondary hover:bg-secondary/80 border-2 border-transparent hover:border-accent/30 rounded-xl transition-all"
+                    >
+                      <span className="text-sm text-card-foreground">{option}</span>
+                    </button>
+                  ))}
+                </div>
+
+                <div className="flex gap-3 pt-2">
+                  <button
+                    onClick={() => setAiStudyStep("intro")}
+                    className="px-4 py-2.5 text-sm font-medium border rounded-xl hover:bg-muted transition-colors"
+                  >
+                    Voltar
+                  </button>
+                </div>
+              </>
+            )}
+
+            {/* Step: Checkpoint */}
+            {aiStudyStep === "checkpoint" && aiStudyContext && (
+              <>
+                <div className="text-center py-4">
+                  <div className="w-16 h-16 rounded-full bg-status-success flex items-center justify-center mx-auto mb-4">
+                    <CheckCircle2 size={32} className="text-status-success-text" />
+                  </div>
+                  <h3 className="text-xl font-bold text-card-foreground mb-2">Ótimo progresso! 🎉</h3>
+                  <p className="text-muted-foreground">
+                    Você completou a sessão de estudo em <strong>{aiStudyContext.label}</strong>.
+                  </p>
+                </div>
+
+                <div className="bg-secondary/50 rounded-xl p-4">
+                  <p className="text-sm font-medium text-card-foreground mb-3">Você se sentiu confiante neste tema?</p>
+                  <div className="grid grid-cols-3 gap-2">
+                    {[
+                      { label: "Preciso revisar", emoji: "😕", color: "bg-status-danger text-status-danger-text" },
+                      { label: "Mais ou menos", emoji: "🤔", color: "bg-status-warning text-status-warning-text" },
+                      { label: "Dominei!", emoji: "💪", color: "bg-status-success text-status-success-text" },
+                    ].map((option) => (
+                      <button
+                        key={option.label}
+                        onClick={() => {
+                          recordAIStudySession(aiStudyContext.estimatedMinutes);
+                          setAiStudySessionOpen(false);
+                          setAiStudyStep("intro");
+                        }}
+                        className={`p-3 rounded-xl ${option.color} hover:opacity-90 transition-all text-center`}
+                      >
+                        <span className="text-2xl block mb-1">{option.emoji}</span>
+                        <span className="text-xs font-medium">{option.label}</span>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="bg-accent/5 border border-accent/20 rounded-xl p-4">
+                  <p className="text-sm text-muted-foreground">
+                    <span className="font-medium text-card-foreground">Próxima recomendação da IA:</span> Revisar este tópico em 3 dias para consolidar o aprendizado.
+                  </p>
+                </div>
+              </>
+            )}
           </div>
         </div>
       </Modal>
