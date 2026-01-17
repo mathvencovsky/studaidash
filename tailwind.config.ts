@@ -47,6 +47,14 @@ export default {
           DEFAULT: "hsl(var(--warning))",
           foreground: "hsl(var(--warning-foreground))",
         },
+        status: {
+          success: "hsl(var(--status-success))",
+          "success-text": "hsl(var(--status-success-text))",
+          warning: "hsl(var(--status-warning))",
+          "warning-text": "hsl(var(--status-warning-text))",
+          danger: "hsl(var(--status-danger))",
+          "danger-text": "hsl(var(--status-danger-text))",
+        },
         popover: {
           DEFAULT: "hsl(var(--popover))",
           foreground: "hsl(var(--popover-foreground))",

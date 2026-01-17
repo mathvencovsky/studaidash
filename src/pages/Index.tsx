@@ -3090,25 +3090,61 @@ const Dashboard = () => {
                     // Next pending content
                     const nextContent = contents.find(c => c.status !== "done");
                     
-                    // Status colors
+                    // Status colors - Premium, elegant states
                     const statusColors = {
-                      on_track: { bg: "bg-green-100", text: "text-green-700", label: "No ritmo" },
-                      attention: { bg: "bg-amber-100", text: "text-amber-700", label: "Atenção" },
-                      at_risk: { bg: "bg-red-100", text: "text-red-700", label: "Risco" }
+                      on_track: { bg: "bg-status-success", text: "text-status-success-text", label: "No ritmo", icon: "✓" },
+                      attention: { bg: "bg-status-warning", text: "text-status-warning-text", label: "Atenção", icon: "!" },
+                      at_risk: { bg: "bg-status-danger", text: "text-status-danger-text", label: "Ajustar ritmo", icon: "↓" }
                     };
                     const statusConfig = statusColors[metrics.status];
 
                     return (
                       <>
-                        {/* Row 1: Header with title + dates + actions */}
+                        {/* Executive Summary Banner - Investor-ready narrative */}
+                        <div className="bg-card border rounded-2xl p-6 shadow-sm">
+                          <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+                            <div className="flex-1">
+                              <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-1.5">
+                                Resumo Executivo
+                              </p>
+                              <p className="text-base md:text-lg text-card-foreground leading-relaxed">
+                                Para concluir até{" "}
+                                <span className="font-semibold text-primary">
+                                  {metrics.targetEndDate.toLocaleDateString("pt-BR")}
+                                </span>
+                                , você precisa de{" "}
+                                <span className="font-bold text-2xl md:text-3xl text-primary">
+                                  {metrics.requiredDailyMin}
+                                </span>
+                                <span className="text-muted-foreground"> min/dia</span>. 
+                                Seu ritmo atual é{" "}
+                                <span className={`font-bold text-2xl md:text-3xl ${
+                                  metrics.status === "on_track" ? "text-success" : 
+                                  metrics.status === "attention" ? "text-warning" : "text-destructive"
+                                }`}>
+                                  {metrics.currentDailyAvgMin}
+                                </span>
+                                <span className="text-muted-foreground"> min/dia</span>.
+                              </p>
+                            </div>
+                            <div className={`flex items-center gap-2.5 px-4 py-2.5 rounded-xl ${statusColors[metrics.status].bg} ${statusColors[metrics.status].text} font-medium text-sm whitespace-nowrap transition-all duration-300`}>
+                              <span className="w-6 h-6 flex items-center justify-center rounded-full bg-white/60 text-xs font-bold">
+                                {statusColors[metrics.status].icon}
+                              </span>
+                              {statusColors[metrics.status].label}
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* Header Row */}
                         <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
                           <div>
-                            <h1 className="text-2xl font-bold text-primary">{activeProgram.name}</h1>
-                            <p className="text-muted-foreground flex items-center gap-2 flex-wrap">
-                              <span>{metrics.startDate.toLocaleDateString("pt-BR")}</span>
+                            <h1 className="text-xl md:text-2xl font-bold text-primary tracking-tight">{activeProgram.name}</h1>
+                            <p className="text-sm text-muted-foreground flex items-center gap-2 flex-wrap mt-1">
+                              <span className="font-medium">{metrics.startDate.toLocaleDateString("pt-BR")}</span>
                               <span className="text-accent">→</span>
-                              <span className="font-medium">{metrics.targetEndDate.toLocaleDateString("pt-BR")}</span>
-                              <span className="text-xs bg-muted px-2 py-0.5 rounded">({metrics.totalDays} dias)</span>
+                              <span className="font-semibold text-card-foreground">{metrics.targetEndDate.toLocaleDateString("pt-BR")}</span>
+                              <span className="text-xs bg-secondary px-2 py-0.5 rounded-md font-medium">{metrics.totalDays} dias</span>
                             </p>
                           </div>
                           <div className="flex gap-2">
@@ -3120,89 +3156,108 @@ const Dashboard = () => {
                                 });
                                 setEditDatesModalOpen(true);
                               }}
-                              className="px-4 py-2 text-sm font-medium border rounded-xl hover:bg-muted transition-colors flex items-center gap-2"
+                              className="px-4 py-2.5 text-sm font-medium border rounded-xl hover:bg-secondary transition-all duration-200 flex items-center gap-2 group"
                             >
-                              <Edit3 size={16} />
+                              <Edit3 size={15} className="text-muted-foreground group-hover:text-primary transition-colors" />
                               <span className="hidden sm:inline">Editar prazo</span>
                             </button>
                             <button
                               onClick={() => addToast({ message: "Exportação em desenvolvimento", type: "info" })}
-                              className="px-4 py-2 text-sm font-medium border rounded-xl hover:bg-muted transition-colors flex items-center gap-2"
+                              className="px-4 py-2.5 text-sm font-medium border rounded-xl hover:bg-secondary transition-all duration-200 flex items-center gap-2 group"
                             >
-                              <Download size={16} />
+                              <Download size={15} className="text-muted-foreground group-hover:text-primary transition-colors" />
                               <span className="hidden sm:inline">Exportar</span>
                             </button>
                           </div>
                         </div>
 
                         {/* Row 2: Timeline (8 cols) + Rhythm (4 cols) */}
-                        <div className="grid lg:grid-cols-12 gap-4">
+                        <div className="grid lg:grid-cols-12 gap-5">
                           {/* Timeline Card - span 8 */}
-                          <div className="lg:col-span-8 bg-card border rounded-2xl p-6">
-                            <div className="flex items-center gap-3 mb-5">
-                              <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
-                                <Calendar size={20} className="text-primary" />
+                          <div className="lg:col-span-8 bg-card border rounded-2xl p-6 shadow-sm hover:shadow-md transition-shadow duration-300">
+                            <div className="flex items-center gap-3 mb-6">
+                              <div className="w-11 h-11 rounded-xl bg-primary/10 flex items-center justify-center">
+                                <Calendar size={22} className="text-primary" />
                               </div>
                               <div>
-                                <h2 className="font-semibold text-card-foreground">Linha do Tempo</h2>
-                                <p className="text-sm text-muted-foreground">
-                                  {metrics.elapsedDays} de {metrics.totalDays} dias • {metrics.remainingDays} restantes
+                                <h2 className="text-base font-semibold text-card-foreground">Linha do Tempo</h2>
+                                <p className="text-xs text-muted-foreground mt-0.5">
+                                  {metrics.elapsedDays} de {metrics.totalDays} dias • <span className="font-medium text-primary">{metrics.remainingDays} restantes</span>
                                 </p>
                               </div>
                             </div>
 
-                            {/* Desktop: Horizontal Timeline */}
+                            {/* Desktop: Horizontal Timeline with weekly ticks */}
                             <div className="hidden md:block">
-                              <div className="flex items-center justify-between mb-3 text-sm">
+                              <div className="flex items-center justify-between mb-4 text-sm">
                                 <div className="text-left">
-                                  <p className="text-xs text-muted-foreground uppercase tracking-wide">Início</p>
-                                  <p className="font-medium text-card-foreground">{metrics.startDate.toLocaleDateString("pt-BR")}</p>
+                                  <p className="text-[11px] text-muted-foreground uppercase tracking-wider font-medium">Início</p>
+                                  <p className="font-semibold text-card-foreground text-base">{metrics.startDate.toLocaleDateString("pt-BR")}</p>
                                 </div>
                                 <div className="text-center px-4">
-                                  <div className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium ${statusConfig.bg} ${statusConfig.text}`}>
-                                    {metrics.status === "on_track" && <CheckCircle2 size={12} />}
-                                    {metrics.status === "attention" && <Flame size={12} />}
-                                    {metrics.status === "at_risk" && <ArrowDownRight size={12} />}
+                                  <div 
+                                    className={`inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-xs font-semibold ${statusConfig.bg} ${statusConfig.text} transition-all duration-300`}
+                                    title="Status calculado com base na diferença entre ritmo atual e necessário"
+                                  >
+                                    <span className="w-4 h-4 flex items-center justify-center rounded-full bg-white/60 text-[10px] font-bold">
+                                      {statusConfig.icon}
+                                    </span>
                                     {statusConfig.label}
                                   </div>
                                 </div>
                                 <div className="text-right">
-                                  <p className="text-xs text-muted-foreground uppercase tracking-wide">Prazo</p>
-                                  <p className="font-medium text-card-foreground">{metrics.targetEndDate.toLocaleDateString("pt-BR")}</p>
+                                  <p className="text-[11px] text-muted-foreground uppercase tracking-wider font-medium">Prazo</p>
+                                  <p className="font-semibold text-card-foreground text-base">{metrics.targetEndDate.toLocaleDateString("pt-BR")}</p>
                                 </div>
                               </div>
                               
-                              <div className="relative h-4 bg-muted rounded-full overflow-hidden">
-                                <div 
-                                  className="absolute left-0 top-0 h-full bg-gradient-to-r from-primary to-accent rounded-full transition-all duration-500"
-                                  style={{ width: `${metrics.timelineProgressPct}%` }}
-                                />
-                                <div 
-                                  className="absolute top-1/2 -translate-y-1/2 w-5 h-5 bg-white border-2 border-accent rounded-full shadow-md transition-all duration-500 flex items-center justify-center"
-                                  style={{ left: `calc(${metrics.timelineProgressPct}% - 10px)` }}
-                                >
-                                  <div className="w-2 h-2 bg-accent rounded-full" />
+                              {/* Progress bar with weekly ticks */}
+                              <div className="relative">
+                                {/* Weekly tick marks - visual only */}
+                                <div className="absolute top-0 left-0 right-0 h-5 flex items-end justify-between px-[2px] pointer-events-none">
+                                  {Array.from({ length: Math.min(Math.ceil(metrics.totalDays / 7) + 1, 20) }).map((_, i) => (
+                                    <div 
+                                      key={i} 
+                                      className="w-px h-2 bg-border opacity-50"
+                                      style={{ marginLeft: i === 0 ? 0 : undefined }}
+                                    />
+                                  ))}
+                                </div>
+                                
+                                <div className="relative h-5 bg-secondary rounded-full overflow-hidden shadow-inner">
+                                  <div 
+                                    className="absolute left-0 top-0 h-full bg-gradient-to-r from-primary via-accent to-accent rounded-full transition-all duration-700 ease-out"
+                                    style={{ width: `${metrics.timelineProgressPct}%` }}
+                                  />
+                                  {/* Current position indicator */}
+                                  <div 
+                                    className="absolute top-1/2 -translate-y-1/2 w-6 h-6 bg-white border-[3px] border-accent rounded-full shadow-lg transition-all duration-700 ease-out flex items-center justify-center"
+                                    style={{ left: `calc(${Math.min(metrics.timelineProgressPct, 96)}% - 12px)` }}
+                                    title={`${metrics.timelineProgressPct}% do tempo decorrido`}
+                                  >
+                                    <div className="w-2 h-2 bg-accent rounded-full animate-pulse" />
+                                  </div>
                                 </div>
                               </div>
                               
-                              <div className="flex justify-between mt-2 text-xs text-muted-foreground">
-                                <span>0%</span>
-                                <span className="font-medium text-primary">{metrics.timelineProgressPct}% do tempo decorrido</span>
-                                <span>100%</span>
+                              <div className="flex justify-between mt-2.5 text-xs text-muted-foreground">
+                                <span className="font-medium">0%</span>
+                                <span className="font-semibold text-primary">{metrics.timelineProgressPct}% do tempo decorrido</span>
+                                <span className="font-medium">100%</span>
                               </div>
 
                               {/* Projection line */}
                               {metrics.projectedEndDate && (
-                                <div className="mt-4 pt-4 border-t border-dashed">
-                                  <p className="text-sm text-muted-foreground">
-                                    <span className="font-medium text-card-foreground">Projeção:</span>{" "}
+                                <div className="mt-5 pt-4 border-t border-dashed">
+                                  <p className="text-sm text-muted-foreground flex items-center gap-2">
+                                    <span className="text-[11px] uppercase tracking-wider font-medium text-muted-foreground">Projeção</span>
                                     {metrics.projectedEndDate <= metrics.targetEndDate ? (
-                                      <span className="text-green-600">
-                                        Conclusão em {metrics.projectedEndDate.toLocaleDateString("pt-BR")} (dentro do prazo)
+                                      <span className="text-status-success-text bg-status-success px-2.5 py-1 rounded-md font-medium text-xs">
+                                        ✓ Conclusão em {metrics.projectedEndDate.toLocaleDateString("pt-BR")}
                                       </span>
                                     ) : (
-                                      <span className="text-amber-600">
-                                        Conclusão em {metrics.projectedEndDate.toLocaleDateString("pt-BR")} ({diffDays(metrics.projectedEndDate, metrics.targetEndDate)} dias após o prazo)
+                                      <span className="text-status-danger-text bg-status-danger px-2.5 py-1 rounded-md font-medium text-xs">
+                                        {metrics.projectedEndDate.toLocaleDateString("pt-BR")} • {diffDays(metrics.projectedEndDate, metrics.targetEndDate)} dias após prazo
                                       </span>
                                     )}
                                   </p>
@@ -3214,210 +3269,232 @@ const Dashboard = () => {
                             <div className="md:hidden space-y-4">
                               <div className="flex items-start gap-4">
                                 <div className="flex flex-col items-center">
-                                  <div className="w-4 h-4 rounded-full bg-primary" />
-                                  <div className="w-0.5 h-16 bg-gradient-to-b from-primary to-accent" />
+                                  <div className="w-5 h-5 rounded-full bg-primary shadow-sm" />
+                                  <div className="w-0.5 h-14 bg-gradient-to-b from-primary to-accent" />
                                 </div>
-                                <div>
-                                  <p className="text-xs text-muted-foreground uppercase">Início</p>
-                                  <p className="font-medium text-card-foreground">{metrics.startDate.toLocaleDateString("pt-BR")}</p>
+                                <div className="pt-0.5">
+                                  <p className="text-[11px] text-muted-foreground uppercase tracking-wider font-medium">Início</p>
+                                  <p className="font-semibold text-card-foreground">{metrics.startDate.toLocaleDateString("pt-BR")}</p>
                                 </div>
                               </div>
                               <div className="flex items-start gap-4">
                                 <div className="flex flex-col items-center">
-                                  <div className="w-4 h-4 rounded-full bg-accent border-2 border-white shadow" />
-                                  <div className="w-0.5 h-16 bg-muted" />
+                                  <div className="w-5 h-5 rounded-full bg-accent border-[3px] border-white shadow-lg" />
+                                  <div className="w-0.5 h-14 bg-secondary" />
                                 </div>
-                                <div>
-                                  <p className="text-xs text-muted-foreground uppercase">Hoje</p>
-                                  <p className="font-medium text-accent">{metrics.timelineProgressPct}% • {metrics.elapsedDays} dias</p>
-                                  <div className={`inline-flex items-center gap-1 mt-1 px-2 py-0.5 rounded-full text-xs font-medium ${statusConfig.bg} ${statusConfig.text}`}>
+                                <div className="pt-0.5">
+                                  <p className="text-[11px] text-muted-foreground uppercase tracking-wider font-medium">Hoje</p>
+                                  <p className="font-bold text-accent text-lg">{metrics.timelineProgressPct}%</p>
+                                  <p className="text-xs text-muted-foreground">{metrics.elapsedDays} dias decorridos</p>
+                                  <div className={`inline-flex items-center gap-1.5 mt-2 px-2.5 py-1 rounded-md text-xs font-semibold ${statusConfig.bg} ${statusConfig.text}`}>
+                                    <span className="w-3.5 h-3.5 flex items-center justify-center rounded-full bg-white/60 text-[8px] font-bold">
+                                      {statusConfig.icon}
+                                    </span>
                                     {statusConfig.label}
                                   </div>
                                 </div>
                               </div>
                               <div className="flex items-start gap-4">
-                                <div className="w-4 h-4 rounded-full bg-muted" />
-                                <div>
-                                  <p className="text-xs text-muted-foreground uppercase">Prazo</p>
-                                  <p className="font-medium text-card-foreground">{metrics.targetEndDate.toLocaleDateString("pt-BR")}</p>
-                                  <p className="text-sm text-muted-foreground">{metrics.remainingDays} dias restantes</p>
+                                <div className="w-5 h-5 rounded-full bg-secondary border-2 border-border" />
+                                <div className="pt-0.5">
+                                  <p className="text-[11px] text-muted-foreground uppercase tracking-wider font-medium">Prazo</p>
+                                  <p className="font-semibold text-card-foreground">{metrics.targetEndDate.toLocaleDateString("pt-BR")}</p>
+                                  <p className="text-xs text-muted-foreground">{metrics.remainingDays} dias restantes</p>
                                 </div>
                               </div>
                             </div>
                           </div>
 
                           {/* Rhythm Card - span 4 */}
-                          <div className="lg:col-span-4 bg-card border rounded-2xl p-6">
-                            <div className="flex items-center gap-3 mb-5">
-                              <div className="w-10 h-10 rounded-xl bg-accent/10 flex items-center justify-center">
-                                <TrendingUp size={20} className="text-accent" />
+                          <div className="lg:col-span-4 bg-card border rounded-2xl p-6 shadow-sm hover:shadow-md transition-shadow duration-300">
+                            <div className="flex items-center gap-3 mb-6">
+                              <div className="w-11 h-11 rounded-xl bg-accent/10 flex items-center justify-center">
+                                <TrendingUp size={22} className="text-accent" />
                               </div>
                               <div>
-                                <h2 className="font-semibold text-card-foreground">Ritmo</h2>
-                                <p className="text-sm text-muted-foreground">Últimos 7 dias</p>
+                                <h2 className="text-base font-semibold text-card-foreground">Ritmo de Estudo</h2>
+                                <p className="text-xs text-muted-foreground mt-0.5">Média dos últimos 7 dias</p>
                               </div>
                             </div>
 
-                            <div className="space-y-4">
+                            <div className="space-y-5">
                               {/* Required (large) */}
-                              <div>
-                                <p className="text-xs text-muted-foreground uppercase tracking-wide mb-1">Necessário</p>
-                                <p className="text-3xl font-bold text-primary">{metrics.requiredDailyMin}<span className="text-lg font-normal text-muted-foreground"> min/dia</span></p>
+                              <div className="group cursor-help" title="Minutos necessários por dia para concluir no prazo = Minutos restantes ÷ Dias restantes">
+                                <p className="text-[11px] text-muted-foreground uppercase tracking-wider font-medium mb-1">Meta diária</p>
+                                <p className="text-4xl font-bold text-primary tracking-tight">{metrics.requiredDailyMin}<span className="text-base font-normal text-muted-foreground ml-1">min/dia</span></p>
                               </div>
                               
                               {/* Current (smaller) */}
-                              <div>
-                                <p className="text-xs text-muted-foreground uppercase tracking-wide mb-1">Atual</p>
-                                <p className="text-xl font-semibold text-card-foreground">{metrics.currentDailyAvgMin}<span className="text-sm font-normal text-muted-foreground"> min/dia</span></p>
+                              <div className="group cursor-help" title="Média de minutos estudados nos últimos 7 dias">
+                                <p className="text-[11px] text-muted-foreground uppercase tracking-wider font-medium mb-1">Ritmo atual</p>
+                                <p className={`text-2xl font-bold tracking-tight ${
+                                  metrics.status === "on_track" ? "text-success" : 
+                                  metrics.status === "attention" ? "text-warning" : "text-destructive"
+                                }`}>{metrics.currentDailyAvgMin}<span className="text-sm font-normal text-muted-foreground ml-1">min/dia</span></p>
                               </div>
 
-                              {/* Status badge */}
-                              <div className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-sm font-medium ${statusConfig.bg} ${statusConfig.text}`}>
-                                {metrics.status === "on_track" && <CheckCircle2 size={16} />}
-                                {metrics.status === "attention" && <Flame size={16} />}
-                                {metrics.status === "at_risk" && <ArrowDownRight size={16} />}
-                                {statusConfig.label}
+                              {/* Gap message - cleaner */}
+                              <div className="pt-3 border-t">
+                                {metrics.deltaDailyMin > 0 && (
+                                  <p className={`text-sm flex items-center gap-2 ${
+                                    metrics.status === "attention" ? "text-status-warning-text" : "text-status-danger-text"
+                                  }`}>
+                                    <ArrowUpRight size={16} />
+                                    <span>Aumente <span className="font-semibold">+{metrics.deltaDailyMin} min/dia</span></span>
+                                  </p>
+                                )}
+                                {metrics.deltaDailyMin <= 0 && (
+                                  <p className="text-sm text-status-success-text flex items-center gap-2">
+                                    <CheckCircle2 size={16} />
+                                    <span>Ritmo suficiente para o prazo</span>
+                                  </p>
+                                )}
                               </div>
-
-                              {/* Gap message */}
-                              {metrics.deltaDailyMin > 0 && (
-                                <p className="text-sm text-muted-foreground">
-                                  Ajuste necessário: <span className="font-medium text-amber-600">+{metrics.deltaDailyMin} min/dia</span>
-                                </p>
-                              )}
-                              {metrics.deltaDailyMin < 0 && (
-                                <p className="text-sm text-green-600">
-                                  Você está {Math.abs(metrics.deltaDailyMin)} min/dia acima do necessário! 🎉
-                                </p>
-                              )}
                             </div>
                           </div>
                         </div>
 
-                        {/* Row 3: Progress + Consistency + Next Step */}
-                        <div className="grid md:grid-cols-3 gap-4">
+                        {/* Row 3: Progress + Consistency + Next Step (equal height cards) */}
+                        <div className="grid md:grid-cols-3 gap-5">
                           {/* Progress Card */}
-                          <div className="bg-card border rounded-2xl p-5">
-                            <div className="flex items-center gap-3 mb-4">
+                          <div className="bg-card border rounded-2xl p-5 shadow-sm hover:shadow-md transition-shadow duration-300 flex flex-col">
+                            <div className="flex items-center gap-3 mb-5">
                               <div className="w-10 h-10 rounded-xl bg-accent/10 flex items-center justify-center">
                                 <Target size={20} className="text-accent" />
                               </div>
-                              <h2 className="font-semibold text-card-foreground">Progresso</h2>
+                              <h2 className="text-sm font-semibold text-card-foreground">Progresso do Programa</h2>
                             </div>
-                            <div className="space-y-3">
-                              <div className="flex justify-between text-sm">
-                                <span className="text-muted-foreground">Estudado</span>
-                                <span className="font-medium text-card-foreground">
-                                  {Math.floor(metrics.totalCompletedMinutes / 60)}h {metrics.totalCompletedMinutes % 60}min
-                                </span>
+                            <div className="flex-1 flex flex-col justify-between">
+                              <div className="space-y-3">
+                                <div className="flex justify-between text-sm">
+                                  <span className="text-muted-foreground">Estudado</span>
+                                  <span className="font-semibold text-card-foreground">
+                                    {Math.floor(metrics.totalCompletedMinutes / 60)}h {metrics.totalCompletedMinutes % 60}min
+                                  </span>
+                                </div>
+                                <div className="flex justify-between text-sm">
+                                  <span className="text-muted-foreground">Restante</span>
+                                  <span className="font-semibold text-card-foreground">
+                                    {Math.floor(metrics.remainingMinutes / 60)}h {metrics.remainingMinutes % 60}min
+                                  </span>
+                                </div>
                               </div>
-                              <div className="flex justify-between text-sm">
-                                <span className="text-muted-foreground">Restante</span>
-                                <span className="font-medium text-card-foreground">
-                                  {Math.floor(metrics.remainingMinutes / 60)}h {metrics.remainingMinutes % 60}min
-                                </span>
-                              </div>
-                              <div className="h-2 bg-muted rounded-full overflow-hidden">
-                                <div 
-                                  className="h-full bg-accent rounded-full transition-all"
-                                  style={{ width: `${activeProgram.progress}%` }}
-                                />
-                              </div>
-                              <div className="flex justify-between text-xs text-muted-foreground">
-                                <span>Conteúdos: {metrics.completedContents}/{metrics.totalContents}</span>
-                                <span className="font-medium text-accent">{activeProgram.progress}%</span>
+                              <div className="mt-4">
+                                <div className="h-2.5 bg-secondary rounded-full overflow-hidden shadow-inner">
+                                  <div 
+                                    className="h-full bg-gradient-to-r from-accent to-primary rounded-full transition-all duration-500"
+                                    style={{ width: `${activeProgram.progress}%` }}
+                                  />
+                                </div>
+                                <div className="flex justify-between mt-2 text-xs text-muted-foreground">
+                                  <span>Conteúdos: {metrics.completedContents}/{metrics.totalContents}</span>
+                                  <span className="font-bold text-primary text-sm">{activeProgram.progress}%</span>
+                                </div>
                               </div>
                             </div>
                           </div>
 
                           {/* Consistency Card */}
-                          <div className="bg-card border rounded-2xl p-5">
-                            <div className="flex items-center gap-3 mb-4">
+                          <div className="bg-card border rounded-2xl p-5 shadow-sm hover:shadow-md transition-shadow duration-300 flex flex-col">
+                            <div className="flex items-center gap-3 mb-5">
                               <div className="w-10 h-10 rounded-xl bg-accent/10 flex items-center justify-center">
                                 <Flame size={20} className="text-accent" />
                               </div>
-                              <h2 className="font-semibold text-card-foreground">Consistência</h2>
+                              <h2 className="text-sm font-semibold text-card-foreground">Consistência Semanal</h2>
                             </div>
-                            <div className="space-y-3">
-                              <p className="text-2xl font-bold text-card-foreground">
-                                {metrics.activeDays7d}/7 <span className="text-sm font-normal text-muted-foreground">dias ativos</span>
+                            <div className="flex-1 flex flex-col justify-between">
+                              <p className="text-3xl font-bold text-card-foreground tracking-tight">
+                                {metrics.activeDays7d}<span className="text-base font-normal text-muted-foreground">/7 dias</span>
                               </p>
-                              <div className="flex gap-1">
-                                {last7Days.map((day, i) => (
-                                  <div key={i} className="flex-1 flex flex-col items-center gap-1">
-                                    <div 
-                                      className={`w-full h-8 rounded ${day.active ? "bg-accent" : "bg-muted"} transition-colors`}
-                                      title={`${formatDateBR(day.date)}: ${day.minutes}min`}
-                                    />
-                                    <span className="text-[10px] text-muted-foreground">
-                                      {["D", "S", "T", "Q", "Q", "S", "S"][(new Date(day.date + "T12:00:00")).getDay()]}
-                                    </span>
-                                  </div>
-                                ))}
+                              <div className="mt-4">
+                                <div className="flex gap-1.5">
+                                  {last7Days.map((day, i) => {
+                                    const maxMins = Math.max(...last7Days.map(d => d.minutes), 1);
+                                    const height = day.active ? Math.max(20, (day.minutes / maxMins) * 100) : 15;
+                                    return (
+                                      <div key={i} className="flex-1 flex flex-col items-center gap-1.5 group cursor-help" title={`${formatDateBR(day.date)}: ${day.minutes}min`}>
+                                        <div 
+                                          className={`w-full rounded-md transition-all duration-300 ${day.active ? "bg-accent group-hover:bg-primary" : "bg-secondary"}`}
+                                          style={{ height: `${height}%`, minHeight: day.active ? "24px" : "12px" }}
+                                        />
+                                        <span className="text-[10px] text-muted-foreground font-medium">
+                                          {["D", "S", "T", "Q", "Q", "S", "S"][(new Date(day.date + "T12:00:00")).getDay()]}
+                                        </span>
+                                      </div>
+                                    );
+                                  })}
+                                </div>
+                                <p className="text-xs text-muted-foreground mt-3 text-center">
+                                  <span className="font-semibold text-card-foreground">{metrics.studiedMinutes7d}</span> min esta semana
+                                </p>
                               </div>
-                              <p className="text-xs text-muted-foreground">
-                                Total: {metrics.studiedMinutes7d} min na semana
-                              </p>
                             </div>
                           </div>
 
-                          {/* Next Step Card */}
-                          <div className="bg-card border rounded-2xl p-5">
-                            <div className="flex items-center gap-3 mb-4">
-                              <div className="w-10 h-10 rounded-xl bg-accent/10 flex items-center justify-center">
-                                <Play size={20} className="text-accent" />
+                          {/* Next Step Card - Recommended Action CTA */}
+                          <div className="bg-card border rounded-2xl p-5 shadow-sm hover:shadow-md transition-shadow duration-300 flex flex-col">
+                            <div className="flex items-center gap-3 mb-5">
+                              <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
+                                <Play size={20} className="text-primary" />
                               </div>
-                              <h2 className="font-semibold text-card-foreground">Próximo Passo</h2>
+                              <div>
+                                <p className="text-[10px] text-muted-foreground uppercase tracking-wider font-medium">Próxima ação</p>
+                                <h2 className="text-sm font-semibold text-card-foreground">Continuar estudando</h2>
+                              </div>
                             </div>
                             {nextContent ? (
-                              <div className="space-y-3">
+                              <div className="flex-1 flex flex-col justify-between">
                                 <div>
-                                  <p className="font-medium text-card-foreground">{nextContent.title}</p>
-                                  <p className="text-sm text-muted-foreground">
+                                  <p className="font-medium text-card-foreground text-sm mb-1 line-clamp-2">{nextContent.title}</p>
+                                  <p className="text-xs text-muted-foreground">
                                     {nextContent.estimatedMinutes - nextContent.completedMinutes} min restantes
                                   </p>
                                 </div>
-                                <div className="h-2 bg-muted rounded-full overflow-hidden">
-                                  <div 
-                                    className="h-full bg-accent rounded-full"
-                                    style={{ width: `${(nextContent.completedMinutes / nextContent.estimatedMinutes) * 100}%` }}
-                                  />
+                                <div className="mt-4">
+                                  <div className="h-1.5 bg-secondary rounded-full overflow-hidden mb-4">
+                                    <div 
+                                      className="h-full bg-accent rounded-full transition-all"
+                                      style={{ width: `${(nextContent.completedMinutes / nextContent.estimatedMinutes) * 100}%` }}
+                                    />
+                                  </div>
+                                  <button
+                                    onClick={() => openNewSessionModal()}
+                                    className="w-full py-3 text-sm font-semibold bg-primary text-primary-foreground rounded-xl hover:opacity-90 transition-all duration-200 flex items-center justify-center gap-2 shadow-sm hover:shadow-md"
+                                  >
+                                    <Play size={16} />
+                                    Continuar: {nextContent.title.split(" ").slice(0, 2).join(" ")}...
+                                  </button>
                                 </div>
-                                <button
-                                  onClick={() => openNewSessionModal()}
-                                  className="w-full py-2.5 text-sm font-medium bg-accent text-accent-foreground rounded-xl hover:opacity-90 transition-opacity flex items-center justify-center gap-2"
-                                >
-                                  <Play size={16} />
-                                  Continuar
-                                </button>
                               </div>
                             ) : (
-                              <div className="flex flex-col items-center justify-center py-4 text-center">
-                                <Trophy size={32} className="text-accent mb-2" />
-                                <p className="font-medium text-card-foreground">Trilha concluída!</p>
-                                <p className="text-sm text-muted-foreground">Parabéns pelo esforço</p>
+                              <div className="flex-1 flex flex-col items-center justify-center text-center py-4">
+                                <div className="w-14 h-14 rounded-full bg-status-success flex items-center justify-center mb-3">
+                                  <Trophy size={28} className="text-status-success-text" />
+                                </div>
+                                <p className="font-semibold text-card-foreground">Trilha concluída!</p>
+                                <p className="text-sm text-muted-foreground mt-1">Parabéns pelo esforço 🎉</p>
                               </div>
                             )}
                           </div>
                         </div>
 
                         {/* Row 4: Content Map (8 cols) + Reviews (4 cols) */}
-                        <div className="grid lg:grid-cols-12 gap-4">
+                        <div className="grid lg:grid-cols-12 gap-5">
                           {/* Content Map - span 8 */}
-                          <div className="lg:col-span-8 bg-card border rounded-2xl p-6">
-                            <div className="flex items-center justify-between mb-5">
+                          <div className="lg:col-span-8 bg-card border rounded-2xl p-6 shadow-sm">
+                            <div className="flex items-center justify-between mb-6">
                               <div className="flex items-center gap-3">
-                                <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
-                                  <Layers size={20} className="text-primary" />
+                                <div className="w-11 h-11 rounded-xl bg-primary/10 flex items-center justify-center">
+                                  <Layers size={22} className="text-primary" />
                                 </div>
                                 <div>
-                                  <h2 className="font-semibold text-card-foreground">Mapa de Conteúdos</h2>
-                                  <p className="text-sm text-muted-foreground">{contents.length} competências</p>
+                                  <h2 className="text-base font-semibold text-card-foreground">Mapa de Conteúdos</h2>
+                                  <p className="text-xs text-muted-foreground mt-0.5">{contents.length} competências • {metrics.completedContents} concluídas</p>
                                 </div>
                               </div>
                             </div>
 
-                            <div className="space-y-3">
+                            <div className="space-y-2.5">
                               {contents.map((node, idx) => {
                                 const percent = node.estimatedMinutes > 0 
                                   ? Math.round((node.completedMinutes / node.estimatedMinutes) * 100) 
@@ -3426,15 +3503,15 @@ const Dashboard = () => {
                                 const isExpanded = expandedCompetencies.has(node.id);
                                 
                                 const nodeStatusConfig = {
-                                  done: { label: "Concluído", color: "bg-green-100 text-green-700", icon: CheckCircle2 },
-                                  in_progress: { label: "Em andamento", color: "bg-accent/10 text-accent", icon: Play },
-                                  not_started: { label: "A iniciar", color: "bg-muted text-muted-foreground", icon: Clock }
+                                  done: { label: "Concluído", bg: "bg-status-success", text: "text-status-success-text", icon: CheckCircle2 },
+                                  in_progress: { label: "Em andamento", bg: "bg-accent/10", text: "text-accent", icon: Play },
+                                  not_started: { label: "A iniciar", bg: "bg-secondary", text: "text-muted-foreground", icon: Clock }
                                 };
                                 const config = nodeStatusConfig[node.status];
                                 const StatusIcon = config.icon;
 
                                 return (
-                                  <div key={node.id} className="border rounded-xl overflow-hidden">
+                                  <div key={node.id} className="border rounded-xl overflow-hidden hover:border-accent/30 transition-colors duration-200">
                                     <button
                                       onClick={() => {
                                         const newSet = new Set(expandedCompetencies);
@@ -3445,37 +3522,37 @@ const Dashboard = () => {
                                         }
                                         setExpandedCompetencies(newSet);
                                       }}
-                                      className="w-full p-4 flex items-center gap-4 hover:bg-muted/50 transition-colors text-left"
+                                      className="w-full p-4 flex items-center gap-4 hover:bg-muted/30 transition-colors text-left"
                                     >
-                                      <div className={`w-8 h-8 rounded-lg flex items-center justify-center shrink-0 ${config.color}`}>
+                                      <div className={`w-9 h-9 rounded-lg flex items-center justify-center shrink-0 ${config.bg} ${config.text} transition-all duration-200`}>
                                         <StatusIcon size={16} />
                                       </div>
                                       <div className="flex-1 min-w-0">
-                                        <div className="flex items-center justify-between mb-1">
-                                          <p className="font-medium text-card-foreground truncate">{node.title}</p>
-                                          <div className="flex items-center gap-2 shrink-0 ml-2">
+                                        <div className="flex items-center justify-between mb-1.5">
+                                          <p className="font-medium text-sm text-card-foreground truncate">{node.title}</p>
+                                          <div className="flex items-center gap-2.5 shrink-0 ml-3">
                                             <span className="text-xs text-muted-foreground">{remainingMins}min</span>
-                                            <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${config.color}`}>
+                                            <span className={`px-2.5 py-0.5 rounded-md text-xs font-semibold ${config.bg} ${config.text}`}>
                                               {percent}%
                                             </span>
                                           </div>
                                         </div>
-                                        <div className="h-1.5 bg-muted rounded-full overflow-hidden">
+                                        <div className="h-1.5 bg-secondary rounded-full overflow-hidden">
                                           <div 
-                                            className={`h-full rounded-full transition-all ${node.status === "done" ? "bg-green-500" : "bg-accent"}`}
+                                            className={`h-full rounded-full transition-all duration-500 ${node.status === "done" ? "bg-success" : "bg-accent"}`}
                                             style={{ width: `${percent}%` }}
                                           />
                                         </div>
                                       </div>
                                       <ChevronDown 
-                                        size={20} 
-                                        className={`text-muted-foreground transition-transform ${isExpanded ? "rotate-180" : ""}`}
+                                        size={18} 
+                                        className={`text-muted-foreground transition-transform duration-200 ${isExpanded ? "rotate-180" : ""}`}
                                       />
                                     </button>
                                     
                                     {/* Expandable children */}
                                     {isExpanded && node.children && node.children.length > 0 && (
-                                      <div className="border-t bg-muted/20 p-3 space-y-2">
+                                      <div className="border-t bg-muted/10 p-3 space-y-1.5">
                                         {node.children.map((child, childIdx) => {
                                           const childPercent = child.estimatedMinutes > 0 
                                             ? Math.round((child.completedMinutes / child.estimatedMinutes) * 100) 
@@ -3484,8 +3561,8 @@ const Dashboard = () => {
                                           const ChildIcon = childConfig.icon;
                                           
                                           return (
-                                            <div key={child.id} className="flex items-center gap-3 p-2 rounded-lg hover:bg-card transition-colors">
-                                              <div className={`w-6 h-6 rounded flex items-center justify-center ${childConfig.color}`}>
+                                            <div key={child.id} className="flex items-center gap-3 p-2.5 rounded-lg hover:bg-card transition-colors">
+                                              <div className={`w-6 h-6 rounded flex items-center justify-center ${childConfig.bg} ${childConfig.text}`}>
                                                 <ChildIcon size={12} />
                                               </div>
                                               <div className="flex-1 min-w-0">
@@ -3493,7 +3570,7 @@ const Dashboard = () => {
                                               </div>
                                               <div className="flex items-center gap-2 shrink-0">
                                                 <span className="text-xs text-muted-foreground">{child.estimatedMinutes}min</span>
-                                                <span className={`px-1.5 py-0.5 rounded text-[10px] font-medium ${childConfig.color}`}>
+                                                <span className={`px-1.5 py-0.5 rounded text-[10px] font-semibold ${childConfig.bg} ${childConfig.text}`}>
                                                   {childPercent}%
                                                 </span>
                                               </div>
@@ -3509,59 +3586,73 @@ const Dashboard = () => {
                           </div>
 
                           {/* Reviews & Checkpoints - span 4 */}
-                          <div className="lg:col-span-4 space-y-4">
+                          <div className="lg:col-span-4 space-y-5">
                             {/* Reviews Card */}
-                            <div className="bg-card border rounded-2xl p-5">
+                            <div className="bg-card border rounded-2xl p-5 shadow-sm">
                               <div className="flex items-center gap-3 mb-4">
                                 <div className="w-10 h-10 rounded-xl bg-accent/10 flex items-center justify-center">
                                   <RotateCw size={20} className="text-accent" />
                                 </div>
-                                <h2 className="font-semibold text-card-foreground">Revisões</h2>
+                                <h2 className="text-sm font-semibold text-card-foreground">Revisões Pendentes</h2>
                               </div>
                               {pendingReviewsCount > 0 ? (
                                 <div className="space-y-3">
-                                  <p className="text-sm text-muted-foreground">
-                                    <span className="text-accent font-medium">{pendingReviewsCount}</span> revisões pendentes
+                                  <p className="text-2xl font-bold text-card-foreground">
+                                    {pendingReviewsCount}
+                                    <span className="text-sm font-normal text-muted-foreground ml-1">para revisar</span>
                                   </p>
                                   <button
                                     onClick={() => navigate("revisoes")}
-                                    className="w-full py-2 text-sm font-medium border rounded-xl hover:bg-muted transition-colors"
+                                    className="w-full py-2.5 text-sm font-medium border rounded-xl hover:bg-secondary transition-all duration-200"
                                   >
                                     Ver revisões
                                   </button>
                                 </div>
                               ) : (
-                                <p className="text-sm text-muted-foreground">Nenhuma revisão pendente</p>
+                                <div className="text-center py-4">
+                                  <p className="text-sm text-muted-foreground">Nenhuma revisão pendente</p>
+                                  <p className="text-xs text-muted-foreground mt-1">Continue estudando para gerar revisões</p>
+                                </div>
                               )}
                             </div>
 
                             {/* Checkpoints Card */}
-                            <div className="bg-card border rounded-2xl p-5">
+                            <div className="bg-card border rounded-2xl p-5 shadow-sm">
                               <div className="flex items-center gap-3 mb-4">
                                 <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
                                   <Award size={20} className="text-primary" />
                                 </div>
-                                <h2 className="font-semibold text-card-foreground">Checkpoints</h2>
+                                <h2 className="text-sm font-semibold text-card-foreground">Próximos Marcos</h2>
                               </div>
                               <div className="space-y-3">
-                                <div className="flex items-center gap-2 text-sm">
-                                  <div className="w-6 h-6 rounded-full bg-accent/10 flex items-center justify-center">
-                                    <FileText size={12} className="text-accent" />
+                                <div className="flex items-center gap-3 p-3 bg-secondary/50 rounded-xl">
+                                  <div className="w-8 h-8 rounded-lg bg-accent/10 flex items-center justify-center">
+                                    <FileText size={14} className="text-accent" />
                                   </div>
-                                  <span className="text-muted-foreground">Próximo simulado</span>
-                                  <span className="ml-auto font-medium text-card-foreground">Em 7 dias</span>
+                                  <div className="flex-1">
+                                    <span className="text-sm text-card-foreground font-medium">Próximo simulado</span>
+                                  </div>
+                                  <span className="text-xs font-semibold text-muted-foreground bg-secondary px-2 py-1 rounded-md">7 dias</span>
                                 </div>
-                                <div className="flex items-center gap-2 text-sm">
-                                  <div className="w-6 h-6 rounded-full bg-accent/10 flex items-center justify-center">
-                                    <Target size={12} className="text-accent" />
+                                <div className="flex items-center gap-3 p-3 bg-secondary/50 rounded-xl">
+                                  <div className="w-8 h-8 rounded-lg bg-accent/10 flex items-center justify-center">
+                                    <Target size={14} className="text-accent" />
                                   </div>
-                                  <span className="text-muted-foreground">Meta semanal</span>
-                                  <span className="ml-auto font-medium text-card-foreground">{Math.round((metrics.studiedMinutes7d / (goals?.weeklyGoal || 300)) * 100)}%</span>
+                                  <div className="flex-1">
+                                    <span className="text-sm text-card-foreground font-medium">Meta semanal</span>
+                                  </div>
+                                  <span className={`text-xs font-bold px-2 py-1 rounded-md ${
+                                    (metrics.studiedMinutes7d / (goals?.weeklyGoal || 300)) >= 1 
+                                      ? "bg-status-success text-status-success-text" 
+                                      : "bg-secondary text-muted-foreground"
+                                  }`}>
+                                    {Math.round((metrics.studiedMinutes7d / (goals?.weeklyGoal || 300)) * 100)}%
+                                  </span>
                                 </div>
                               </div>
                               <button
                                 onClick={() => addToast({ message: "Geração de plano em desenvolvimento", type: "info" })}
-                                className="w-full mt-4 py-2 text-sm font-medium bg-primary text-primary-foreground rounded-xl hover:opacity-90 transition-opacity"
+                                className="w-full mt-4 py-2.5 text-sm font-semibold bg-primary text-primary-foreground rounded-xl hover:opacity-90 transition-all duration-200 shadow-sm"
                               >
                                 Gerar plano semanal
                               </button>
@@ -3569,38 +3660,44 @@ const Dashboard = () => {
                           </div>
                         </div>
 
-                        {/* Smart Projection Banner */}
-                        <div className="bg-gradient-to-r from-primary to-accent rounded-2xl p-6 text-white">
-                          <div className="flex items-start gap-4">
-                            <div className="w-12 h-12 rounded-xl bg-white/20 flex items-center justify-center shrink-0">
+                        {/* Smart Projection Banner - Premium gradient with subtle animation */}
+                        <div className="bg-gradient-to-br from-primary via-primary to-accent rounded-2xl p-6 text-white shadow-lg relative overflow-hidden">
+                          {/* Subtle background pattern */}
+                          <div className="absolute inset-0 opacity-10">
+                            <div className="absolute top-0 right-0 w-64 h-64 bg-white rounded-full blur-3xl -translate-y-1/2 translate-x-1/2" />
+                            <div className="absolute bottom-0 left-0 w-48 h-48 bg-white rounded-full blur-3xl translate-y-1/2 -translate-x-1/2" />
+                          </div>
+                          
+                          <div className="flex items-start gap-4 relative z-10">
+                            <div className="w-12 h-12 rounded-xl bg-white/20 backdrop-blur-sm flex items-center justify-center shrink-0">
                               <Sparkles size={24} />
                             </div>
                             <div className="flex-1">
-                              <h2 className="font-semibold text-lg mb-2">Projeção Inteligente</h2>
+                              <h2 className="font-semibold text-lg mb-3">Projeção Inteligente</h2>
                               {metrics.projectedDaysToFinish !== null && metrics.currentDailyAvgMin > 0 ? (
-                                <div className="space-y-2">
+                                <div className="space-y-3">
                                   {metrics.projectedDaysToFinish <= metrics.remainingDays ? (
-                                    <p className="text-white/95">
-                                      ✅ Mantendo o ritmo atual de <strong>{metrics.currentDailyAvgMin} min/dia</strong>, você conclui esta trilha em <strong>{metrics.projectedDaysToFinish} dias</strong> — {diffDays(metrics.targetEndDate, metrics.today) - metrics.projectedDaysToFinish} dias antes do prazo!
+                                    <p className="text-white/95 leading-relaxed">
+                                      ✅ Mantendo o ritmo atual de <strong>{metrics.currentDailyAvgMin} min/dia</strong>, você conclui esta trilha em <strong>{metrics.projectedDaysToFinish} dias</strong> — <span className="bg-white/20 px-2 py-0.5 rounded-md font-semibold">{diffDays(metrics.targetEndDate, metrics.today) - metrics.projectedDaysToFinish} dias antes do prazo!</span>
                                     </p>
                                   ) : (
                                     <>
-                                      <p className="text-white/95">
+                                      <p className="text-white/95 leading-relaxed">
                                         ⚠️ Com o ritmo atual de <strong>{metrics.currentDailyAvgMin} min/dia</strong>, você concluirá em <strong>{metrics.projectedDaysToFinish} dias</strong> — {metrics.projectedDaysToFinish - metrics.remainingDays} dias após o prazo.
                                       </p>
-                                      <p className="text-white/80 text-sm">
-                                        💡 Para concluir no prazo, aumente seu ritmo para <strong>{metrics.requiredDailyMin} min/dia</strong> (+{metrics.deltaDailyMin} min/dia).
+                                      <p className="text-white/80 text-sm bg-white/10 rounded-lg p-3">
+                                        💡 <strong>Recomendação:</strong> Aumente seu ritmo para <span className="font-bold">{metrics.requiredDailyMin} min/dia</span> (+{metrics.deltaDailyMin} min) para concluir no prazo.
                                       </p>
                                     </>
                                   )}
                                 </div>
                               ) : (
-                                <p className="text-white/90">
+                                <p className="text-white/90 leading-relaxed">
                                   📊 Registre sessões de estudo para ver sua projeção personalizada. Quanto mais dados, mais precisa a previsão.
                                 </p>
                               )}
-                              <p className="text-xs text-white/50 mt-3">
-                                * Projeção recalculada automaticamente a cada nova sessão
+                              <p className="text-[11px] text-white/40 mt-4 uppercase tracking-wider font-medium">
+                                Projeção recalculada automaticamente a cada nova sessão
                               </p>
                             </div>
                           </div>
