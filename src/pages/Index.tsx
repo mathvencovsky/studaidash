@@ -192,6 +192,10 @@ function loadState<T>(key: string, defaultValue: T): T {
     if (parsed === null || parsed === undefined) return defaultValue;
     // For arrays, ensure we have an array
     if (Array.isArray(defaultValue) && !Array.isArray(parsed)) return defaultValue;
+    // For objects (like goals), merge with defaults to ensure all properties exist
+    if (typeof defaultValue === 'object' && !Array.isArray(defaultValue) && defaultValue !== null) {
+      return { ...defaultValue, ...parsed } as T;
+    }
     return parsed;
   } catch {
     return defaultValue;
@@ -1106,7 +1110,7 @@ const Dashboard = () => {
                           <span className="text-sm font-medium text-muted-foreground">{track.progress}%</span>
                         </div>
                         <div className="flex flex-wrap gap-1.5">
-                          {track.skills.map((skill) => <Badge key={skill} variant="outline">{skill}</Badge>)}
+                          {(track.skills || []).map((skill) => <Badge key={skill} variant="outline">{skill}</Badge>)}
                         </div>
                       </div>
                       <button className="px-4 py-2 text-sm font-medium bg-primary text-primary-foreground rounded-lg hover:opacity-90">
@@ -1390,7 +1394,7 @@ const Dashboard = () => {
               <div className="bg-card border rounded-xl p-5">
                 <h2 className="font-semibold text-card-foreground mb-4">Plano da Semana</h2>
                 <div className="grid grid-cols-7 gap-2">
-                  {goals.weeklyPlan.map((day, i) => (
+                  {(goals.weeklyPlan || defaultGoals.weeklyPlan).map((day, i) => (
                     <div key={i} className="text-center">
                       <p className="text-xs font-medium text-muted-foreground mb-2">{day.day}</p>
                       <div className="h-24 bg-muted rounded-lg relative overflow-hidden">
