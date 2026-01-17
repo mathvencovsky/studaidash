@@ -111,6 +111,29 @@ interface Program {
   competencies: string[];
   prerequisites: string[];
   enrolledAt?: number;
+  // MVP+ fields for trail overview
+  startDate?: string; // YYYY-MM-DD - user-defined start date
+  targetEndDate?: string; // YYYY-MM-DD - deadline (e.g., exam date)
+  defaultDailyCapacityMin?: number; // available min/day (e.g., 90)
+}
+
+// TODO API: ContentNode for structured trail content
+interface ContentNode {
+  id: string;
+  title: string;
+  competency: string;
+  estimatedMinutes: number;
+  status: "not_started" | "in_progress" | "done";
+  completedMinutes: number; // 0..estimatedMinutes
+  order: number;
+  children?: ContentNode[]; // optional (module -> lessons)
+}
+
+// TODO API: TrailData for persisting trail-specific data
+interface TrailData {
+  programId: number;
+  contents: ContentNode[];
+  lastUpdated: number;
 }
 
 interface Competency {
@@ -128,6 +151,7 @@ interface Session {
   topic: string;
   programId: number;
   competencyId?: number;
+  contentId?: string; // TODO API: Link session to specific ContentNode
   duration: number;
   type: "Conceitual" | "Exercícios" | "Simulado" | "Revisão" | "Projeto";
   result: string;
@@ -197,6 +221,220 @@ interface NavItem {
 }
 
 // ============================================================================
+// TRAIL CALCULATION UTILITIES (Exact formulas from spec)
+// ============================================================================
+
+// Parse date string to Date object with time at 00:00 local
+function parseLocalDate(dateStr: string): Date {
+  const [year, month, day] = dateStr.split("-").map(Number);
+  return new Date(year, month - 1, day, 0, 0, 0, 0);
+}
+
+// Get today's date with time at 00:00 local
+function getTodayLocal(): Date {
+  const now = new Date();
+  return new Date(now.getFullYear(), now.getMonth(), now.getDate(), 0, 0, 0, 0);
+}
+
+// Calculate difference in days between two dates
+function diffDays(a: Date, b: Date): number {
+  return Math.floor((a.getTime() - b.getTime()) / 86400000);
+}
+
+// Add days to a date
+function addDays(date: Date, days: number): Date {
+  const result = new Date(date);
+  result.setDate(result.getDate() + days);
+  return result;
+}
+
+// Clamp value between min and max
+function clamp(min: number, value: number, max: number): number {
+  return Math.max(min, Math.min(max, value));
+}
+
+// Format date to YYYY-MM-DD
+function formatDateISO(date: Date): string {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const day = String(date.getDate()).padStart(2, "0");
+  return `${year}-${month}-${day}`;
+}
+
+// Trail calculation types
+interface TrailCalculations {
+  // Totals
+  totalEstimatedMinutes: number;
+  totalCompletedMinutes: number;
+  remainingMinutes: number;
+  
+  // Dates
+  startDate: Date;
+  targetEndDate: Date;
+  today: Date;
+  
+  // Duration
+  totalDays: number;
+  elapsedDays: number;
+  remainingDays: number;
+  timelineProgressPct: number;
+  
+  // Rhythm (7-day rolling)
+  studiedMinutes7d: number;
+  activeDays7d: number;
+  currentDailyAvgMin: number;
+  
+  // Required rhythm
+  requiredDailyMin: number;
+  
+  // Projection
+  projectedDaysToFinish: number | null;
+  projectedEndDate: Date | null;
+  
+  // Gap
+  deltaDailyMin: number;
+  status: "on_track" | "attention" | "at_risk";
+  
+  // Content stats
+  totalContents: number;
+  completedContents: number;
+}
+
+function calculateTrailMetrics(
+  program: Program,
+  sessions: Session[],
+  trailContents: ContentNode[]
+): TrailCalculations {
+  const today = getTodayLocal();
+  
+  // Default dates if not set
+  const startDate = program.startDate 
+    ? parseLocalDate(program.startDate)
+    : program.enrolledAt 
+      ? new Date(program.enrolledAt)
+      : addDays(today, -90);
+  
+  // Parse duration for target end if not set
+  let targetEndDate: Date;
+  if (program.targetEndDate) {
+    targetEndDate = parseLocalDate(program.targetEndDate);
+  } else {
+    const durationMatch = program.duration.match(/(\d+)\s*(mês|meses|semanas?)/i);
+    let durationDays = 180;
+    if (durationMatch) {
+      const num = parseInt(durationMatch[1]);
+      durationDays = durationMatch[2].includes("semana") ? num * 7 : num * 30;
+    }
+    targetEndDate = addDays(startDate, durationDays);
+  }
+  
+  // Calculate totals from trail contents
+  const calculateNodeMinutes = (node: ContentNode): { estimated: number; completed: number } => {
+    let estimated = node.estimatedMinutes;
+    let completed = node.completedMinutes;
+    if (node.children) {
+      node.children.forEach(child => {
+        const childMins = calculateNodeMinutes(child);
+        estimated += childMins.estimated;
+        completed += childMins.completed;
+      });
+    }
+    return { estimated, completed };
+  };
+  
+  let totalEstimatedMinutes = 0;
+  let totalCompletedMinutes = 0;
+  let completedContents = 0;
+  
+  trailContents.forEach(node => {
+    const mins = calculateNodeMinutes(node);
+    totalEstimatedMinutes += mins.estimated;
+    totalCompletedMinutes += mins.completed;
+    if (node.status === "done") completedContents++;
+  });
+  
+  // If no trail contents, use sessions for completed minutes
+  if (trailContents.length === 0) {
+    const programSessions = sessions.filter(s => s.programId === program.id);
+    totalCompletedMinutes = programSessions.reduce((acc, s) => acc + s.duration, 0);
+    // Estimate total based on program progress
+    if (program.progress > 0) {
+      totalEstimatedMinutes = Math.round(totalCompletedMinutes / (program.progress / 100));
+    } else {
+      totalEstimatedMinutes = totalCompletedMinutes + 1000; // Default estimate
+    }
+  }
+  
+  const remainingMinutes = Math.max(0, totalEstimatedMinutes - totalCompletedMinutes);
+  
+  // Duration calculations
+  const totalDays = Math.max(1, diffDays(targetEndDate, startDate) + 1);
+  const elapsedDays = clamp(0, diffDays(today, startDate) + 1, totalDays);
+  const remainingDays = Math.max(0, totalDays - elapsedDays);
+  const timelineProgressPct = Math.round((elapsedDays / totalDays) * 100);
+  
+  // 7-day rolling average
+  const window7d: string[] = [];
+  for (let i = 6; i >= 0; i--) {
+    window7d.push(formatDateISO(addDays(today, -i)));
+  }
+  
+  const programSessions7d = sessions.filter(
+    s => s.programId === program.id && window7d.includes(s.date)
+  );
+  const studiedMinutes7d = programSessions7d.reduce((acc, s) => acc + s.duration, 0);
+  const activeDays7d = new Set(programSessions7d.map(s => s.date)).size;
+  const currentDailyAvgMin = Math.round(studiedMinutes7d / 7);
+  
+  // Required rhythm
+  const requiredDailyMin = remainingDays > 0 
+    ? Math.ceil(remainingMinutes / remainingDays) 
+    : remainingMinutes;
+  
+  // Projection
+  let projectedDaysToFinish: number | null = null;
+  let projectedEndDate: Date | null = null;
+  if (currentDailyAvgMin > 0) {
+    projectedDaysToFinish = Math.ceil(remainingMinutes / currentDailyAvgMin);
+    projectedEndDate = addDays(today, projectedDaysToFinish);
+  }
+  
+  // Gap and status
+  const deltaDailyMin = requiredDailyMin - currentDailyAvgMin;
+  let status: "on_track" | "attention" | "at_risk" = "on_track";
+  if (remainingMinutes > 0) {
+    if (deltaDailyMin > 15) {
+      status = "at_risk";
+    } else if (deltaDailyMin > 0) {
+      status = "attention";
+    }
+  }
+  
+  return {
+    totalEstimatedMinutes,
+    totalCompletedMinutes,
+    remainingMinutes,
+    startDate,
+    targetEndDate,
+    today,
+    totalDays,
+    elapsedDays,
+    remainingDays,
+    timelineProgressPct,
+    studiedMinutes7d,
+    activeDays7d,
+    currentDailyAvgMin,
+    requiredDailyMin,
+    projectedDaysToFinish,
+    projectedEndDate,
+    deltaDailyMin,
+    status,
+    totalContents: trailContents.length,
+    completedContents,
+  };
+}
+
+// ============================================================================
 // AREAS (Top-level taxonomy)
 // ============================================================================
 
@@ -215,17 +453,47 @@ const AREAS: Area[] = [
 // ============================================================================
 
 const defaultPrograms: Program[] = [
-  // Concursos
-  { id: 1, name: "Analista BACEN", areaId: "concursos", description: "Preparação completa para Analista do Banco Central", duration: "12 meses", progress: 45, status: "Em andamento", competencies: ["Economia", "Direito Administrativo", "Matemática Financeira", "Contabilidade"], prerequisites: [], enrolledAt: Date.now() - 90 * 86400000 },
+  // Concursos - with MVP+ trail fields
+  { 
+    id: 1, name: "Analista BACEN", areaId: "concursos", 
+    description: "Preparação completa para Analista do Banco Central", 
+    duration: "12 meses", progress: 45, status: "Em andamento", 
+    competencies: ["Economia", "Direito Administrativo", "Matemática Financeira", "Contabilidade"], 
+    prerequisites: [], 
+    enrolledAt: Date.now() - 90 * 86400000,
+    startDate: formatDateISO(addDays(getTodayLocal(), -90)),
+    targetEndDate: formatDateISO(addDays(getTodayLocal(), 180)),
+    defaultDailyCapacityMin: 90
+  },
   { id: 2, name: "Auditor Fiscal - Receita Federal", areaId: "concursos", description: "Programa de estudos para Auditor-Fiscal da RFB", duration: "18 meses", progress: 0, status: "A iniciar", competencies: ["Direito Tributário", "Contabilidade Avançada", "Legislação Aduaneira"], prerequisites: [] },
   
-  // Certificações
-  { id: 3, name: "CFA Level I", areaId: "certificacoes", description: "Chartered Financial Analyst - Nível 1", duration: "6 meses", progress: 62, status: "Em andamento", competencies: ["Ethics", "Quantitative Methods", "Economics", "Financial Reporting", "Corporate Finance", "Equity", "Fixed Income", "Derivatives", "Portfolio Management"], prerequisites: [], enrolledAt: Date.now() - 120 * 86400000 },
+  // Certificações - with MVP+ trail fields
+  { 
+    id: 3, name: "CFA Level I", areaId: "certificacoes", 
+    description: "Chartered Financial Analyst - Nível 1", 
+    duration: "6 meses", progress: 62, status: "Em andamento", 
+    competencies: ["Ethics", "Quantitative Methods", "Economics", "Financial Reporting", "Corporate Finance", "Equity", "Fixed Income", "Derivatives", "Portfolio Management"], 
+    prerequisites: [], 
+    enrolledAt: Date.now() - 120 * 86400000,
+    startDate: formatDateISO(addDays(getTodayLocal(), -120)),
+    targetEndDate: formatDateISO(addDays(getTodayLocal(), 60)),
+    defaultDailyCapacityMin: 60
+  },
   { id: 4, name: "AWS Cloud Practitioner", areaId: "certificacoes", description: "Fundamentos de cloud computing na AWS", duration: "2 meses", progress: 100, status: "Concluído", competencies: ["Cloud Concepts", "Security", "Technology", "Billing"], prerequisites: [] },
   { id: 5, name: "PMP Certification", areaId: "certificacoes", description: "Project Management Professional", duration: "4 meses", progress: 28, status: "Em andamento", competencies: ["Iniciação", "Planejamento", "Execução", "Monitoramento", "Encerramento"], prerequisites: [] },
   
-  // Tech
-  { id: 6, name: "Data Analyst", areaId: "tech", description: "Formação completa em Análise de Dados", duration: "6 meses", progress: 35, status: "Em andamento", competencies: ["SQL", "Python", "Estatística", "Visualização", "Machine Learning Básico"], prerequisites: [], enrolledAt: Date.now() - 60 * 86400000 },
+  // Tech - with MVP+ trail fields
+  { 
+    id: 6, name: "Data Analyst", areaId: "tech", 
+    description: "Formação completa em Análise de Dados", 
+    duration: "6 meses", progress: 35, status: "Em andamento", 
+    competencies: ["SQL", "Python", "Estatística", "Visualização", "Machine Learning Básico"], 
+    prerequisites: [], 
+    enrolledAt: Date.now() - 60 * 86400000,
+    startDate: formatDateISO(addDays(getTodayLocal(), -60)),
+    targetEndDate: formatDateISO(addDays(getTodayLocal(), 120)),
+    defaultDailyCapacityMin: 75
+  },
   { id: 7, name: "Engenheiro de Software", areaId: "tech", description: "Do básico ao avançado em engenharia de software", duration: "12 meses", progress: 0, status: "A iniciar", competencies: ["Algoritmos", "Estruturas de Dados", "System Design", "DevOps"], prerequisites: [] },
   { id: 8, name: "Transição para Tech", areaId: "tech", description: "Programa para quem está migrando de carreira", duration: "8 meses", progress: 15, status: "Em andamento", competencies: ["Lógica de Programação", "Python Básico", "Git", "SQL", "HTML/CSS"], prerequisites: [] },
   
@@ -617,7 +885,7 @@ const BOTTOM_NAV_ITEMS: { id: ViewId; icon: any; label: string }[] = [
 
 const STORAGE_KEYS = {
   sessions: "studai_sessions_v2",
-  programs: "studai_programs_v2",
+  programs: "studai_programs_v3", // Updated for new fields
   goals: "studai_goals_v2",
   streak: "studai_streak",
   searchHistory: "studai_search_history",
@@ -627,6 +895,7 @@ const STORAGE_KEYS = {
   calendarMonth: "studai_calendar_month",
   chartRange: "studai_chart_range",
   reviews: "studai_reviews",
+  trailData: "studai_trail_data", // TODO API: Trail content data
 };
 
 // TODO API: Replace localStorage with API calls
@@ -949,6 +1218,7 @@ const Dashboard = () => {
     `${new Date().getFullYear()}-${String(new Date().getMonth() + 1).padStart(2, "0")}`
   );
   const [chartRange, setChartRange] = usePersistedState<number>(STORAGE_KEYS.chartRange, 7);
+  const [trailData, setTrailData] = usePersistedState<TrailData[]>(STORAGE_KEYS.trailData, []);
 
   // UI state
   const [activeView, setActiveView] = useState<ViewId>("dashboard");
@@ -956,6 +1226,11 @@ const Dashboard = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [selectedAreaFilter, setSelectedAreaFilter] = useState<AreaId | "all">("all");
   const [selectedPersona, setSelectedPersona] = useState<DemoPersona | null>(null);
+  
+  // Trail modals
+  const [editDatesModalOpen, setEditDatesModalOpen] = useState(false);
+  const [editDatesForm, setEditDatesForm] = useState({ startDate: "", targetEndDate: "" });
+  const [expandedCompetencies, setExpandedCompetencies] = useState<Set<string>>(new Set());
 
   // Global search
   const [globalSearchQuery, setGlobalSearchQuery] = useState("");
@@ -2727,17 +3002,9 @@ const Dashboard = () => {
             </div>
           )}
 
-          {/* ====== TRILHA VIEW (Trail Overview) ====== */}
+          {/* ====== TRILHA VIEW (Trail Overview - PMF Ready) ====== */}
           {activeView === "trilha" && (
-            <div className="space-y-6 max-w-5xl mx-auto">
-              {/* Header */}
-              <div>
-                <h1 className="text-2xl font-bold text-card-foreground">Visão Geral da Trilha</h1>
-                <p className="text-muted-foreground">
-                  {activeProgram ? `Acompanhe seu progresso em ${activeProgram.name}` : "Selecione um programa para começar"}
-                </p>
-              </div>
-
+            <div className="space-y-6 max-w-6xl mx-auto">
               {!activeProgram ? (
                 <EmptyState 
                   icon={GraduationCap} 
@@ -2747,350 +3014,657 @@ const Dashboard = () => {
                 />
               ) : (
                 <>
-                  {/* Trail calculations */}
+                  {/* Use exact trail calculations */}
                   {(() => {
-                    // TODO API: Fetch trail data from backend
-                    const trailStartDate = activeProgram.enrolledAt 
-                      ? new Date(activeProgram.enrolledAt) 
-                      : new Date(Date.now() - 90 * 86400000);
+                    // TODO API: Fetch trail contents from backend
+                    const currentTrailData = trailData.find(t => t.programId === activeProgram.id);
+                    const trailContents: ContentNode[] = currentTrailData?.contents || [];
                     
-                    // Parse duration (e.g., "6 meses" -> 180 days)
-                    const durationMatch = activeProgram.duration.match(/(\d+)\s*(mês|meses|semanas?)/i);
-                    let totalDays = 180; // Default 6 months
-                    if (durationMatch) {
-                      const num = parseInt(durationMatch[1]);
-                      if (durationMatch[2].includes("semana")) {
-                        totalDays = num * 7;
-                      } else {
-                        totalDays = num * 30;
-                      }
-                    }
-                    
-                    const trailEndDate = new Date(trailStartDate.getTime() + totalDays * 86400000);
-                    const today = new Date();
-                    const daysPassed = Math.floor((today.getTime() - trailStartDate.getTime()) / 86400000);
-                    const daysRemaining = Math.max(0, Math.floor((trailEndDate.getTime() - today.getTime()) / 86400000));
-                    const temporalProgress = Math.min(100, Math.round((daysPassed / totalDays) * 100));
-                    
-                    // Get program content
-                    const programContents = contentDatabase.filter(c => c.program === activeProgram.name);
-                    const totalMinutes = programContents.reduce((acc, c) => acc + c.estimatedMinutes, 0);
-                    const completedMinutes = Math.round(totalMinutes * (activeProgram.progress / 100));
-                    const remainingMinutes = totalMinutes - completedMinutes;
-                    
-                    // Sessions from last 7 days for this program
-                    const last7Sessions = (sessions || []).filter(s => {
-                      const d = new Date(s.date);
-                      const diff = (today.getTime() - d.getTime()) / 86400000;
-                      return diff <= 7 && s.programId === activeProgram.id;
-                    });
-                    const avgMinutesPerDay = Math.round(last7Sessions.reduce((acc, s) => acc + s.duration, 0) / 7);
-                    
-                    // Required rhythm to complete on time
-                    const requiredMinutesPerDay = daysRemaining > 0 ? Math.ceil(remainingMinutes / daysRemaining) : 0;
-                    
-                    // Status color
-                    let rhythmStatus: "success" | "warning" | "danger" = "success";
-                    let rhythmMessage = "Ritmo suficiente";
-                    if (avgMinutesPerDay < requiredMinutesPerDay * 0.7) {
-                      rhythmStatus = "danger";
-                      rhythmMessage = "Risco de atraso";
-                    } else if (avgMinutesPerDay < requiredMinutesPerDay) {
-                      rhythmStatus = "warning";
-                      rhythmMessage = "Atenção ao ritmo";
-                    }
-                    
-                    // Completion projection
-                    const projectedDaysToComplete = avgMinutesPerDay > 0 
-                      ? Math.ceil(remainingMinutes / avgMinutesPerDay) 
-                      : null;
-                    
-                    // Group by competency
-                    const competencyProgress: Record<string, { total: number; completed: number }> = {};
-                    activeProgram.competencies.forEach(comp => {
-                      const compContents = programContents.filter(c => c.competency === comp);
-                      const total = compContents.length;
-                      // Mock completed based on overall progress
-                      const completed = Math.floor(total * (activeProgram.progress / 100));
-                      competencyProgress[comp] = { total, completed };
-                    });
-
-                    const rhythmColors = {
-                      success: "text-green-600 bg-green-100",
-                      warning: "text-amber-600 bg-amber-100",
-                      danger: "text-red-600 bg-red-100"
+                    // Generate mock trail contents if empty
+                    const generateMockContents = (): ContentNode[] => {
+                      const programContents = contentDatabase.filter(c => c.program === activeProgram.name);
+                      const contentsByCompetency: Record<string, ContentItem[]> = {};
+                      
+                      activeProgram.competencies.forEach(comp => {
+                        const items = programContents.filter(c => c.competency === comp);
+                        if (items.length === 0) {
+                          // Generate mock content
+                          contentsByCompetency[comp] = [{
+                            id: Math.random() * 10000,
+                            title: `Introdução a ${comp}`,
+                            summary: `Fundamentos de ${comp}`,
+                            area: "Certificações Profissionais",
+                            program: activeProgram.name,
+                            competency: comp,
+                            difficulty: "Intermediário",
+                            estimatedMinutes: 45,
+                            tags: []
+                          }];
+                        } else {
+                          contentsByCompetency[comp] = items;
+                        }
+                      });
+                      
+                      return activeProgram.competencies.map((comp, idx) => {
+                        const items = contentsByCompetency[comp] || [];
+                        const totalMins = items.reduce((acc, i) => acc + i.estimatedMinutes, 0) || 60;
+                        const progressRatio = activeProgram.progress / 100;
+                        const isCompleted = idx < Math.floor(activeProgram.competencies.length * progressRatio);
+                        const isInProgress = idx === Math.floor(activeProgram.competencies.length * progressRatio);
+                        
+                        return {
+                          id: `comp_${idx}`,
+                          title: comp,
+                          competency: comp,
+                          estimatedMinutes: totalMins,
+                          status: isCompleted ? "done" : isInProgress ? "in_progress" : "not_started",
+                          completedMinutes: isCompleted ? totalMins : isInProgress ? Math.round(totalMins * 0.5) : 0,
+                          order: idx,
+                          children: items.map((item, itemIdx) => ({
+                            id: `content_${item.id}`,
+                            title: item.title,
+                            competency: comp,
+                            estimatedMinutes: item.estimatedMinutes,
+                            status: isCompleted ? "done" : (isInProgress && itemIdx === 0) ? "in_progress" : "not_started",
+                            completedMinutes: isCompleted ? item.estimatedMinutes : 0,
+                            order: itemIdx,
+                          }))
+                        } as ContentNode;
+                      });
                     };
+                    
+                    const contents = trailContents.length > 0 ? trailContents : generateMockContents();
+                    const metrics = calculateTrailMetrics(activeProgram, sessions || [], contents);
+                    
+                    // 7-day consistency data
+                    const last7Days: { date: string; minutes: number; active: boolean }[] = [];
+                    for (let i = 6; i >= 0; i--) {
+                      const d = addDays(metrics.today, -i);
+                      const dateStr = formatDateISO(d);
+                      const dayMins = (sessions || [])
+                        .filter(s => s.date === dateStr && s.programId === activeProgram.id)
+                        .reduce((acc, s) => acc + s.duration, 0);
+                      last7Days.push({ date: dateStr, minutes: dayMins, active: dayMins > 0 });
+                    }
+                    
+                    // Next pending content
+                    const nextContent = contents.find(c => c.status !== "done");
+                    
+                    // Status colors
+                    const statusColors = {
+                      on_track: { bg: "bg-green-100", text: "text-green-700", label: "No ritmo" },
+                      attention: { bg: "bg-amber-100", text: "text-amber-700", label: "Atenção" },
+                      at_risk: { bg: "bg-red-100", text: "text-red-700", label: "Risco" }
+                    };
+                    const statusConfig = statusColors[metrics.status];
 
                     return (
                       <>
-                        {/* Timeline Card */}
-                        <div className="bg-card border rounded-2xl p-6">
-                          <div className="flex items-center gap-3 mb-5">
-                            <div className="w-10 h-10 rounded-xl bg-accent/10 flex items-center justify-center">
-                              <Calendar size={20} className="text-accent" />
-                            </div>
-                            <div>
-                              <h2 className="font-semibold text-card-foreground">Linha do Tempo</h2>
-                              <p className="text-sm text-muted-foreground">Progresso temporal da trilha</p>
-                            </div>
+                        {/* Row 1: Header with title + dates + actions */}
+                        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+                          <div>
+                            <h1 className="text-2xl font-bold text-primary">{activeProgram.name}</h1>
+                            <p className="text-muted-foreground flex items-center gap-2 flex-wrap">
+                              <span>{metrics.startDate.toLocaleDateString("pt-BR")}</span>
+                              <span className="text-accent">→</span>
+                              <span className="font-medium">{metrics.targetEndDate.toLocaleDateString("pt-BR")}</span>
+                              <span className="text-xs bg-muted px-2 py-0.5 rounded">({metrics.totalDays} dias)</span>
+                            </p>
                           </div>
-
-                          {/* Desktop: Horizontal Timeline */}
-                          <div className="hidden md:block">
-                            <div className="flex items-center justify-between mb-2 text-sm">
-                              <div className="text-left">
-                                <p className="font-medium text-card-foreground">Início</p>
-                                <p className="text-muted-foreground">{trailStartDate.toLocaleDateString("pt-BR")}</p>
-                              </div>
-                              <div className="text-center">
-                                <p className="font-medium text-accent">{daysPassed} dias</p>
-                                <p className="text-muted-foreground text-xs">decorridos</p>
-                              </div>
-                              <div className="text-right">
-                                <p className="font-medium text-card-foreground">Término</p>
-                                <p className="text-muted-foreground">{trailEndDate.toLocaleDateString("pt-BR")}</p>
-                              </div>
-                            </div>
-                            <div className="relative h-3 bg-muted rounded-full overflow-hidden">
-                              <div 
-                                className="absolute left-0 top-0 h-full bg-gradient-to-r from-primary to-accent rounded-full transition-all duration-500"
-                                style={{ width: `${temporalProgress}%` }}
-                              />
-                              <div 
-                                className="absolute top-1/2 -translate-y-1/2 w-4 h-4 bg-accent rounded-full border-2 border-white shadow-md transition-all duration-500"
-                                style={{ left: `calc(${temporalProgress}% - 8px)` }}
-                              />
-                            </div>
-                            <div className="flex justify-between mt-2 text-xs text-muted-foreground">
-                              <span>0%</span>
-                              <span className="font-medium text-accent">{temporalProgress}% do tempo</span>
-                              <span>100%</span>
-                            </div>
-                          </div>
-
-                          {/* Mobile: Vertical Timeline */}
-                          <div className="md:hidden space-y-4">
-                            <div className="flex items-center gap-4">
-                              <div className="w-4 h-4 rounded-full bg-accent flex-shrink-0" />
-                              <div>
-                                <p className="font-medium text-card-foreground">Início</p>
-                                <p className="text-sm text-muted-foreground">{trailStartDate.toLocaleDateString("pt-BR")}</p>
-                              </div>
-                            </div>
-                            <div className="ml-[7px] w-0.5 h-12 bg-gradient-to-b from-accent to-muted" />
-                            <div className="flex items-center gap-4">
-                              <div className="w-4 h-4 rounded-full bg-accent/50 border-2 border-accent flex-shrink-0" />
-                              <div>
-                                <p className="font-medium text-accent">Hoje • {daysPassed} dias</p>
-                                <p className="text-sm text-muted-foreground">{temporalProgress}% do tempo decorrido</p>
-                              </div>
-                            </div>
-                            <div className="ml-[7px] w-0.5 h-12 bg-muted" />
-                            <div className="flex items-center gap-4">
-                              <div className="w-4 h-4 rounded-full bg-muted flex-shrink-0" />
-                              <div>
-                                <p className="font-medium text-card-foreground">Término previsto</p>
-                                <p className="text-sm text-muted-foreground">{trailEndDate.toLocaleDateString("pt-BR")} • {daysRemaining} dias restantes</p>
-                              </div>
-                            </div>
+                          <div className="flex gap-2">
+                            <button
+                              onClick={() => {
+                                setEditDatesForm({
+                                  startDate: activeProgram.startDate || formatDateISO(metrics.startDate),
+                                  targetEndDate: activeProgram.targetEndDate || formatDateISO(metrics.targetEndDate)
+                                });
+                                setEditDatesModalOpen(true);
+                              }}
+                              className="px-4 py-2 text-sm font-medium border rounded-xl hover:bg-muted transition-colors flex items-center gap-2"
+                            >
+                              <Edit3 size={16} />
+                              <span className="hidden sm:inline">Editar prazo</span>
+                            </button>
+                            <button
+                              onClick={() => addToast({ message: "Exportação em desenvolvimento", type: "info" })}
+                              className="px-4 py-2 text-sm font-medium border rounded-xl hover:bg-muted transition-colors flex items-center gap-2"
+                            >
+                              <Download size={16} />
+                              <span className="hidden sm:inline">Exportar</span>
+                            </button>
                           </div>
                         </div>
 
-                        {/* Study Rhythm + Progress Cards */}
-                        <div className="grid md:grid-cols-2 gap-4">
-                          {/* Rhythm Card */}
-                          <div className="bg-card border rounded-2xl p-6">
+                        {/* Row 2: Timeline (8 cols) + Rhythm (4 cols) */}
+                        <div className="grid lg:grid-cols-12 gap-4">
+                          {/* Timeline Card - span 8 */}
+                          <div className="lg:col-span-8 bg-card border rounded-2xl p-6">
+                            <div className="flex items-center gap-3 mb-5">
+                              <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
+                                <Calendar size={20} className="text-primary" />
+                              </div>
+                              <div>
+                                <h2 className="font-semibold text-card-foreground">Linha do Tempo</h2>
+                                <p className="text-sm text-muted-foreground">
+                                  {metrics.elapsedDays} de {metrics.totalDays} dias • {metrics.remainingDays} restantes
+                                </p>
+                              </div>
+                            </div>
+
+                            {/* Desktop: Horizontal Timeline */}
+                            <div className="hidden md:block">
+                              <div className="flex items-center justify-between mb-3 text-sm">
+                                <div className="text-left">
+                                  <p className="text-xs text-muted-foreground uppercase tracking-wide">Início</p>
+                                  <p className="font-medium text-card-foreground">{metrics.startDate.toLocaleDateString("pt-BR")}</p>
+                                </div>
+                                <div className="text-center px-4">
+                                  <div className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium ${statusConfig.bg} ${statusConfig.text}`}>
+                                    {metrics.status === "on_track" && <CheckCircle2 size={12} />}
+                                    {metrics.status === "attention" && <Flame size={12} />}
+                                    {metrics.status === "at_risk" && <ArrowDownRight size={12} />}
+                                    {statusConfig.label}
+                                  </div>
+                                </div>
+                                <div className="text-right">
+                                  <p className="text-xs text-muted-foreground uppercase tracking-wide">Prazo</p>
+                                  <p className="font-medium text-card-foreground">{metrics.targetEndDate.toLocaleDateString("pt-BR")}</p>
+                                </div>
+                              </div>
+                              
+                              <div className="relative h-4 bg-muted rounded-full overflow-hidden">
+                                <div 
+                                  className="absolute left-0 top-0 h-full bg-gradient-to-r from-primary to-accent rounded-full transition-all duration-500"
+                                  style={{ width: `${metrics.timelineProgressPct}%` }}
+                                />
+                                <div 
+                                  className="absolute top-1/2 -translate-y-1/2 w-5 h-5 bg-white border-2 border-accent rounded-full shadow-md transition-all duration-500 flex items-center justify-center"
+                                  style={{ left: `calc(${metrics.timelineProgressPct}% - 10px)` }}
+                                >
+                                  <div className="w-2 h-2 bg-accent rounded-full" />
+                                </div>
+                              </div>
+                              
+                              <div className="flex justify-between mt-2 text-xs text-muted-foreground">
+                                <span>0%</span>
+                                <span className="font-medium text-primary">{metrics.timelineProgressPct}% do tempo decorrido</span>
+                                <span>100%</span>
+                              </div>
+
+                              {/* Projection line */}
+                              {metrics.projectedEndDate && (
+                                <div className="mt-4 pt-4 border-t border-dashed">
+                                  <p className="text-sm text-muted-foreground">
+                                    <span className="font-medium text-card-foreground">Projeção:</span>{" "}
+                                    {metrics.projectedEndDate <= metrics.targetEndDate ? (
+                                      <span className="text-green-600">
+                                        Conclusão em {metrics.projectedEndDate.toLocaleDateString("pt-BR")} (dentro do prazo)
+                                      </span>
+                                    ) : (
+                                      <span className="text-amber-600">
+                                        Conclusão em {metrics.projectedEndDate.toLocaleDateString("pt-BR")} ({diffDays(metrics.projectedEndDate, metrics.targetEndDate)} dias após o prazo)
+                                      </span>
+                                    )}
+                                  </p>
+                                </div>
+                              )}
+                            </div>
+
+                            {/* Mobile: Vertical Timeline */}
+                            <div className="md:hidden space-y-4">
+                              <div className="flex items-start gap-4">
+                                <div className="flex flex-col items-center">
+                                  <div className="w-4 h-4 rounded-full bg-primary" />
+                                  <div className="w-0.5 h-16 bg-gradient-to-b from-primary to-accent" />
+                                </div>
+                                <div>
+                                  <p className="text-xs text-muted-foreground uppercase">Início</p>
+                                  <p className="font-medium text-card-foreground">{metrics.startDate.toLocaleDateString("pt-BR")}</p>
+                                </div>
+                              </div>
+                              <div className="flex items-start gap-4">
+                                <div className="flex flex-col items-center">
+                                  <div className="w-4 h-4 rounded-full bg-accent border-2 border-white shadow" />
+                                  <div className="w-0.5 h-16 bg-muted" />
+                                </div>
+                                <div>
+                                  <p className="text-xs text-muted-foreground uppercase">Hoje</p>
+                                  <p className="font-medium text-accent">{metrics.timelineProgressPct}% • {metrics.elapsedDays} dias</p>
+                                  <div className={`inline-flex items-center gap-1 mt-1 px-2 py-0.5 rounded-full text-xs font-medium ${statusConfig.bg} ${statusConfig.text}`}>
+                                    {statusConfig.label}
+                                  </div>
+                                </div>
+                              </div>
+                              <div className="flex items-start gap-4">
+                                <div className="w-4 h-4 rounded-full bg-muted" />
+                                <div>
+                                  <p className="text-xs text-muted-foreground uppercase">Prazo</p>
+                                  <p className="font-medium text-card-foreground">{metrics.targetEndDate.toLocaleDateString("pt-BR")}</p>
+                                  <p className="text-sm text-muted-foreground">{metrics.remainingDays} dias restantes</p>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+
+                          {/* Rhythm Card - span 4 */}
+                          <div className="lg:col-span-4 bg-card border rounded-2xl p-6">
                             <div className="flex items-center gap-3 mb-5">
                               <div className="w-10 h-10 rounded-xl bg-accent/10 flex items-center justify-center">
                                 <TrendingUp size={20} className="text-accent" />
                               </div>
                               <div>
-                                <h2 className="font-semibold text-card-foreground">Ritmo de Estudo</h2>
-                                <p className="text-sm text-muted-foreground">Média dos últimos 7 dias</p>
+                                <h2 className="font-semibold text-card-foreground">Ritmo</h2>
+                                <p className="text-sm text-muted-foreground">Últimos 7 dias</p>
                               </div>
                             </div>
 
                             <div className="space-y-4">
-                              <div className="flex items-end justify-between">
-                                <div>
-                                  <p className="text-3xl font-bold text-card-foreground">{avgMinutesPerDay}</p>
-                                  <p className="text-sm text-muted-foreground">min/dia atual</p>
-                                </div>
-                                <div className="text-right">
-                                  <p className="text-xl font-semibold text-muted-foreground">{requiredMinutesPerDay}</p>
-                                  <p className="text-sm text-muted-foreground">min/dia necessário</p>
-                                </div>
+                              {/* Required (large) */}
+                              <div>
+                                <p className="text-xs text-muted-foreground uppercase tracking-wide mb-1">Necessário</p>
+                                <p className="text-3xl font-bold text-primary">{metrics.requiredDailyMin}<span className="text-lg font-normal text-muted-foreground"> min/dia</span></p>
+                              </div>
+                              
+                              {/* Current (smaller) */}
+                              <div>
+                                <p className="text-xs text-muted-foreground uppercase tracking-wide mb-1">Atual</p>
+                                <p className="text-xl font-semibold text-card-foreground">{metrics.currentDailyAvgMin}<span className="text-sm font-normal text-muted-foreground"> min/dia</span></p>
                               </div>
 
-                              {/* Progress comparison bar */}
-                              <div className="space-y-2">
-                                <div className="flex justify-between text-xs text-muted-foreground">
-                                  <span>Ritmo atual</span>
-                                  <span>{Math.round((avgMinutesPerDay / Math.max(requiredMinutesPerDay, 1)) * 100)}%</span>
-                                </div>
-                                <div className="h-3 bg-muted rounded-full overflow-hidden">
-                                  <div 
-                                    className={`h-full rounded-full transition-all ${
-                                      rhythmStatus === "success" ? "bg-green-500" :
-                                      rhythmStatus === "warning" ? "bg-amber-500" : "bg-red-500"
-                                    }`}
-                                    style={{ width: `${Math.min(100, (avgMinutesPerDay / Math.max(requiredMinutesPerDay, 1)) * 100)}%` }}
-                                  />
-                                </div>
+                              {/* Status badge */}
+                              <div className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-sm font-medium ${statusConfig.bg} ${statusConfig.text}`}>
+                                {metrics.status === "on_track" && <CheckCircle2 size={16} />}
+                                {metrics.status === "attention" && <Flame size={16} />}
+                                {metrics.status === "at_risk" && <ArrowDownRight size={16} />}
+                                {statusConfig.label}
                               </div>
 
-                              <div className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-sm font-medium ${rhythmColors[rhythmStatus]}`}>
-                                {rhythmStatus === "success" && <CheckCircle2 size={16} />}
-                                {rhythmStatus === "warning" && <Flame size={16} />}
-                                {rhythmStatus === "danger" && <ArrowDownRight size={16} />}
-                                {rhythmMessage}
-                              </div>
+                              {/* Gap message */}
+                              {metrics.deltaDailyMin > 0 && (
+                                <p className="text-sm text-muted-foreground">
+                                  Ajuste necessário: <span className="font-medium text-amber-600">+{metrics.deltaDailyMin} min/dia</span>
+                                </p>
+                              )}
+                              {metrics.deltaDailyMin < 0 && (
+                                <p className="text-sm text-green-600">
+                                  Você está {Math.abs(metrics.deltaDailyMin)} min/dia acima do necessário! 🎉
+                                </p>
+                              )}
                             </div>
                           </div>
+                        </div>
 
+                        {/* Row 3: Progress + Consistency + Next Step */}
+                        <div className="grid md:grid-cols-3 gap-4">
                           {/* Progress Card */}
-                          <div className="bg-card border rounded-2xl p-6">
-                            <div className="flex items-center gap-3 mb-5">
+                          <div className="bg-card border rounded-2xl p-5">
+                            <div className="flex items-center gap-3 mb-4">
                               <div className="w-10 h-10 rounded-xl bg-accent/10 flex items-center justify-center">
                                 <Target size={20} className="text-accent" />
                               </div>
-                              <div>
-                                <h2 className="font-semibold text-card-foreground">Progresso da Trilha</h2>
-                                <p className="text-sm text-muted-foreground">Visão geral do andamento</p>
-                              </div>
+                              <h2 className="font-semibold text-card-foreground">Progresso</h2>
                             </div>
-
-                            <div className="flex items-center gap-6 mb-4">
-                              <div className="relative">
-                                <ProgressRing progress={activeProgram.progress} size={100} strokeWidth={8} />
-                                <div className="absolute inset-0 flex items-center justify-center">
-                                  <span className="text-2xl font-bold text-card-foreground">{activeProgram.progress}%</span>
-                                </div>
+                            <div className="space-y-3">
+                              <div className="flex justify-between text-sm">
+                                <span className="text-muted-foreground">Estudado</span>
+                                <span className="font-medium text-card-foreground">
+                                  {Math.floor(metrics.totalCompletedMinutes / 60)}h {metrics.totalCompletedMinutes % 60}min
+                                </span>
                               </div>
-                              <div className="flex-1 space-y-2">
-                                <div className="flex justify-between text-sm">
-                                  <span className="text-muted-foreground">Tempo estudado</span>
-                                  <span className="font-medium text-card-foreground">{Math.round(completedMinutes / 60)}h {completedMinutes % 60}min</span>
-                                </div>
-                                <div className="flex justify-between text-sm">
-                                  <span className="text-muted-foreground">Tempo restante</span>
-                                  <span className="font-medium text-card-foreground">{Math.round(remainingMinutes / 60)}h {remainingMinutes % 60}min</span>
-                                </div>
-                                <div className="flex justify-between text-sm">
-                                  <span className="text-muted-foreground">Conteúdos</span>
-                                  <span className="font-medium text-card-foreground">
-                                    {Math.floor(programContents.length * (activeProgram.progress / 100))}/{programContents.length}
-                                  </span>
-                                </div>
+                              <div className="flex justify-between text-sm">
+                                <span className="text-muted-foreground">Restante</span>
+                                <span className="font-medium text-card-foreground">
+                                  {Math.floor(metrics.remainingMinutes / 60)}h {metrics.remainingMinutes % 60}min
+                                </span>
+                              </div>
+                              <div className="h-2 bg-muted rounded-full overflow-hidden">
+                                <div 
+                                  className="h-full bg-accent rounded-full transition-all"
+                                  style={{ width: `${activeProgram.progress}%` }}
+                                />
+                              </div>
+                              <div className="flex justify-between text-xs text-muted-foreground">
+                                <span>Conteúdos: {metrics.completedContents}/{metrics.totalContents}</span>
+                                <span className="font-medium text-accent">{activeProgram.progress}%</span>
                               </div>
                             </div>
                           </div>
-                        </div>
 
-                        {/* Content Map */}
-                        <div className="bg-card border rounded-2xl p-6">
-                          <div className="flex items-center gap-3 mb-5">
-                            <div className="w-10 h-10 rounded-xl bg-accent/10 flex items-center justify-center">
-                              <Layers size={20} className="text-accent" />
+                          {/* Consistency Card */}
+                          <div className="bg-card border rounded-2xl p-5">
+                            <div className="flex items-center gap-3 mb-4">
+                              <div className="w-10 h-10 rounded-xl bg-accent/10 flex items-center justify-center">
+                                <Flame size={20} className="text-accent" />
+                              </div>
+                              <h2 className="font-semibold text-card-foreground">Consistência</h2>
                             </div>
-                            <div>
-                              <h2 className="font-semibold text-card-foreground">Mapa de Conteúdos</h2>
-                              <p className="text-sm text-muted-foreground">Competências e status de cada área</p>
-                            </div>
-                          </div>
-
-                          <div className="space-y-3">
-                            {activeProgram.competencies.map((comp, idx) => {
-                              const progress = competencyProgress[comp] || { total: 0, completed: 0 };
-                              const percent = progress.total > 0 ? Math.round((progress.completed / progress.total) * 100) : 0;
-                              let status: "done" | "progress" | "todo" = "todo";
-                              if (percent === 100) status = "done";
-                              else if (percent > 0) status = "progress";
-                              
-                              const statusConfig = {
-                                done: { label: "Concluído", color: "bg-green-100 text-green-700", icon: CheckCircle2 },
-                                progress: { label: "Em andamento", color: "bg-accent/10 text-accent", icon: Play },
-                                todo: { label: "A iniciar", color: "bg-muted text-muted-foreground", icon: Clock }
-                              };
-                              const config = statusConfig[status];
-                              const StatusIcon = config.icon;
-
-                              return (
-                                <div key={idx} className="p-4 rounded-xl bg-muted/30 hover:bg-muted/50 transition-colors">
-                                  <div className="flex items-center justify-between mb-2">
-                                    <div className="flex items-center gap-3">
-                                      <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${config.color}`}>
-                                        <StatusIcon size={16} />
-                                      </div>
-                                      <div>
-                                        <p className="font-medium text-card-foreground">{comp}</p>
-                                        <p className="text-xs text-muted-foreground">
-                                          {progress.completed}/{progress.total} conteúdos
-                                        </p>
-                                      </div>
-                                    </div>
-                                    <div className={`px-3 py-1 rounded-full text-xs font-medium ${config.color}`}>
-                                      {config.label}
-                                    </div>
-                                  </div>
-                                  <div className="h-2 bg-muted rounded-full overflow-hidden">
-                                    <div 
-                                      className={`h-full rounded-full transition-all ${
-                                        status === "done" ? "bg-green-500" : "bg-accent"
-                                      }`}
-                                      style={{ width: `${percent}%` }}
-                                    />
-                                  </div>
-                                </div>
-                              );
-                            })}
-                          </div>
-                        </div>
-
-                        {/* Smart Projection */}
-                        <div className="bg-gradient-to-r from-primary to-accent rounded-2xl p-6 text-white">
-                          <div className="flex items-center gap-3 mb-4">
-                            <div className="w-10 h-10 rounded-xl bg-white/20 flex items-center justify-center">
-                              <Sparkles size={20} />
-                            </div>
-                            <div>
-                              <h2 className="font-semibold">Projeção Inteligente</h2>
-                              <p className="text-sm opacity-80">Baseada no seu ritmo atual</p>
-                            </div>
-                          </div>
-
-                          <div className="space-y-3">
-                            {projectedDaysToComplete !== null && avgMinutesPerDay > 0 ? (
-                              <>
-                                <p className="text-lg font-medium">
-                                  {projectedDaysToComplete <= daysRemaining ? (
-                                    <>✅ Mantendo o ritmo atual, você conclui esta trilha em <span className="font-bold">{projectedDaysToComplete} dias</span></>
-                                  ) : (
-                                    <>⚠️ Com o ritmo atual, você concluirá em <span className="font-bold">{projectedDaysToComplete} dias</span> ({projectedDaysToComplete - daysRemaining} dias após o prazo)</>
-                                  )}
-                                </p>
-                                {avgMinutesPerDay < requiredMinutesPerDay && (
-                                  <p className="text-sm opacity-90">
-                                    💡 Para concluir no prazo, aumente seu ritmo em <span className="font-bold">{requiredMinutesPerDay - avgMinutesPerDay} min/dia</span>
-                                  </p>
-                                )}
-                              </>
-                            ) : (
-                              <p className="text-lg font-medium">
-                                📊 Registre sessões de estudo para ver sua projeção personalizada
+                            <div className="space-y-3">
+                              <p className="text-2xl font-bold text-card-foreground">
+                                {metrics.activeDays7d}/7 <span className="text-sm font-normal text-muted-foreground">dias ativos</span>
                               </p>
+                              <div className="flex gap-1">
+                                {last7Days.map((day, i) => (
+                                  <div key={i} className="flex-1 flex flex-col items-center gap-1">
+                                    <div 
+                                      className={`w-full h-8 rounded ${day.active ? "bg-accent" : "bg-muted"} transition-colors`}
+                                      title={`${formatDateBR(day.date)}: ${day.minutes}min`}
+                                    />
+                                    <span className="text-[10px] text-muted-foreground">
+                                      {["D", "S", "T", "Q", "Q", "S", "S"][(new Date(day.date + "T12:00:00")).getDay()]}
+                                    </span>
+                                  </div>
+                                ))}
+                              </div>
+                              <p className="text-xs text-muted-foreground">
+                                Total: {metrics.studiedMinutes7d} min na semana
+                              </p>
+                            </div>
+                          </div>
+
+                          {/* Next Step Card */}
+                          <div className="bg-card border rounded-2xl p-5">
+                            <div className="flex items-center gap-3 mb-4">
+                              <div className="w-10 h-10 rounded-xl bg-accent/10 flex items-center justify-center">
+                                <Play size={20} className="text-accent" />
+                              </div>
+                              <h2 className="font-semibold text-card-foreground">Próximo Passo</h2>
+                            </div>
+                            {nextContent ? (
+                              <div className="space-y-3">
+                                <div>
+                                  <p className="font-medium text-card-foreground">{nextContent.title}</p>
+                                  <p className="text-sm text-muted-foreground">
+                                    {nextContent.estimatedMinutes - nextContent.completedMinutes} min restantes
+                                  </p>
+                                </div>
+                                <div className="h-2 bg-muted rounded-full overflow-hidden">
+                                  <div 
+                                    className="h-full bg-accent rounded-full"
+                                    style={{ width: `${(nextContent.completedMinutes / nextContent.estimatedMinutes) * 100}%` }}
+                                  />
+                                </div>
+                                <button
+                                  onClick={() => openNewSessionModal()}
+                                  className="w-full py-2.5 text-sm font-medium bg-accent text-accent-foreground rounded-xl hover:opacity-90 transition-opacity flex items-center justify-center gap-2"
+                                >
+                                  <Play size={16} />
+                                  Continuar
+                                </button>
+                              </div>
+                            ) : (
+                              <div className="flex flex-col items-center justify-center py-4 text-center">
+                                <Trophy size={32} className="text-accent mb-2" />
+                                <p className="font-medium text-card-foreground">Trilha concluída!</p>
+                                <p className="text-sm text-muted-foreground">Parabéns pelo esforço</p>
+                              </div>
                             )}
                           </div>
+                        </div>
 
-                          <p className="text-xs opacity-60 mt-4">
-                            * Projeção recalculada automaticamente a cada nova sessão registrada
-                          </p>
+                        {/* Row 4: Content Map (8 cols) + Reviews (4 cols) */}
+                        <div className="grid lg:grid-cols-12 gap-4">
+                          {/* Content Map - span 8 */}
+                          <div className="lg:col-span-8 bg-card border rounded-2xl p-6">
+                            <div className="flex items-center justify-between mb-5">
+                              <div className="flex items-center gap-3">
+                                <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
+                                  <Layers size={20} className="text-primary" />
+                                </div>
+                                <div>
+                                  <h2 className="font-semibold text-card-foreground">Mapa de Conteúdos</h2>
+                                  <p className="text-sm text-muted-foreground">{contents.length} competências</p>
+                                </div>
+                              </div>
+                            </div>
+
+                            <div className="space-y-3">
+                              {contents.map((node, idx) => {
+                                const percent = node.estimatedMinutes > 0 
+                                  ? Math.round((node.completedMinutes / node.estimatedMinutes) * 100) 
+                                  : 0;
+                                const remainingMins = node.estimatedMinutes - node.completedMinutes;
+                                const isExpanded = expandedCompetencies.has(node.id);
+                                
+                                const nodeStatusConfig = {
+                                  done: { label: "Concluído", color: "bg-green-100 text-green-700", icon: CheckCircle2 },
+                                  in_progress: { label: "Em andamento", color: "bg-accent/10 text-accent", icon: Play },
+                                  not_started: { label: "A iniciar", color: "bg-muted text-muted-foreground", icon: Clock }
+                                };
+                                const config = nodeStatusConfig[node.status];
+                                const StatusIcon = config.icon;
+
+                                return (
+                                  <div key={node.id} className="border rounded-xl overflow-hidden">
+                                    <button
+                                      onClick={() => {
+                                        const newSet = new Set(expandedCompetencies);
+                                        if (isExpanded) {
+                                          newSet.delete(node.id);
+                                        } else {
+                                          newSet.add(node.id);
+                                        }
+                                        setExpandedCompetencies(newSet);
+                                      }}
+                                      className="w-full p-4 flex items-center gap-4 hover:bg-muted/50 transition-colors text-left"
+                                    >
+                                      <div className={`w-8 h-8 rounded-lg flex items-center justify-center shrink-0 ${config.color}`}>
+                                        <StatusIcon size={16} />
+                                      </div>
+                                      <div className="flex-1 min-w-0">
+                                        <div className="flex items-center justify-between mb-1">
+                                          <p className="font-medium text-card-foreground truncate">{node.title}</p>
+                                          <div className="flex items-center gap-2 shrink-0 ml-2">
+                                            <span className="text-xs text-muted-foreground">{remainingMins}min</span>
+                                            <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${config.color}`}>
+                                              {percent}%
+                                            </span>
+                                          </div>
+                                        </div>
+                                        <div className="h-1.5 bg-muted rounded-full overflow-hidden">
+                                          <div 
+                                            className={`h-full rounded-full transition-all ${node.status === "done" ? "bg-green-500" : "bg-accent"}`}
+                                            style={{ width: `${percent}%` }}
+                                          />
+                                        </div>
+                                      </div>
+                                      <ChevronDown 
+                                        size={20} 
+                                        className={`text-muted-foreground transition-transform ${isExpanded ? "rotate-180" : ""}`}
+                                      />
+                                    </button>
+                                    
+                                    {/* Expandable children */}
+                                    {isExpanded && node.children && node.children.length > 0 && (
+                                      <div className="border-t bg-muted/20 p-3 space-y-2">
+                                        {node.children.map((child, childIdx) => {
+                                          const childPercent = child.estimatedMinutes > 0 
+                                            ? Math.round((child.completedMinutes / child.estimatedMinutes) * 100) 
+                                            : 0;
+                                          const childConfig = nodeStatusConfig[child.status];
+                                          const ChildIcon = childConfig.icon;
+                                          
+                                          return (
+                                            <div key={child.id} className="flex items-center gap-3 p-2 rounded-lg hover:bg-card transition-colors">
+                                              <div className={`w-6 h-6 rounded flex items-center justify-center ${childConfig.color}`}>
+                                                <ChildIcon size={12} />
+                                              </div>
+                                              <div className="flex-1 min-w-0">
+                                                <p className="text-sm text-card-foreground truncate">{child.title}</p>
+                                              </div>
+                                              <div className="flex items-center gap-2 shrink-0">
+                                                <span className="text-xs text-muted-foreground">{child.estimatedMinutes}min</span>
+                                                <span className={`px-1.5 py-0.5 rounded text-[10px] font-medium ${childConfig.color}`}>
+                                                  {childPercent}%
+                                                </span>
+                                              </div>
+                                            </div>
+                                          );
+                                        })}
+                                      </div>
+                                    )}
+                                  </div>
+                                );
+                              })}
+                            </div>
+                          </div>
+
+                          {/* Reviews & Checkpoints - span 4 */}
+                          <div className="lg:col-span-4 space-y-4">
+                            {/* Reviews Card */}
+                            <div className="bg-card border rounded-2xl p-5">
+                              <div className="flex items-center gap-3 mb-4">
+                                <div className="w-10 h-10 rounded-xl bg-accent/10 flex items-center justify-center">
+                                  <RotateCw size={20} className="text-accent" />
+                                </div>
+                                <h2 className="font-semibold text-card-foreground">Revisões</h2>
+                              </div>
+                              {pendingReviewsCount > 0 ? (
+                                <div className="space-y-3">
+                                  <p className="text-sm text-muted-foreground">
+                                    <span className="text-accent font-medium">{pendingReviewsCount}</span> revisões pendentes
+                                  </p>
+                                  <button
+                                    onClick={() => navigate("revisoes")}
+                                    className="w-full py-2 text-sm font-medium border rounded-xl hover:bg-muted transition-colors"
+                                  >
+                                    Ver revisões
+                                  </button>
+                                </div>
+                              ) : (
+                                <p className="text-sm text-muted-foreground">Nenhuma revisão pendente</p>
+                              )}
+                            </div>
+
+                            {/* Checkpoints Card */}
+                            <div className="bg-card border rounded-2xl p-5">
+                              <div className="flex items-center gap-3 mb-4">
+                                <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
+                                  <Award size={20} className="text-primary" />
+                                </div>
+                                <h2 className="font-semibold text-card-foreground">Checkpoints</h2>
+                              </div>
+                              <div className="space-y-3">
+                                <div className="flex items-center gap-2 text-sm">
+                                  <div className="w-6 h-6 rounded-full bg-accent/10 flex items-center justify-center">
+                                    <FileText size={12} className="text-accent" />
+                                  </div>
+                                  <span className="text-muted-foreground">Próximo simulado</span>
+                                  <span className="ml-auto font-medium text-card-foreground">Em 7 dias</span>
+                                </div>
+                                <div className="flex items-center gap-2 text-sm">
+                                  <div className="w-6 h-6 rounded-full bg-accent/10 flex items-center justify-center">
+                                    <Target size={12} className="text-accent" />
+                                  </div>
+                                  <span className="text-muted-foreground">Meta semanal</span>
+                                  <span className="ml-auto font-medium text-card-foreground">{Math.round((metrics.studiedMinutes7d / (goals?.weeklyGoal || 300)) * 100)}%</span>
+                                </div>
+                              </div>
+                              <button
+                                onClick={() => addToast({ message: "Geração de plano em desenvolvimento", type: "info" })}
+                                className="w-full mt-4 py-2 text-sm font-medium bg-primary text-primary-foreground rounded-xl hover:opacity-90 transition-opacity"
+                              >
+                                Gerar plano semanal
+                              </button>
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* Smart Projection Banner */}
+                        <div className="bg-gradient-to-r from-primary to-accent rounded-2xl p-6 text-white">
+                          <div className="flex items-start gap-4">
+                            <div className="w-12 h-12 rounded-xl bg-white/20 flex items-center justify-center shrink-0">
+                              <Sparkles size={24} />
+                            </div>
+                            <div className="flex-1">
+                              <h2 className="font-semibold text-lg mb-2">Projeção Inteligente</h2>
+                              {metrics.projectedDaysToFinish !== null && metrics.currentDailyAvgMin > 0 ? (
+                                <div className="space-y-2">
+                                  {metrics.projectedDaysToFinish <= metrics.remainingDays ? (
+                                    <p className="text-white/95">
+                                      ✅ Mantendo o ritmo atual de <strong>{metrics.currentDailyAvgMin} min/dia</strong>, você conclui esta trilha em <strong>{metrics.projectedDaysToFinish} dias</strong> — {diffDays(metrics.targetEndDate, metrics.today) - metrics.projectedDaysToFinish} dias antes do prazo!
+                                    </p>
+                                  ) : (
+                                    <>
+                                      <p className="text-white/95">
+                                        ⚠️ Com o ritmo atual de <strong>{metrics.currentDailyAvgMin} min/dia</strong>, você concluirá em <strong>{metrics.projectedDaysToFinish} dias</strong> — {metrics.projectedDaysToFinish - metrics.remainingDays} dias após o prazo.
+                                      </p>
+                                      <p className="text-white/80 text-sm">
+                                        💡 Para concluir no prazo, aumente seu ritmo para <strong>{metrics.requiredDailyMin} min/dia</strong> (+{metrics.deltaDailyMin} min/dia).
+                                      </p>
+                                    </>
+                                  )}
+                                </div>
+                              ) : (
+                                <p className="text-white/90">
+                                  📊 Registre sessões de estudo para ver sua projeção personalizada. Quanto mais dados, mais precisa a previsão.
+                                </p>
+                              )}
+                              <p className="text-xs text-white/50 mt-3">
+                                * Projeção recalculada automaticamente a cada nova sessão
+                              </p>
+                            </div>
+                          </div>
                         </div>
                       </>
                     );
                   })()}
                 </>
               )}
+
+              {/* Edit Dates Modal */}
+              <Modal
+                open={editDatesModalOpen}
+                onClose={() => setEditDatesModalOpen(false)}
+                title="Editar Datas da Trilha"
+                size="sm"
+              >
+                <div className="space-y-4">
+                  <div>
+                    <label className="block text-sm font-medium text-card-foreground mb-2">Data de Início</label>
+                    <input
+                      type="date"
+                      value={editDatesForm.startDate}
+                      onChange={(e) => setEditDatesForm(f => ({ ...f, startDate: e.target.value }))}
+                      className="w-full px-3 py-2.5 bg-secondary border-0 rounded-xl"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-card-foreground mb-2">Data de Término (Prazo)</label>
+                    <input
+                      type="date"
+                      value={editDatesForm.targetEndDate}
+                      onChange={(e) => setEditDatesForm(f => ({ ...f, targetEndDate: e.target.value }))}
+                      className="w-full px-3 py-2.5 bg-secondary border-0 rounded-xl"
+                    />
+                    <p className="text-xs text-muted-foreground mt-1">Ex: data da prova ou deadline do objetivo</p>
+                  </div>
+                  <div className="flex gap-3 pt-2">
+                    <button 
+                      onClick={() => setEditDatesModalOpen(false)} 
+                      className="flex-1 px-4 py-3 text-sm font-medium border rounded-xl hover:bg-muted transition-colors"
+                    >
+                      Cancelar
+                    </button>
+                    <button 
+                      onClick={() => {
+                        // TODO API: Save dates to backend
+                        if (activeProgram) {
+                          setPrograms(prev => (prev || []).map(p => 
+                            p.id === activeProgram.id 
+                              ? { ...p, startDate: editDatesForm.startDate, targetEndDate: editDatesForm.targetEndDate }
+                              : p
+                          ));
+                          addToast({ message: "Datas atualizadas", type: "success" });
+                          setEditDatesModalOpen(false);
+                        }
+                      }}
+                      className="flex-1 px-4 py-3 text-sm font-medium bg-primary text-primary-foreground rounded-xl hover:opacity-90 transition-opacity"
+                    >
+                      Salvar
+                    </button>
+                  </div>
+                </div>
+              </Modal>
             </div>
           )}
 
