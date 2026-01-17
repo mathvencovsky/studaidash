@@ -186,7 +186,13 @@ const STORAGE_KEYS = {
 function loadState<T>(key: string, defaultValue: T): T {
   try {
     const stored = localStorage.getItem(key);
-    return stored ? JSON.parse(stored) : defaultValue;
+    if (!stored) return defaultValue;
+    const parsed = JSON.parse(stored);
+    // Ensure we return defaultValue if parsed is null/undefined
+    if (parsed === null || parsed === undefined) return defaultValue;
+    // For arrays, ensure we have an array
+    if (Array.isArray(defaultValue) && !Array.isArray(parsed)) return defaultValue;
+    return parsed;
   } catch {
     return defaultValue;
   }
@@ -578,24 +584,24 @@ const Dashboard = () => {
   const [contentFilters, setContentFilters] = useState({ track: "all", difficulty: "all", search: "" });
 
   // Reviews
-  const reviewSchedule = useMemo(() => generateReviewSchedule(sortSessions(sessions)), [sessions]);
+  const reviewSchedule = useMemo(() => generateReviewSchedule(sortSessions(sessions || [])), [sessions]);
   const todayReviews = useMemo(() => {
     const today = new Date().toISOString().split("T")[0];
-    return reviewSchedule.filter((r) => r.reviewDates.some((d) => d.date === today && !d.completed));
+    return (reviewSchedule || []).filter((r) => r.reviewDates.some((d) => d.date === today && !d.completed));
   }, [reviewSchedule]);
 
   // Sorted sessions
-  const sortedSessions = useMemo(() => sortSessions(sessions), [sessions]);
+  const sortedSessions = useMemo(() => sortSessions(sessions || []), [sessions]);
 
   // Nav items with badge counts
   const navItems = useMemo(() => 
-    createNavItems(bookmarks.length, todayReviews.length, planItems.filter((p) => !p.completed).length),
-    [bookmarks.length, todayReviews.length, planItems]
+    createNavItems((bookmarks || []).length, (todayReviews || []).length, (planItems || []).filter((p) => !p.completed).length),
+    [bookmarks, todayReviews, planItems]
   );
 
   // Global search results
   const searchResults = useMemo(() => 
-    globalSearch(globalSearchQuery, tracks, sortedSessions, contentDatabase),
+    globalSearch(globalSearchQuery, tracks || [], sortedSessions || [], contentDatabase),
     [globalSearchQuery, tracks, sortedSessions]
   );
 
