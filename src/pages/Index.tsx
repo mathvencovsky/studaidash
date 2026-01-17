@@ -1,21 +1,23 @@
-import { useState, useEffect, useCallback, useRef, createContext, useContext } from "react";
+import { useState, useEffect, useCallback, useRef, createContext, useContext, useMemo } from "react";
 import {
   Search, Flame, Clock, CheckCircle2, Target, BookOpen, Menu, X,
   Plus, TrendingUp, AlertTriangle, Award, Zap, Calendar, Filter,
   Sparkles, RotateCcw, Loader2, ChevronLeft, ChevronRight, Edit3,
   Copy, Trash2, Bookmark, BookmarkCheck, History, Play, Brain,
-  Settings, BarChart3, Trophy, Shield, ArrowUpRight, ArrowDownRight
+  Settings, BarChart3, Trophy, Shield, ArrowUpRight, ArrowDownRight,
+  LayoutDashboard, GraduationCap, FolderOpen, CalendarDays, ListChecks,
+  RefreshCw, Bot, Star, ChevronDown, FileText, ExternalLink
 } from "lucide-react";
 
 // ============================================================================
-// DESIGN TOKENS - Referência da paleta StudAI
+// DESIGN TOKENS - Paleta StudAI
 // Primária: #1A237E (hsl 234 67% 30%)
 // Gradiente: #1A1054 → #255FF1
 // Accent: #255FF1 (hsl 222 89% 55%)
 // ============================================================================
 
 // ============================================================================
-// TOAST CONTEXT - Sistema de notificações leve sem biblioteca
+// TOAST CONTEXT
 // ============================================================================
 
 interface Toast {
@@ -48,12 +50,12 @@ const ToastProvider = ({ children }: { children: React.ReactNode }) => {
   return (
     <ToastContext.Provider value={{ addToast, removeToast }}>
       {children}
-      <div className="fixed bottom-4 right-4 z-50 space-y-2 max-w-sm">
+      <div className="fixed bottom-4 right-4 z-[100] space-y-2 max-w-sm">
         {toasts.map((toast) => (
           <div
             key={toast.id}
-            className={`p-4 rounded-lg shadow-lg border animate-in slide-in-from-right ${
-              toast.type === "error" ? "bg-card border-destructive/50" : "bg-card border-accent/30"
+            className={`p-4 rounded-lg shadow-lg border bg-card ${
+              toast.type === "error" ? "border-destructive/50" : "border-accent/30"
             }`}
           >
             <div className="flex items-center justify-between gap-3">
@@ -61,10 +63,7 @@ const ToastProvider = ({ children }: { children: React.ReactNode }) => {
               <div className="flex items-center gap-2">
                 {toast.action && (
                   <button
-                    onClick={() => {
-                      toast.action?.onClick();
-                      removeToast(toast.id);
-                    }}
+                    onClick={() => { toast.action?.onClick(); removeToast(toast.id); }}
                     className="text-xs font-medium text-accent hover:underline"
                   >
                     {toast.action.label}
@@ -86,6 +85,16 @@ const ToastProvider = ({ children }: { children: React.ReactNode }) => {
 // TYPES
 // ============================================================================
 
+type ViewId = "dashboard" | "trilhas" | "cursos" | "sessoes" | "calendario" | "metas" | "revisoes" | "ia" | "salvos" | "config";
+
+interface NavItem {
+  id: ViewId;
+  label: string;
+  icon: any;
+  section: "learn" | "progress" | "tools";
+  badgeCount?: number;
+}
+
 interface Track {
   id: number;
   name: string;
@@ -97,8 +106,8 @@ interface Track {
 
 interface Session {
   id: string;
-  date: string; // ISO YYYY-MM-DD
-  createdAt: number; // timestamp para desempate
+  date: string;
+  createdAt: number;
   theme: string;
   trackId: number;
   duration: number;
@@ -122,24 +131,26 @@ interface ContentItem {
   difficulty: "Fácil" | "Médio" | "Difícil";
 }
 
-interface SearchFilters {
-  track: string;
-  difficulty: string;
-  sortBy: "relevance" | "recent";
-}
-
 interface Goals {
   dailyGoal: number;
-  weeklyGoal: number; // em minutos
+  weeklyGoal: number;
   completed: number;
-  dayOffUsed: boolean;
-  dayOffAvailable: boolean;
+  weeklyPlan: { day: string; target: number; completed: number }[];
 }
 
-interface SavedSearch {
+interface PlanItem {
   id: string;
-  query: string;
-  timestamp: number;
+  contentId: number;
+  addedAt: number;
+  completed: boolean;
+}
+
+interface ReviewItem {
+  id: string;
+  theme: string;
+  trackId: number;
+  originalDate: string;
+  reviewDates: { date: string; completed: boolean }[];
 }
 
 interface BookmarkedContent {
@@ -148,8 +159,14 @@ interface BookmarkedContent {
   savedAt: number;
 }
 
+interface SavedSearch {
+  id: string;
+  query: string;
+  timestamp: number;
+}
+
 // ============================================================================
-// STORAGE HELPERS - Centralização de leitura/escrita localStorage
+// STORAGE HELPERS
 // ============================================================================
 
 const STORAGE_KEYS = {
@@ -157,12 +174,13 @@ const STORAGE_KEYS = {
   tracks: "studai_tracks",
   checklist: "studai_checklist",
   goals: "studai_goals",
-  period: "studai_period",
-  lastSessionDate: "studai_last_session",
   streak: "studai_streak",
   searchHistory: "studai_search_history",
   bookmarks: "studai_bookmarks",
-  chartAnchor: "studai_chart_anchor",
+  sidebarCollapsed: "studai_sidebar_collapsed",
+  planItems: "studai_plan_items",
+  reviewSchedule: "studai_review_schedule",
+  calendarMonth: "studai_calendar_month",
 };
 
 function loadState<T>(key: string, defaultValue: T): T {
@@ -180,88 +198,6 @@ function saveState<T>(key: string, value: T): void {
   } catch (e) {
     console.error("Failed to save state:", e);
   }
-}
-
-// ============================================================================
-// PSEUDO-RANDOM WITH SEED - Para demo consistente
-// ============================================================================
-
-function seededRandom(seed: number): () => number {
-  return () => {
-    seed = (seed * 1103515245 + 12345) & 0x7fffffff;
-    return seed / 0x7fffffff;
-  };
-}
-
-function generateDemoData(daysBack: number = 60): { sessions: Session[]; tracks: Track[] } {
-  const random = seededRandom(42); // Seed fixa para consistência
-  const tracks: Track[] = [
-    { id: 1, name: "Matemática", progress: 0, status: "A iniciar", skills: ["Álgebra", "Cálculo", "Probabilidade"], milestones: [] },
-    { id: 2, name: "Português", progress: 0, status: "A iniciar", skills: ["Gramática", "Redação", "Interpretação"], milestones: [] },
-    { id: 3, name: "Programação", progress: 0, status: "A iniciar", skills: ["Python", "Lógica", "Estruturas de Dados"], milestones: [] },
-    { id: 4, name: "Inglês", progress: 0, status: "A iniciar", skills: ["Gramática", "Vocabulário", "Conversação"], milestones: [] },
-    { id: 5, name: "Física", progress: 0, status: "A iniciar", skills: ["Mecânica", "Termodinâmica", "Eletricidade"], milestones: [] },
-  ];
-
-  const themes = {
-    1: ["Álgebra Linear", "Derivadas", "Integrais", "Probabilidade", "Estatística", "Matrizes"],
-    2: ["Gramática", "Redação ENEM", "Interpretação", "Literatura", "Concordância"],
-    3: ["Python Básico", "Funções", "POO", "Estruturas de Dados", "Algoritmos"],
-    4: ["Present Perfect", "Phrasal Verbs", "Reading", "Listening", "Vocabulary"],
-    5: ["Cinemática", "Dinâmica", "Energia", "Ondas", "Óptica"],
-  };
-
-  const types: Session["type"][] = ["Estudo", "Revisão", "Simulado"];
-  const sessions: Session[] = [];
-  const today = new Date();
-
-  for (let i = 0; i < daysBack; i++) {
-    // 70% chance de ter sessão no dia
-    if (random() < 0.7) {
-      const numSessions = random() < 0.3 ? 2 : 1; // 30% chance de 2 sessões
-      for (let j = 0; j < numSessions; j++) {
-        const date = new Date(today);
-        date.setDate(date.getDate() - i);
-        const trackId = Math.floor(random() * 5) + 1;
-        const trackThemes = themes[trackId as keyof typeof themes];
-        const duration = Math.floor(random() * 60) + 15; // 15-75 min
-        const type = types[Math.floor(random() * 3)];
-        const hasQuiz = type === "Simulado" || random() < 0.4;
-        const quizCorrect = hasQuiz ? Math.floor(random() * 4) + 6 : 0; // 6-10
-
-        sessions.push({
-          id: `demo_${i}_${j}`,
-          date: date.toISOString().split("T")[0],
-          createdAt: date.getTime() + j * 1000,
-          theme: trackThemes[Math.floor(random() * trackThemes.length)],
-          trackId,
-          duration,
-          type,
-          result: hasQuiz ? `Quiz ${quizCorrect}/10` : "",
-          notes: "",
-        });
-
-        // Atualizar progresso da trilha
-        const track = tracks.find((t) => t.id === trackId);
-        if (track) {
-          track.progress = Math.min(100, track.progress + 1);
-          track.status = track.progress >= 100 ? "Concluída" : "Em andamento";
-        }
-      }
-    }
-  }
-
-  // Adicionar milestones
-  tracks.forEach((track) => {
-    track.milestones = [
-      { percent: 25, label: "Iniciante", achieved: track.progress >= 25 },
-      { percent: 50, label: "Intermediário", achieved: track.progress >= 50 },
-      { percent: 75, label: "Avançado", achieved: track.progress >= 75 },
-      { percent: 100, label: "Mestre", achieved: track.progress >= 100 },
-    ];
-  });
-
-  return { sessions: sortSessions(sessions), tracks };
 }
 
 // ============================================================================
@@ -287,7 +223,7 @@ const defaultTracks: Track[] = [
     { percent: 75, label: "Avançado", achieved: false },
     { percent: 100, label: "Mestre", achieved: false },
   ]},
-  { id: 4, name: "Inglês", progress: 0, status: "A iniciar", skills: ["Gramática", "Vocabulário", "Conversação"], milestones: [
+  { id: 4, name: "Inglês", progress: 15, status: "Em andamento", skills: ["Gramática", "Vocabulário", "Conversação"], milestones: [
     { percent: 25, label: "Iniciante", achieved: false },
     { percent: 50, label: "Intermediário", achieved: false },
     { percent: 75, label: "Avançado", achieved: false },
@@ -301,24 +237,31 @@ const defaultTracks: Track[] = [
   ]},
 ];
 
-const defaultSessions: Session[] = sortSessions([
+const defaultSessions: Session[] = [
   { id: "1", date: "2025-01-17", createdAt: Date.now(), theme: "Álgebra Linear", trackId: 1, duration: 45, type: "Estudo", result: "Quiz 9/10", notes: "" },
   { id: "2", date: "2025-01-16", createdAt: Date.now() - 86400000, theme: "Gramática", trackId: 2, duration: 30, type: "Revisão", result: "", notes: "" },
   { id: "3", date: "2025-01-15", createdAt: Date.now() - 172800000, theme: "Python Básico", trackId: 3, duration: 60, type: "Estudo", result: "Quiz 8/10", notes: "" },
   { id: "4", date: "2025-01-14", createdAt: Date.now() - 259200000, theme: "Trigonometria", trackId: 1, duration: 40, type: "Simulado", result: "Quiz 7/10", notes: "" },
   { id: "5", date: "2025-01-13", createdAt: Date.now() - 345600000, theme: "Mecânica", trackId: 5, duration: 35, type: "Estudo", result: "Quiz 6/10", notes: "" },
   { id: "6", date: "2025-01-12", createdAt: Date.now() - 432000000, theme: "Redação", trackId: 2, duration: 50, type: "Estudo", result: "", notes: "" },
-]);
-
-const defaultChecklist: ChecklistItem[] = [
-  { id: 1, text: "Revisar fórmulas de física", checked: false },
-  { id: 2, text: "Fazer quiz de matemática", checked: true },
-  { id: 3, text: "Ler capítulo de gramática", checked: false },
+  { id: "7", date: "2025-01-10", createdAt: Date.now() - 604800000, theme: "Present Perfect", trackId: 4, duration: 25, type: "Estudo", result: "Quiz 7/10", notes: "" },
 ];
 
-const defaultGoals: Goals = { dailyGoal: 60, weeklyGoal: 300, completed: 35, dayOffUsed: false, dayOffAvailable: true };
+const defaultGoals: Goals = {
+  dailyGoal: 60,
+  weeklyGoal: 300,
+  completed: 35,
+  weeklyPlan: [
+    { day: "Seg", target: 60, completed: 45 },
+    { day: "Ter", target: 60, completed: 60 },
+    { day: "Qua", target: 45, completed: 30 },
+    { day: "Qui", target: 60, completed: 0 },
+    { day: "Sex", target: 45, completed: 0 },
+    { day: "Sáb", target: 30, completed: 0 },
+    { day: "Dom", target: 0, completed: 0 },
+  ],
+};
 
-// Mock content database for AI search
 const contentDatabase: ContentItem[] = [
   { id: 1, title: "Introdução à Álgebra Linear", summary: "Conceitos fundamentais de vetores, matrizes e transformações lineares.", tags: ["matemática", "álgebra", "vetores"], track: "Matemática", difficulty: "Médio" },
   { id: 2, title: "Derivadas e Integrais", summary: "Fundamentos do cálculo diferencial e integral com aplicações práticas.", tags: ["matemática", "cálculo", "derivadas"], track: "Matemática", difficulty: "Difícil" },
@@ -338,6 +281,29 @@ const contentDatabase: ContentItem[] = [
 ];
 
 // ============================================================================
+// NAVIGATION CONFIG
+// ============================================================================
+
+const NAV_SECTIONS = [
+  { id: "learn", label: "Aprender" },
+  { id: "progress", label: "Progresso" },
+  { id: "tools", label: "Ferramentas" },
+] as const;
+
+const createNavItems = (bookmarkCount: number, reviewCount: number, planCount: number): NavItem[] => [
+  { id: "dashboard", label: "Visão Geral", icon: LayoutDashboard, section: "learn" },
+  { id: "trilhas", label: "Trilhas", icon: GraduationCap, section: "learn" },
+  { id: "cursos", label: "Conteúdos", icon: FolderOpen, section: "learn" },
+  { id: "sessoes", label: "Sessões", icon: Clock, section: "progress" },
+  { id: "calendario", label: "Calendário", icon: CalendarDays, section: "progress" },
+  { id: "metas", label: "Metas", icon: Target, section: "progress", badgeCount: planCount > 0 ? planCount : undefined },
+  { id: "revisoes", label: "Revisões", icon: RefreshCw, section: "progress", badgeCount: reviewCount > 0 ? reviewCount : undefined },
+  { id: "ia", label: "IA", icon: Bot, section: "tools" },
+  { id: "salvos", label: "Salvos", icon: Star, section: "tools", badgeCount: bookmarkCount > 0 ? bookmarkCount : undefined },
+  { id: "config", label: "Configurações", icon: Settings, section: "tools" },
+];
+
+// ============================================================================
 // UTILITY FUNCTIONS
 // ============================================================================
 
@@ -350,7 +316,7 @@ function sortSessions(sessions: Session[]): Session[] {
 }
 
 function formatDateBR(dateStr: string): string {
-  const [year, month, day] = dateStr.split("-");
+  const [, month, day] = dateStr.split("-");
   return `${day}/${month}`;
 }
 
@@ -359,231 +325,111 @@ function formatFullDateBR(dateStr: string): string {
   return date.toLocaleDateString("pt-BR", { weekday: "short", day: "2-digit", month: "2-digit" });
 }
 
-function getDateRange(anchor: Date, days: number): { start: Date; end: Date } {
-  const end = new Date(anchor);
-  const start = new Date(anchor);
-  start.setDate(start.getDate() - days + 1);
-  return { start, end };
+function getMonthDays(year: number, month: number): Date[] {
+  const days: Date[] = [];
+  const firstDay = new Date(year, month, 1);
+  const lastDay = new Date(year, month + 1, 0);
+  
+  // Add padding days from previous month
+  const startPadding = firstDay.getDay();
+  for (let i = startPadding - 1; i >= 0; i--) {
+    const d = new Date(year, month, -i);
+    days.push(d);
+  }
+  
+  // Add days of current month
+  for (let i = 1; i <= lastDay.getDate(); i++) {
+    days.push(new Date(year, month, i));
+  }
+  
+  // Add padding days from next month
+  const endPadding = 42 - days.length;
+  for (let i = 1; i <= endPadding; i++) {
+    days.push(new Date(year, month + 1, i));
+  }
+  
+  return days;
 }
 
-function parseQuizResult(result: string): { correct: number; total: number } | null {
-  const match = result.match(/Quiz\s*(\d+)\s*\/\s*(\d+)/i);
-  if (match) {
-    return { correct: parseInt(match[1]), total: parseInt(match[2]) };
-  }
-  return null;
-}
-
-// ============================================================================
-// ACTIONS - Business logic
-// ============================================================================
-
-// AI Search function - isolated for easy API replacement
-// TODO API: Substituir por chamada real ao backend/Perplexity
-async function searchStudAI(
-  query: string,
-  filters: SearchFilters,
-  signal?: AbortSignal
-): Promise<ContentItem[]> {
-  // Simulate network delay with abort support
-  await new Promise((resolve, reject) => {
-    const timeout = setTimeout(resolve, 500);
-    signal?.addEventListener("abort", () => {
-      clearTimeout(timeout);
-      reject(new DOMException("Aborted", "AbortError"));
-    });
-  });
-
-  let results = contentDatabase;
-
-  if (query.trim()) {
-    const q = query.toLowerCase();
-    results = results.filter(
-      (item) =>
-        item.title.toLowerCase().includes(q) ||
-        item.summary.toLowerCase().includes(q) ||
-        item.tags.some((tag) => tag.includes(q))
-    );
-  }
-
-  if (filters.track && filters.track !== "all") {
-    results = results.filter((item) => item.track === filters.track);
-  }
-
-  if (filters.difficulty && filters.difficulty !== "all") {
-    results = results.filter((item) => item.difficulty === filters.difficulty);
-  }
-
-  if (filters.sortBy === "recent") {
-    results = [...results].reverse();
-  }
-
-  return results;
-}
-
-function computeInsights(sessions: Session[], tracks: Track[], goals: Goals) {
+function generateReviewSchedule(sessions: Session[]): ReviewItem[] {
+  const reviews: ReviewItem[] = [];
   const today = new Date();
   const todayStr = today.toISOString().split("T")[0];
   
-  // Últimos 7 dias
-  const last7Days = Array.from({ length: 7 }, (_, i) => {
-    const d = new Date(today);
-    d.setDate(d.getDate() - i);
-    return d.toISOString().split("T")[0];
+  // Get unique themes from last 7 days
+  const recentSessions = sessions.filter((s) => {
+    const diff = (today.getTime() - new Date(s.date + "T12:00:00").getTime()) / (1000 * 60 * 60 * 24);
+    return diff >= 1 && diff <= 7;
   });
-
-  // Último mês
-  const last30Days = Array.from({ length: 30 }, (_, i) => {
-    const d = new Date(today);
-    d.setDate(d.getDate() - i);
-    return d.toISOString().split("T")[0];
-  });
-
-  const sessionsLast7 = sessions.filter((s) => last7Days.includes(s.date));
-  const sessionsLast30 = sessions.filter((s) => last30Days.includes(s.date));
-
-  const activeDays7 = new Set(sessionsLast7.map((s) => s.date)).size;
-  const activeDays30 = new Set(sessionsLast30.map((s) => s.date)).size;
-
-  const totalMinutes7 = sessionsLast7.reduce((acc, s) => acc + s.duration, 0);
-  const totalMinutes30 = sessionsLast30.reduce((acc, s) => acc + s.duration, 0);
-
-  const bestTrack = tracks
-    .filter((t) => t.status !== "A iniciar")
-    .sort((a, b) => b.progress - a.progress)[0];
-
-  const lastSessionDate = sessions.length > 0 ? sessions[0].date : null;
-  const daysSinceLastSession = lastSessionDate
-    ? Math.floor((today.getTime() - new Date(lastSessionDate + "T12:00:00").getTime()) / (1000 * 60 * 60 * 24))
-    : 999;
-
-  // Risco de queda (considerando day off)
-  const effectiveDaysSince = goals.dayOffAvailable && daysSinceLastSession === 1 ? 0 : daysSinceLastSession;
-  const atRisk = effectiveDaysSince >= 2;
-
-  // Taxa de acerto média (parse robusto)
-  const quizResults = sessions
-    .map((s) => parseQuizResult(s.result))
-    .filter((r): r is { correct: number; total: number } => r !== null);
   
-  const avgAccuracy = quizResults.length > 0
-    ? Math.round(quizResults.reduce((acc, r) => acc + (r.correct / r.total) * 100, 0) / quizResults.length)
-    : 0;
-
-  // Consistência (% de dias com estudo na semana)
-  const consistency7 = Math.round((activeDays7 / 7) * 100);
-
-  // Projeção: dias para concluir trilha principal
-  const mainTrack = tracks.find((t) => t.status === "Em andamento");
-  let daysToComplete = null;
-  if (mainTrack && sessions.length > 0) {
-    const avgProgressPerSession = 2;
-    const remaining = 100 - mainTrack.progress;
-    const sessionsNeeded = Math.ceil(remaining / avgProgressPerSession);
-    const avgSessionsPerWeek = Math.max(1, sessionsLast7.length);
-    daysToComplete = Math.ceil((sessionsNeeded / avgSessionsPerWeek) * 7);
-  }
-
-  // Progresso semanal (vs meta)
-  const weeklyProgress = Math.round((totalMinutes7 / goals.weeklyGoal) * 100);
-
-  // Período anterior para comparação
-  const prev7Days = Array.from({ length: 7 }, (_, i) => {
-    const d = new Date(today);
-    d.setDate(d.getDate() - 7 - i);
-    return d.toISOString().split("T")[0];
+  const uniqueThemes = new Map<string, Session>();
+  recentSessions.forEach((s) => {
+    if (!uniqueThemes.has(s.theme)) {
+      uniqueThemes.set(s.theme, s);
+    }
   });
-  const sessionsPrev7 = sessions.filter((s) => prev7Days.includes(s.date));
-  const totalMinutesPrev7 = sessionsPrev7.reduce((acc, s) => acc + s.duration, 0);
-  const deltaPercent = totalMinutesPrev7 > 0
-    ? Math.round(((totalMinutes7 - totalMinutesPrev7) / totalMinutesPrev7) * 100)
-    : totalMinutes7 > 0 ? 100 : 0;
-
-  return {
-    activeDays7,
-    activeDays30,
-    totalMinutes7,
-    totalMinutes30,
-    bestTrack,
-    atRisk,
-    daysSinceLastSession,
-    avgAccuracy,
-    consistency7,
-    daysToComplete,
-    mainTrack,
-    weeklyProgress,
-    deltaPercent,
-  };
-}
-
-function computeChartData(sessions: Session[], anchor: Date, days: number, dailyGoal: number) {
-  const { start, end } = getDateRange(anchor, days);
-  const data: { date: string; label: string; fullLabel: string; minutes: number; isGoalMet: boolean }[] = [];
-
-  for (let d = new Date(start); d <= end; d.setDate(d.getDate() + 1)) {
-    const dateStr = d.toISOString().split("T")[0];
-    const dayMinutes = sessions
-      .filter((s) => s.date === dateStr)
-      .reduce((acc, s) => acc + s.duration, 0);
-
-    data.push({
-      date: dateStr,
-      label: formatDateBR(dateStr),
-      fullLabel: formatFullDateBR(dateStr),
-      minutes: dayMinutes,
-      isGoalMet: dayMinutes >= dailyGoal,
+  
+  uniqueThemes.forEach((session, theme) => {
+    const originalDate = new Date(session.date + "T12:00:00");
+    const d1 = new Date(originalDate);
+    d1.setDate(d1.getDate() + 1);
+    const d3 = new Date(originalDate);
+    d3.setDate(d3.getDate() + 3);
+    const d7 = new Date(originalDate);
+    d7.setDate(d7.getDate() + 7);
+    
+    reviews.push({
+      id: `review_${session.id}`,
+      theme,
+      trackId: session.trackId,
+      originalDate: session.date,
+      reviewDates: [
+        { date: d1.toISOString().split("T")[0], completed: d1 < today },
+        { date: d3.toISOString().split("T")[0], completed: d3 < today },
+        { date: d7.toISOString().split("T")[0], completed: false },
+      ],
     });
-  }
-
-  const total = data.reduce((acc, d) => acc + d.minutes, 0);
-  const avg = Math.round(total / days);
-  const best = data.reduce((max, d) => (d.minutes > max.minutes ? d : max), data[0]);
-
-  return { data, total, avg, best };
+  });
+  
+  return reviews;
 }
 
-function generateWeeklyReport(sessions: Session[], tracks: Track[], insights: ReturnType<typeof computeInsights>) {
-  const positives: string[] = [];
-  const needsFocus: string[] = [];
-  const suggestions: string[] = [];
+// ============================================================================
+// GLOBAL SEARCH FUNCTION
+// ============================================================================
 
-  if (insights.activeDays7 >= 5) {
-    positives.push("Excelente consistência: estudou em " + insights.activeDays7 + " dias esta semana!");
-  } else if (insights.activeDays7 >= 3) {
-    positives.push("Boa frequência de estudos: " + insights.activeDays7 + " dias ativos.");
-  }
+interface SearchResult {
+  type: "track" | "session" | "content";
+  id: number | string;
+  title: string;
+  subtitle: string;
+  viewId: ViewId;
+}
 
-  if (insights.avgAccuracy >= 80) {
-    positives.push("Taxa de acerto alta nos quizzes: " + insights.avgAccuracy + "%");
-  }
-
-  if (insights.deltaPercent > 0) {
-    positives.push("Tempo de estudo " + insights.deltaPercent + "% maior que semana anterior.");
-  }
-
-  if (insights.atRisk) {
-    needsFocus.push("Atenção: " + insights.daysSinceLastSession + " dias sem estudar. Retome hoje!");
-  }
-
-  if (insights.avgAccuracy > 0 && insights.avgAccuracy < 70) {
-    needsFocus.push("Revisar conteúdos com taxa de acerto abaixo de 70%.");
-  }
-
-  const incompleteTrack = tracks.find((t) => t.status === "Em andamento" && t.progress < 50);
-  if (incompleteTrack) {
-    needsFocus.push(`Trilha "${incompleteTrack.name}" precisa de mais atenção (${incompleteTrack.progress}%).`);
-  }
-
-  if (insights.mainTrack) {
-    suggestions.push(`Foque em "${insights.mainTrack.name}" para concluir em ~${insights.daysToComplete} dias.`);
-  }
-
-  if (insights.weeklyProgress < 100) {
-    const remaining = Math.ceil((100 - insights.weeklyProgress) * 3); // ~3 min por %
-    suggestions.push(`Estude mais ${remaining} min para bater a meta semanal.`);
-  }
-
-  return { positives, needsFocus, suggestions };
+function globalSearch(query: string, tracks: Track[], sessions: Session[], contents: ContentItem[]): SearchResult[] {
+  if (!query.trim()) return [];
+  const q = query.toLowerCase();
+  const results: SearchResult[] = [];
+  
+  tracks.forEach((t) => {
+    if (t.name.toLowerCase().includes(q) || t.skills.some((s) => s.toLowerCase().includes(q))) {
+      results.push({ type: "track", id: t.id, title: t.name, subtitle: `${t.progress}% concluído`, viewId: "trilhas" });
+    }
+  });
+  
+  sessions.slice(0, 20).forEach((s) => {
+    if (s.theme.toLowerCase().includes(q)) {
+      results.push({ type: "session", id: s.id, title: s.theme, subtitle: formatDateBR(s.date), viewId: "sessoes" });
+    }
+  });
+  
+  contents.forEach((c) => {
+    if (c.title.toLowerCase().includes(q) || c.tags.some((t) => t.includes(q))) {
+      results.push({ type: "content", id: c.id, title: c.title, subtitle: c.track, viewId: "cursos" });
+    }
+  });
+  
+  return results.slice(0, 10);
 }
 
 // ============================================================================
@@ -616,25 +462,50 @@ const EmptyState = ({ icon: Icon, title, description }: { icon: any; title: stri
   </div>
 );
 
-const Badge = ({ children, variant = "default" }: { children: React.ReactNode; variant?: "default" | "accent" | "muted" | "outline" }) => {
+const Badge = ({ children, variant = "default" }: { children: React.ReactNode; variant?: "default" | "accent" | "muted" | "outline" | "count" }) => {
   const styles = {
     default: "bg-accent/10 text-accent",
     accent: "bg-accent text-accent-foreground",
     muted: "bg-muted text-muted-foreground",
     outline: "border border-border text-muted-foreground",
+    count: "bg-accent text-accent-foreground min-w-[18px] h-[18px] text-[10px] flex items-center justify-center rounded-full",
   };
   return <span className={`px-2 py-0.5 text-xs rounded-md font-medium ${styles[variant]}`}>{children}</span>;
 };
 
-const StatCard = ({ icon, value, label, sublabel, highlight, trend }: {
+const Modal = ({ open, onClose, title, children, size = "md" }: {
+  open: boolean;
+  onClose: () => void;
+  title: string;
+  children: React.ReactNode;
+  size?: "sm" | "md" | "lg";
+}) => {
+  if (!open) return null;
+  const sizeClasses = { sm: "max-w-sm", md: "max-w-md", lg: "max-w-2xl" };
+  return (
+    <div className="fixed inset-0 z-[60] flex items-center justify-center p-4">
+      <div className="absolute inset-0 bg-black/40" onClick={onClose} />
+      <div className={`relative bg-card rounded-xl shadow-xl w-full ${sizeClasses[size]} max-h-[90vh] overflow-y-auto`}>
+        <div className="flex items-center justify-between p-4 border-b sticky top-0 bg-card z-10">
+          <h2 className="font-semibold text-card-foreground">{title}</h2>
+          <button onClick={onClose} className="p-1 hover:bg-muted rounded-lg" aria-label="Fechar">
+            <X size={20} />
+          </button>
+        </div>
+        <div className="p-4">{children}</div>
+      </div>
+    </div>
+  );
+};
+
+const StatCard = ({ icon, value, label, sublabel, trend }: {
   icon: React.ReactNode;
   value: string;
   label: string;
   sublabel: string;
-  highlight?: boolean;
   trend?: { value: number; positive: boolean };
 }) => (
-  <div className={`rounded-xl border p-4 transition-colors ${highlight ? "bg-accent/5 border-accent/30" : "bg-card"}`}>
+  <div className="bg-card rounded-xl border p-4">
     <div className="flex items-center justify-between mb-2">
       <div className="flex items-center gap-3">
         {icon}
@@ -652,53 +523,8 @@ const StatCard = ({ icon, value, label, sublabel, highlight, trend }: {
   </div>
 );
 
-const Modal = ({ open, onClose, title, children, size = "md" }: {
-  open: boolean;
-  onClose: () => void;
-  title: string;
-  children: React.ReactNode;
-  size?: "sm" | "md" | "lg";
-}) => {
-  if (!open) return null;
-  const sizeClasses = { sm: "max-w-sm", md: "max-w-md", lg: "max-w-2xl" };
-  return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-      <div className="absolute inset-0 bg-black/40" onClick={onClose} />
-      <div className={`relative bg-card rounded-xl shadow-xl w-full ${sizeClasses[size]} max-h-[90vh] overflow-y-auto`}>
-        <div className="flex items-center justify-between p-4 border-b sticky top-0 bg-card z-10">
-          <h2 className="font-semibold text-card-foreground">{title}</h2>
-          <button onClick={onClose} className="p-1 hover:bg-muted rounded-lg" aria-label="Fechar modal">
-            <X size={20} />
-          </button>
-        </div>
-        <div className="p-4">{children}</div>
-      </div>
-    </div>
-  );
-};
-
-const ConfirmDialog = ({ open, onClose, onConfirm, title, message }: {
-  open: boolean;
-  onClose: () => void;
-  onConfirm: () => void;
-  title: string;
-  message: string;
-}) => (
-  <Modal open={open} onClose={onClose} title={title} size="sm">
-    <p className="text-sm text-muted-foreground mb-4">{message}</p>
-    <div className="flex gap-3">
-      <button onClick={onClose} className="flex-1 px-4 py-2 text-sm border border-border rounded-lg hover:bg-muted">
-        Cancelar
-      </button>
-      <button onClick={onConfirm} className="flex-1 px-4 py-2 text-sm bg-destructive text-destructive-foreground rounded-lg hover:opacity-90">
-        Confirmar
-      </button>
-    </div>
-  </Modal>
-);
-
 // ============================================================================
-// MAIN COMPONENT
+// MAIN DASHBOARD COMPONENT
 // ============================================================================
 
 const Dashboard = () => {
@@ -707,196 +533,146 @@ const Dashboard = () => {
   // Persisted state
   const [sessions, setSessions] = usePersistedState<Session[]>(STORAGE_KEYS.sessions, defaultSessions);
   const [tracks, setTracks] = usePersistedState<Track[]>(STORAGE_KEYS.tracks, defaultTracks);
-  const [checklist, setChecklist] = usePersistedState<ChecklistItem[]>(STORAGE_KEYS.checklist, defaultChecklist);
   const [goals, setGoals] = usePersistedState<Goals>(STORAGE_KEYS.goals, defaultGoals);
-  const [period, setPeriod] = usePersistedState<"7" | "30" | "90">(STORAGE_KEYS.period, "7");
   const [streak, setStreak] = usePersistedState<number>(STORAGE_KEYS.streak, 12);
-  const [searchHistory, setSearchHistory] = usePersistedState<SavedSearch[]>(STORAGE_KEYS.searchHistory, []);
   const [bookmarks, setBookmarks] = usePersistedState<BookmarkedContent[]>(STORAGE_KEYS.bookmarks, []);
-  const [chartAnchor, setChartAnchor] = usePersistedState<string>(STORAGE_KEYS.chartAnchor, new Date().toISOString().split("T")[0]);
+  const [sidebarCollapsed, setSidebarCollapsed] = usePersistedState<boolean>(STORAGE_KEYS.sidebarCollapsed, false);
+  const [planItems, setPlanItems] = usePersistedState<PlanItem[]>(STORAGE_KEYS.planItems, []);
+  const [searchHistory, setSearchHistory] = usePersistedState<SavedSearch[]>(STORAGE_KEYS.searchHistory, []);
+  const [calendarMonth, setCalendarMonth] = usePersistedState<string>(STORAGE_KEYS.calendarMonth, 
+    `${new Date().getFullYear()}-${String(new Date().getMonth() + 1).padStart(2, "0")}`
+  );
 
   // UI state
-  const [activeTab, setActiveTab] = useState<"dashboard" | "trilhas" | "sessoes" | "ia">("dashboard");
-  const [searchTerm, setSearchTerm] = useState("");
-  const [sidebarOpen, setSidebarOpen] = useState(false);
-  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+  const [activeView, setActiveView] = useState<ViewId>("dashboard");
+  const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [demoMode, setDemoMode] = useState(true);
 
-  // Modal state
+  // Global search
+  const [globalSearchQuery, setGlobalSearchQuery] = useState("");
+  const [globalSearchOpen, setGlobalSearchOpen] = useState(false);
+  const globalSearchRef = useRef<HTMLDivElement>(null);
+
+  // Session modal
   const [sessionModalOpen, setSessionModalOpen] = useState(false);
   const [editingSession, setEditingSession] = useState<Session | null>(null);
   const [sessionForm, setSessionForm] = useState({
-    trackId: "",
-    theme: "",
-    duration: "",
-    type: "Estudo" as Session["type"],
-    result: "",
-    notes: "",
-    date: new Date().toISOString().split("T")[0],
+    trackId: "", theme: "", duration: "", type: "Estudo" as Session["type"], result: "", notes: "", date: new Date().toISOString().split("T")[0],
   });
   const [formErrors, setFormErrors] = useState<Record<string, string>>({});
-  const [sessionDetailModal, setSessionDetailModal] = useState<Session | null>(null);
-  const [deleteConfirm, setDeleteConfirm] = useState<Session | null>(null);
-  const [deletedSession, setDeletedSession] = useState<Session | null>(null);
 
-  // Session filters
-  const [sessionFilters, setSessionFilters] = useState({
-    track: "all",
-    type: "all",
-    dateFrom: "",
-    dateTo: "",
-    search: "",
-    sort: "recent" as "recent" | "oldest" | "duration",
-  });
+  // Content detail modal
+  const [contentDetailModal, setContentDetailModal] = useState<ContentItem | null>(null);
 
-  // AI Search state
+  // Calendar selected day
+  const [selectedCalendarDay, setSelectedCalendarDay] = useState<string | null>(null);
+
+  // AI search
   const [aiQuery, setAiQuery] = useState("");
   const [aiResults, setAiResults] = useState<ContentItem[]>([]);
-  const [aiFilters, setAiFilters] = useState<SearchFilters>({ track: "all", difficulty: "all", sortBy: "relevance" });
+  const [aiFilters, setAiFilters] = useState({ track: "all", difficulty: "all" });
   const [aiLoading, setAiLoading] = useState(false);
-  const [aiTab, setAiTab] = useState<"search" | "saved">("search");
-  const [aiStreaming, setAiStreaming] = useState(false);
-  const abortControllerRef = useRef<AbortController | null>(null);
 
-  // Goals editing
-  const [editingGoals, setEditingGoals] = useState(false);
-  const [tempGoals, setTempGoals] = useState(goals);
+  // Content filters
+  const [contentFilters, setContentFilters] = useState({ track: "all", difficulty: "all", search: "" });
 
-  // Simulate initial loading
+  // Reviews
+  const reviewSchedule = useMemo(() => generateReviewSchedule(sortSessions(sessions)), [sessions]);
+  const todayReviews = useMemo(() => {
+    const today = new Date().toISOString().split("T")[0];
+    return reviewSchedule.filter((r) => r.reviewDates.some((d) => d.date === today && !d.completed));
+  }, [reviewSchedule]);
+
+  // Sorted sessions
+  const sortedSessions = useMemo(() => sortSessions(sessions), [sessions]);
+
+  // Nav items with badge counts
+  const navItems = useMemo(() => 
+    createNavItems(bookmarks.length, todayReviews.length, planItems.filter((p) => !p.completed).length),
+    [bookmarks.length, todayReviews.length, planItems]
+  );
+
+  // Global search results
+  const searchResults = useMemo(() => 
+    globalSearch(globalSearchQuery, tracks, sortedSessions, contentDatabase),
+    [globalSearchQuery, tracks, sortedSessions]
+  );
+
+  // Close global search on outside click
   useEffect(() => {
-    const timer = setTimeout(() => setIsLoading(false), 600);
+    const handleClick = (e: MouseEvent) => {
+      if (globalSearchRef.current && !globalSearchRef.current.contains(e.target as Node)) {
+        setGlobalSearchOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClick);
+    return () => document.removeEventListener("mousedown", handleClick);
+  }, []);
+
+  // Loading simulation
+  useEffect(() => {
+    const timer = setTimeout(() => setIsLoading(false), 500);
     return () => clearTimeout(timer);
   }, []);
 
   // Computed values
-  const userData = { name: "João Silva", plan: "Premium", level: 12, xp: 2450, xpNext: 3000 };
-  const sortedSessions = sortSessions(sessions);
-  const insights = computeInsights(sortedSessions, tracks, goals);
-  const anchorDate = new Date(chartAnchor + "T12:00:00");
-  const chartInfo = computeChartData(sortedSessions, anchorDate, parseInt(period), goals.dailyGoal);
-  const weeklyReport = generateWeeklyReport(sortedSessions, tracks, insights);
-
-  // Filtered sessions for Sessões tab
-  const filteredSessions = sortedSessions
+  const userData = { name: "João Silva", level: 12, xp: 2450 };
+  const totalWeeklyMinutes = sortedSessions
     .filter((s) => {
-      if (sessionFilters.track !== "all" && s.trackId !== parseInt(sessionFilters.track)) return false;
-      if (sessionFilters.type !== "all" && s.type !== sessionFilters.type) return false;
-      if (sessionFilters.dateFrom && s.date < sessionFilters.dateFrom) return false;
-      if (sessionFilters.dateTo && s.date > sessionFilters.dateTo) return false;
-      if (sessionFilters.search && !s.theme.toLowerCase().includes(sessionFilters.search.toLowerCase())) return false;
-      return true;
+      const d = new Date(s.date);
+      const now = new Date();
+      const diff = (now.getTime() - d.getTime()) / (1000 * 60 * 60 * 24);
+      return diff <= 7;
     })
-    .sort((a, b) => {
-      if (sessionFilters.sort === "oldest") return a.date.localeCompare(b.date);
-      if (sessionFilters.sort === "duration") return b.duration - a.duration;
-      return b.date.localeCompare(a.date);
+    .reduce((acc, s) => acc + s.duration, 0);
+
+  // Calendar data
+  const [calendarYear, calendarMonthNum] = calendarMonth.split("-").map(Number);
+  const calendarDays = useMemo(() => getMonthDays(calendarYear, calendarMonthNum - 1), [calendarYear, calendarMonthNum]);
+  const sessionsByDate = useMemo(() => {
+    const map = new Map<string, Session[]>();
+    sortedSessions.forEach((s) => {
+      const list = map.get(s.date) || [];
+      list.push(s);
+      map.set(s.date, list);
     });
+    return map;
+  }, [sortedSessions]);
 
-  const filteredTracks = tracks.filter((t) => t.name.toLowerCase().includes(searchTerm.toLowerCase()));
+  // ============ ACTIONS ============
 
-  // Quick suggestions for AI
-  const quickSuggestions = [
-    "Como resolver equações do 2º grau?",
-    "Dicas para redação ENEM",
-    "Explicar leis de Newton",
-    "Python para iniciantes",
-    "Tempos verbais em inglês",
-  ];
+  const navigate = (viewId: ViewId) => {
+    setActiveView(viewId);
+    setMobileSidebarOpen(false);
+  };
 
-  // Actions
+  const handleGlobalSearchSelect = (result: SearchResult) => {
+    navigate(result.viewId);
+    setGlobalSearchQuery("");
+    setGlobalSearchOpen(false);
+    // TODO: Highlight selected item in view
+  };
+
   const resetDemo = () => {
     Object.values(STORAGE_KEYS).forEach((key) => localStorage.removeItem(key));
     setSessions(defaultSessions);
     setTracks(defaultTracks);
-    setChecklist(defaultChecklist);
     setGoals(defaultGoals);
-    setPeriod("7");
     setStreak(12);
-    setSearchHistory([]);
     setBookmarks([]);
-    setChartAnchor(new Date().toISOString().split("T")[0]);
+    setPlanItems([]);
     addToast({ message: "Dados resetados!", type: "success" });
   };
 
-  const generateDemoDataHandler = () => {
-    const { sessions: demoSessions, tracks: demoTracks } = generateDemoData(60);
-    setSessions(demoSessions);
-    setTracks(demoTracks);
-    addToast({ message: "Dados demo gerados: 60 dias de sessões!", type: "success" });
-  };
-
-  const toggleCheck = (id: number) => {
-    setChecklist((prev) => prev.map((item) => (item.id === id ? { ...item, checked: !item.checked } : item)));
-    addToast({ message: "Checklist atualizado", type: "info" });
-  };
-
-  const handleContinue = (name: string) => {
-    addToast({ message: `Iniciando: ${name}`, type: "success" });
-  };
-
-  const openNewSessionModal = () => {
+  const openNewSessionModal = (prefilledDate?: string) => {
     setEditingSession(null);
     setSessionForm({
-      trackId: "",
-      theme: "",
-      duration: "",
-      type: "Estudo",
-      result: "",
-      notes: "",
-      date: new Date().toISOString().split("T")[0],
+      trackId: "", theme: "", duration: "", type: "Estudo", result: "", notes: "",
+      date: prefilledDate || new Date().toISOString().split("T")[0],
     });
     setFormErrors({});
     setSessionModalOpen(true);
-  };
-
-  const openEditSessionModal = (session: Session) => {
-    setEditingSession(session);
-    setSessionForm({
-      trackId: session.trackId.toString(),
-      theme: session.theme,
-      duration: session.duration.toString(),
-      type: session.type,
-      result: session.result,
-      notes: session.notes,
-      date: session.date,
-    });
-    setFormErrors({});
-    setSessionModalOpen(true);
-    setSessionDetailModal(null);
-  };
-
-  const duplicateSession = (session: Session) => {
-    const newSession: Session = {
-      ...session,
-      id: Date.now().toString(),
-      date: new Date().toISOString().split("T")[0],
-      createdAt: Date.now(),
-    };
-    setSessions((prev) => sortSessions([newSession, ...prev]));
-    addToast({ message: "Sessão duplicada!", type: "success" });
-    setSessionDetailModal(null);
-  };
-
-  const deleteSession = (session: Session) => {
-    setDeletedSession(session);
-    setSessions((prev) => prev.filter((s) => s.id !== session.id));
-    setDeleteConfirm(null);
-    setSessionDetailModal(null);
-    addToast({
-      message: "Sessão removida",
-      type: "info",
-      action: {
-        label: "Desfazer",
-        onClick: () => {
-          if (deletedSession) {
-            setSessions((prev) => sortSessions([...prev, deletedSession]));
-            setDeletedSession(null);
-            addToast({ message: "Sessão restaurada!", type: "success" });
-          }
-        },
-      },
-    });
   };
 
   const validateSessionForm = () => {
@@ -917,71 +693,29 @@ const Dashboard = () => {
     const today = new Date().toISOString().split("T")[0];
 
     if (editingSession) {
-      // Update existing
-      setSessions((prev) =>
-        sortSessions(
-          prev.map((s) =>
-            s.id === editingSession.id
-              ? { ...s, ...sessionForm, trackId, duration }
-              : s
-          )
-        )
-      );
+      setSessions((prev) => sortSessions(prev.map((s) => s.id === editingSession.id ? { ...s, ...sessionForm, trackId, duration } : s)));
       addToast({ message: "Sessão atualizada!", type: "success" });
     } else {
-      // Create new
       const newSession: Session = {
-        id: Date.now().toString(),
-        date: sessionForm.date,
-        createdAt: Date.now(),
-        theme: sessionForm.theme,
-        trackId,
-        duration,
-        type: sessionForm.type,
-        result: sessionForm.result,
-        notes: sessionForm.notes,
+        id: Date.now().toString(), date: sessionForm.date, createdAt: Date.now(),
+        theme: sessionForm.theme, trackId, duration, type: sessionForm.type, result: sessionForm.result, notes: sessionForm.notes,
       };
-
       setSessions((prev) => sortSessions([newSession, ...prev]));
-
+      
       // Update track progress
-      setTracks((prev) =>
-        prev.map((t) => {
-          if (t.id === trackId) {
-            const newProgress = Math.min(100, t.progress + 2);
-            return {
-              ...t,
-              progress: newProgress,
-              status: newProgress === 100 ? "Concluída" : "Em andamento",
-              milestones: t.milestones.map((m) => ({
-                ...m,
-                achieved: newProgress >= m.percent,
-              })),
-            };
-          }
-          return t;
-        })
-      );
-
-      // Update goals if session is today
-      if (sessionForm.date === today) {
-        setGoals((prev) => ({
-          ...prev,
-          completed: Math.min(prev.dailyGoal, prev.completed + duration),
-        }));
-      }
-
-      // Update streak
-      const lastSession = localStorage.getItem(STORAGE_KEYS.lastSessionDate);
-      const yesterday = new Date();
-      yesterday.setDate(yesterday.getDate() - 1);
-      const yesterdayStr = yesterday.toISOString().split("T")[0];
-
-      if (sessionForm.date === today && lastSession !== today) {
-        if (lastSession === yesterdayStr || !lastSession) {
-          setStreak((prev) => prev + 1);
+      setTracks((prev) => prev.map((t) => {
+        if (t.id === trackId) {
+          const newProgress = Math.min(100, t.progress + 2);
+          return { ...t, progress: newProgress, status: newProgress === 100 ? "Concluída" : "Em andamento",
+            milestones: t.milestones.map((m) => ({ ...m, achieved: newProgress >= m.percent })),
+          };
         }
-        localStorage.setItem(STORAGE_KEYS.lastSessionDate, today);
+        return t;
+      }));
+
+      // Update goals if today
+      if (sessionForm.date === today) {
+        setGoals((prev) => ({ ...prev, completed: Math.min(prev.dailyGoal, prev.completed + duration) }));
       }
 
       addToast({ message: "Sessão salva!", type: "success" });
@@ -990,49 +724,6 @@ const Dashboard = () => {
     setSessionModalOpen(false);
     setEditingSession(null);
   };
-
-  const saveGoals = () => {
-    setGoals(tempGoals);
-    setEditingGoals(false);
-    addToast({ message: "Metas atualizadas!", type: "success" });
-  };
-
-  const handleAiSearch = useCallback(async () => {
-    // Cancel previous request
-    if (abortControllerRef.current) {
-      abortControllerRef.current.abort();
-    }
-
-    const controller = new AbortController();
-    abortControllerRef.current = controller;
-
-    setAiLoading(true);
-    setAiStreaming(true);
-
-    // Add to history
-    if (aiQuery.trim()) {
-      setSearchHistory((prev) => {
-        const filtered = prev.filter((h) => h.query !== aiQuery);
-        return [{ id: Date.now().toString(), query: aiQuery, timestamp: Date.now() }, ...filtered].slice(0, 8);
-      });
-    }
-
-    try {
-      // Simulate streaming delay
-      await new Promise((r) => setTimeout(r, 300));
-      setAiStreaming(false);
-
-      const results = await searchStudAI(aiQuery, aiFilters, controller.signal);
-      setAiResults(results);
-    } catch (e) {
-      if ((e as Error).name !== "AbortError") {
-        setAiResults([]);
-      }
-    } finally {
-      setAiLoading(false);
-      setAiStreaming(false);
-    }
-  }, [aiQuery, aiFilters]);
 
   const toggleBookmark = (content: ContentItem) => {
     setBookmarks((prev) => {
@@ -1047,975 +738,957 @@ const Dashboard = () => {
     });
   };
 
-  const isBookmarked = (id: number) => bookmarks.some((b) => b.id === id);
-
-  // Chart navigation
-  const canNavigateNext = new Date(chartAnchor) < new Date();
-  const navigateChart = (direction: "prev" | "next") => {
-    const current = new Date(chartAnchor + "T12:00:00");
-    const days = parseInt(period);
-    if (direction === "prev") {
-      current.setDate(current.getDate() - days);
-    } else if (canNavigateNext) {
-      current.setDate(current.getDate() + days);
-      if (current > new Date()) {
-        current.setTime(new Date().getTime());
-      }
+  const addToPlan = (content: ContentItem) => {
+    if (planItems.some((p) => p.contentId === content.id)) {
+      addToast({ message: "Já está no plano!", type: "info" });
+      return;
     }
-    setChartAnchor(current.toISOString().split("T")[0]);
+    setPlanItems((prev) => [...prev, { id: Date.now().toString(), contentId: content.id, addedAt: Date.now(), completed: false }]);
+    addToast({ message: "Adicionado ao plano!", type: "success" });
   };
 
-  // Loading state
+  const removePlanItem = (id: string) => {
+    setPlanItems((prev) => prev.filter((p) => p.id !== id));
+    addToast({ message: "Removido do plano", type: "info" });
+  };
+
+  const togglePlanComplete = (id: string) => {
+    setPlanItems((prev) => prev.map((p) => p.id === id ? { ...p, completed: !p.completed } : p));
+  };
+
+  const isBookmarked = (id: number) => bookmarks.some((b) => b.id === id);
+  const isInPlan = (id: number) => planItems.some((p) => p.contentId === id);
+
+  // AI Search
+  const handleAiSearch = useCallback(async () => {
+    setAiLoading(true);
+    if (aiQuery.trim()) {
+      setSearchHistory((prev) => {
+        const filtered = prev.filter((h) => h.query !== aiQuery);
+        return [{ id: Date.now().toString(), query: aiQuery, timestamp: Date.now() }, ...filtered].slice(0, 8);
+      });
+    }
+    await new Promise((r) => setTimeout(r, 400));
+    let results = contentDatabase;
+    if (aiQuery.trim()) {
+      const q = aiQuery.toLowerCase();
+      results = results.filter((c) => c.title.toLowerCase().includes(q) || c.summary.toLowerCase().includes(q) || c.tags.some((t) => t.includes(q)));
+    }
+    if (aiFilters.track !== "all") results = results.filter((c) => c.track === aiFilters.track);
+    if (aiFilters.difficulty !== "all") results = results.filter((c) => c.difficulty === aiFilters.difficulty);
+    setAiResults(results);
+    setAiLoading(false);
+  }, [aiQuery, aiFilters]);
+
+  useEffect(() => {
+    if (activeView === "ia") handleAiSearch();
+  }, [activeView]);
+
+  // Filtered content for Cursos view
+  const filteredContent = useMemo(() => {
+    let results = contentDatabase;
+    if (contentFilters.search.trim()) {
+      const q = contentFilters.search.toLowerCase();
+      results = results.filter((c) => c.title.toLowerCase().includes(q) || c.tags.some((t) => t.includes(q)));
+    }
+    if (contentFilters.track !== "all") results = results.filter((c) => c.track === contentFilters.track);
+    if (contentFilters.difficulty !== "all") results = results.filter((c) => c.difficulty === contentFilters.difficulty);
+    return results;
+  }, [contentFilters]);
+
+  // Loading
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-background p-6">
-        <div className="max-w-7xl mx-auto space-y-6">
-          <Skeleton className="h-16 w-full" />
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-            {[1, 2, 3, 4].map((i) => <Skeleton key={i} className="h-24" />)}
-          </div>
-          <Skeleton className="h-48" />
-          <Skeleton className="h-64" />
-        </div>
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <Loader2 size={32} className="animate-spin text-accent" />
       </div>
     );
   }
 
+  // ============ RENDER ============
+
   return (
-    <div className="min-h-screen bg-background">
-      {/* Header */}
-      <header className="sticky top-0 z-50 bg-gradient-to-r from-[hsl(260,80%,20%)] to-[hsl(222,89%,55%)] text-white shadow-md">
-        <div className="max-w-7xl mx-auto px-4 py-3">
-          <div className="flex items-center justify-between gap-4">
-            <div className="flex items-center gap-4">
+    <div className="min-h-screen bg-background flex">
+      {/* ============ LEFT SIDEBAR ============ */}
+      <aside
+        className={`
+          fixed lg:sticky top-0 left-0 h-screen z-50 bg-card border-r flex flex-col
+          transition-all duration-200 ease-in-out
+          ${sidebarCollapsed ? "lg:w-16" : "lg:w-64"}
+          ${mobileSidebarOpen ? "w-64 translate-x-0" : "-translate-x-full lg:translate-x-0"}
+        `}
+      >
+        {/* Sidebar Header */}
+        <div className={`flex items-center justify-between p-4 border-b ${sidebarCollapsed ? "lg:justify-center" : ""}`}>
+          {!sidebarCollapsed && (
+            <div className="flex items-center gap-2">
+              <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-primary to-accent flex items-center justify-center">
+                <Brain size={18} className="text-white" />
+              </div>
+              <span className="font-bold text-lg text-card-foreground">StudAI</span>
+            </div>
+          )}
+          <button
+            onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
+            className="hidden lg:flex p-1.5 hover:bg-muted rounded-lg text-muted-foreground"
+            aria-label={sidebarCollapsed ? "Expandir menu" : "Recolher menu"}
+          >
+            {sidebarCollapsed ? <ChevronRight size={18} /> : <ChevronLeft size={18} />}
+          </button>
+          <button
+            onClick={() => setMobileSidebarOpen(false)}
+            className="lg:hidden p-1.5 hover:bg-muted rounded-lg"
+            aria-label="Fechar menu"
+          >
+            <X size={18} />
+          </button>
+        </div>
+
+        {/* Nav Items */}
+        <nav className="flex-1 overflow-y-auto py-4">
+          {NAV_SECTIONS.map((section) => (
+            <div key={section.id} className="mb-4">
+              {!sidebarCollapsed && (
+                <p className="px-4 mb-2 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
+                  {section.label}
+                </p>
+              )}
+              {navItems.filter((item) => item.section === section.id).map((item) => {
+                const isActive = activeView === item.id;
+                return (
+                  <button
+                    key={item.id}
+                    onClick={() => navigate(item.id)}
+                    className={`
+                      w-full flex items-center gap-3 px-4 py-2.5 text-sm font-medium transition-colors relative
+                      ${isActive 
+                        ? "text-accent bg-accent/10" 
+                        : "text-muted-foreground hover:text-card-foreground hover:bg-muted"
+                      }
+                      ${sidebarCollapsed ? "justify-center px-2" : ""}
+                    `}
+                    aria-label={item.label}
+                    aria-current={isActive ? "page" : undefined}
+                  >
+                    {isActive && <div className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-6 bg-accent rounded-r" />}
+                    <item.icon size={20} />
+                    {!sidebarCollapsed && (
+                      <>
+                        <span className="flex-1 text-left">{item.label}</span>
+                        {item.badgeCount && <Badge variant="count">{item.badgeCount}</Badge>}
+                      </>
+                    )}
+                    {sidebarCollapsed && item.badgeCount && (
+                      <div className="absolute top-1 right-1 w-2 h-2 bg-accent rounded-full" />
+                    )}
+                  </button>
+                );
+              })}
+            </div>
+          ))}
+        </nav>
+
+        {/* Sidebar Footer */}
+        {!sidebarCollapsed && (
+          <div className="p-4 border-t">
+            <div className="p-3 bg-gradient-to-br from-primary/10 to-accent/10 rounded-lg">
+              <div className="flex items-center gap-2 mb-2">
+                <Flame size={16} className="text-accent" />
+                <span className="text-sm font-semibold text-card-foreground">{streak} dias</span>
+              </div>
+              <div className="flex items-center justify-between text-xs text-muted-foreground mb-2">
+                <span>Meta de hoje</span>
+                <span>{goals.completed}/{goals.dailyGoal} min</span>
+              </div>
+              <div className="h-1.5 bg-muted rounded-full overflow-hidden mb-3">
+                <div className="h-full bg-accent rounded-full" style={{ width: `${Math.min(100, (goals.completed / goals.dailyGoal) * 100)}%` }} />
+              </div>
               <button
-                className="lg:hidden p-2 hover:bg-white/10 rounded-lg"
-                onClick={() => setSidebarOpen(!sidebarOpen)}
-                aria-label="Toggle menu"
+                onClick={() => openNewSessionModal()}
+                className="w-full flex items-center justify-center gap-2 py-2 text-xs font-medium bg-primary text-primary-foreground rounded-lg hover:opacity-90"
               >
-                {sidebarOpen ? <X size={20} /> : <Menu size={20} />}
+                <Plus size={14} />
+                Nova sessão
               </button>
-              <h1 className="text-xl font-bold tracking-tight">StudAI</h1>
-              {demoMode && <Badge variant="accent">Demo</Badge>}
+            </div>
+          </div>
+        )}
+      </aside>
+
+      {/* Mobile Overlay */}
+      {mobileSidebarOpen && (
+        <div className="fixed inset-0 bg-black/40 z-40 lg:hidden" onClick={() => setMobileSidebarOpen(false)} />
+      )}
+
+      {/* ============ MAIN AREA ============ */}
+      <div className="flex-1 flex flex-col min-w-0">
+        {/* ============ TOPBAR ============ */}
+        <header className="sticky top-0 z-30 bg-card border-b px-4 py-3">
+          <div className="flex items-center gap-4">
+            {/* Mobile menu button */}
+            <button
+              onClick={() => setMobileSidebarOpen(true)}
+              className="lg:hidden p-2 hover:bg-muted rounded-lg"
+              aria-label="Abrir menu"
+            >
+              <Menu size={20} />
+            </button>
+
+            {/* Global Search */}
+            <div className="relative flex-1 max-w-xl" ref={globalSearchRef}>
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" size={18} />
+              <input
+                type="text"
+                placeholder="Buscar trilhas, sessões, conteúdos..."
+                value={globalSearchQuery}
+                onChange={(e) => { setGlobalSearchQuery(e.target.value); setGlobalSearchOpen(true); }}
+                onFocus={() => setGlobalSearchOpen(true)}
+                className="w-full pl-10 pr-4 py-2 bg-secondary border border-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-accent"
+              />
+              {/* Search Dropdown */}
+              {globalSearchOpen && searchResults.length > 0 && (
+                <div className="absolute top-full left-0 right-0 mt-1 bg-card border rounded-lg shadow-lg overflow-hidden z-50">
+                  {["track", "session", "content"].map((type) => {
+                    const typeResults = searchResults.filter((r) => r.type === type);
+                    if (typeResults.length === 0) return null;
+                    return (
+                      <div key={type}>
+                        <p className="px-3 py-1.5 text-[10px] font-semibold uppercase text-muted-foreground bg-muted">
+                          {type === "track" ? "Trilhas" : type === "session" ? "Sessões" : "Conteúdos"}
+                        </p>
+                        {typeResults.map((result) => (
+                          <button
+                            key={`${result.type}-${result.id}`}
+                            onClick={() => handleGlobalSearchSelect(result)}
+                            className="w-full flex items-center gap-3 px-3 py-2 text-sm hover:bg-muted text-left"
+                          >
+                            {result.type === "track" && <GraduationCap size={16} className="text-muted-foreground" />}
+                            {result.type === "session" && <Clock size={16} className="text-muted-foreground" />}
+                            {result.type === "content" && <FileText size={16} className="text-muted-foreground" />}
+                            <div className="flex-1 min-w-0">
+                              <p className="font-medium text-card-foreground truncate">{result.title}</p>
+                              <p className="text-xs text-muted-foreground">{result.subtitle}</p>
+                            </div>
+                            <ExternalLink size={14} className="text-muted-foreground" />
+                          </button>
+                        ))}
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
             </div>
 
             {/* Quick Actions */}
             <div className="hidden md:flex items-center gap-2">
               <button
-                onClick={openNewSessionModal}
-                className="flex items-center gap-2 px-3 py-1.5 bg-white/20 hover:bg-white/30 rounded-lg text-sm font-medium transition-colors"
+                onClick={() => openNewSessionModal()}
+                className="flex items-center gap-2 px-3 py-2 text-sm font-medium bg-primary text-primary-foreground rounded-lg hover:opacity-90"
               >
                 <Plus size={16} />
                 Nova sessão
               </button>
-              <button className="flex items-center gap-2 px-3 py-1.5 bg-white/10 hover:bg-white/20 rounded-lg text-sm transition-colors">
-                <Play size={16} />
-                Revisão
-              </button>
-              <button className="flex items-center gap-2 px-3 py-1.5 bg-white/10 hover:bg-white/20 rounded-lg text-sm transition-colors">
-                <Brain size={16} />
-                Plano IA
-              </button>
             </div>
 
-            {/* User info */}
+            {/* User */}
             <div className="flex items-center gap-3">
               <div className="hidden sm:block text-right">
-                <p className="text-sm font-medium">{userData.name}</p>
-                <div className="flex items-center gap-2 text-xs text-white/80">
-                  <Zap size={12} />
-                  <span>Nível {userData.level}</span>
-                  <span className="hidden md:inline">• {userData.xp}/{userData.xpNext} XP</span>
-                </div>
+                <p className="text-sm font-medium text-card-foreground">{userData.name}</p>
+                <p className="text-xs text-muted-foreground flex items-center gap-1 justify-end">
+                  <Zap size={10} />
+                  Nível {userData.level}
+                </p>
               </div>
-              <div className="w-9 h-9 rounded-full bg-white/20 flex items-center justify-center font-bold text-sm">
+              <div className="w-9 h-9 rounded-full bg-gradient-to-br from-primary to-accent flex items-center justify-center text-white font-bold text-sm">
                 {userData.name.charAt(0)}
               </div>
             </div>
           </div>
+        </header>
 
-          {/* Tabs */}
-          <nav className="flex gap-1 mt-3 overflow-x-auto pb-1 -mx-4 px-4">
-            {[
-              { id: "dashboard", label: "Dashboard", icon: BarChart3 },
-              { id: "trilhas", label: "Trilhas", icon: BookOpen },
-              { id: "sessoes", label: "Sessões", icon: Clock },
-              { id: "ia", label: "IA", icon: Sparkles },
-            ].map((tab) => (
-              <button
-                key={tab.id}
-                onClick={() => setActiveTab(tab.id as typeof activeTab)}
-                className={`flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-lg whitespace-nowrap transition-colors ${
-                  activeTab === tab.id
-                    ? "bg-white/20 text-white"
-                    : "text-white/70 hover:text-white hover:bg-white/10"
-                }`}
-              >
-                <tab.icon size={16} />
-                {tab.label}
-              </button>
-            ))}
-          </nav>
-        </div>
-      </header>
+        {/* ============ CONTENT ============ */}
+        <main className="flex-1 p-4 md:p-6 overflow-y-auto">
+          {/* ====== DASHBOARD VIEW ====== */}
+          {activeView === "dashboard" && (
+            <div className="space-y-6 max-w-6xl">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h1 className="text-2xl font-bold text-card-foreground">Olá, {userData.name}! 👋</h1>
+                  <p className="text-muted-foreground">Continue sua jornada de aprendizado</p>
+                </div>
+                {demoMode && (
+                  <button onClick={resetDemo} className="flex items-center gap-2 px-3 py-1.5 text-xs bg-muted rounded-lg hover:bg-secondary">
+                    <RotateCcw size={12} />
+                    Reset Demo
+                  </button>
+                )}
+              </div>
 
-      <div className="max-w-7xl mx-auto px-4 py-6">
-        <div className="flex flex-col lg:flex-row gap-6">
-          {/* Main Content */}
-          <main className="flex-1 space-y-6 min-w-0">
-            {/* ============ DASHBOARD TAB ============ */}
-            {activeTab === "dashboard" && (
-              <>
-                {/* Learning Path Card */}
-                {insights.mainTrack && (
-                  <div className="bg-gradient-to-r from-primary/5 to-accent/5 rounded-xl border border-accent/20 p-5">
-                    <div className="flex items-start justify-between gap-4 flex-wrap">
-                      <div className="flex-1 min-w-[200px]">
-                        <div className="flex items-center gap-2 text-sm text-muted-foreground mb-1">
-                          <Trophy size={14} className="text-accent" />
-                          Trilha Principal
-                        </div>
-                        <h2 className="text-xl font-bold text-card-foreground mb-2">{insights.mainTrack.name}</h2>
-                        <div className="flex items-center gap-3 mb-3">
-                          <div className="flex-1 h-2.5 bg-muted rounded-full overflow-hidden max-w-xs">
-                            <div
-                              className="h-full bg-accent rounded-full transition-all"
-                              style={{ width: `${insights.mainTrack.progress}%` }}
-                            />
+              {/* Stats */}
+              <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+                <StatCard icon={<Flame size={24} className="text-accent" />} value={`${streak}`} label="Dias de streak" sublabel={`Meta: ${goals.dailyGoal}min/dia`} />
+                <StatCard icon={<Clock size={24} className="text-primary" />} value={`${Math.round(totalWeeklyMinutes / 60)}h`} label="Esta semana" sublabel={`${Math.round((totalWeeklyMinutes / goals.weeklyGoal) * 100)}% da meta`} />
+                <StatCard icon={<CheckCircle2 size={24} className="text-accent" />} value={tracks.filter((t) => t.status === "Concluída").length.toString()} label="Trilhas concluídas" sublabel={`de ${tracks.length}`} />
+                <StatCard icon={<BookOpen size={24} className="text-primary" />} value={sortedSessions.length.toString()} label="Sessões" sublabel="registradas" />
+              </div>
+
+              {/* Quick Links */}
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                {[
+                  { icon: GraduationCap, label: "Trilhas", view: "trilhas" as ViewId },
+                  { icon: CalendarDays, label: "Calendário", view: "calendario" as ViewId },
+                  { icon: RefreshCw, label: `Revisões (${todayReviews.length})`, view: "revisoes" as ViewId },
+                  { icon: Bot, label: "Busca IA", view: "ia" as ViewId },
+                ].map((item) => (
+                  <button
+                    key={item.view}
+                    onClick={() => navigate(item.view)}
+                    className="flex items-center gap-3 p-4 bg-card border rounded-xl hover:border-accent/50 transition-colors"
+                  >
+                    <item.icon size={24} className="text-accent" />
+                    <span className="font-medium text-card-foreground">{item.label}</span>
+                  </button>
+                ))}
+              </div>
+
+              {/* Recent Sessions */}
+              <div className="bg-card border rounded-xl p-5">
+                <div className="flex items-center justify-between mb-4">
+                  <h2 className="font-semibold text-card-foreground">Atividade Recente</h2>
+                  <button onClick={() => navigate("sessoes")} className="text-sm text-accent hover:underline">Ver todas</button>
+                </div>
+                {sortedSessions.length === 0 ? (
+                  <EmptyState icon={Clock} title="Nenhuma sessão" description="Registre sua primeira sessão de estudo!" />
+                ) : (
+                  <div className="space-y-2">
+                    {sortedSessions.slice(0, 5).map((s) => {
+                      const track = tracks.find((t) => t.id === s.trackId);
+                      return (
+                        <div key={s.id} className="flex items-center gap-4 p-3 bg-secondary/50 rounded-lg">
+                          <div className="flex-1">
+                            <p className="font-medium text-card-foreground">{s.theme}</p>
+                            <p className="text-xs text-muted-foreground">{track?.name} • {s.duration}min</p>
                           </div>
-                          <span className="text-sm font-medium text-card-foreground">{insights.mainTrack.progress}%</span>
+                          <p className="text-sm text-muted-foreground">{formatDateBR(s.date)}</p>
                         </div>
-                        <div className="flex flex-wrap gap-2">
-                          {insights.mainTrack.skills.map((skill) => (
-                            <Badge key={skill} variant="outline">{skill}</Badge>
-                          ))}
-                        </div>
-                      </div>
-                      <div className="flex flex-col gap-2">
-                        <button
-                          onClick={() => handleContinue(insights.mainTrack!.name)}
-                          className="px-5 py-2.5 bg-primary text-primary-foreground rounded-lg font-medium hover:opacity-90 transition-opacity"
-                        >
-                          Continuar
-                        </button>
-                        {insights.daysToComplete && (
-                          <p className="text-xs text-muted-foreground text-center">
-                            ~{insights.daysToComplete} dias para concluir
-                          </p>
-                        )}
-                      </div>
-                    </div>
-                    {/* Milestones */}
-                    <div className="flex items-center gap-2 mt-4 overflow-x-auto pb-1">
-                      {insights.mainTrack.milestones.map((m, i) => (
-                        <div
-                          key={i}
-                          className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium whitespace-nowrap ${
-                            m.achieved ? "bg-accent/20 text-accent" : "bg-muted text-muted-foreground"
-                          }`}
-                        >
-                          {m.achieved ? <CheckCircle2 size={12} /> : <Target size={12} />}
-                          {m.percent}% {m.label}
-                        </div>
-                      ))}
-                    </div>
+                      );
+                    })}
                   </div>
                 )}
+              </div>
+            </div>
+          )}
 
-                {/* Insights */}
-                <div className="bg-card rounded-xl border p-5">
-                  <h3 className="font-semibold text-card-foreground mb-4 flex items-center gap-2">
-                    <Sparkles size={18} className="text-accent" />
-                    Insights
-                  </h3>
-                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-                    <div className="p-3 bg-secondary/50 rounded-lg">
-                      <div className="flex items-center gap-2 text-sm text-muted-foreground mb-1">
-                        <Calendar size={14} />
-                        Consistência
-                      </div>
-                      <p className="text-lg font-bold text-card-foreground">{insights.consistency7}%</p>
-                      <p className="text-xs text-muted-foreground">{insights.activeDays7}/7 dias ativos</p>
-                    </div>
-                    <div className="p-3 bg-secondary/50 rounded-lg">
-                      <div className="flex items-center gap-2 text-sm text-muted-foreground mb-1">
-                        <Award size={14} />
-                        Precisão
-                      </div>
-                      <p className="text-lg font-bold text-card-foreground">{insights.avgAccuracy}%</p>
-                      <p className="text-xs text-muted-foreground">média em quizzes</p>
-                    </div>
-                    <div className="p-3 bg-secondary/50 rounded-lg">
-                      <div className="flex items-center gap-2 text-sm text-muted-foreground mb-1">
-                        <Clock size={14} />
-                        Este mês
-                      </div>
-                      <p className="text-lg font-bold text-card-foreground">{Math.round(insights.totalMinutes30 / 60)}h</p>
-                      <p className="text-xs text-muted-foreground">{insights.activeDays30} dias ativos</p>
-                    </div>
-                    <div className={`p-3 rounded-lg ${insights.atRisk ? "bg-destructive/10" : "bg-accent/10"}`}>
-                      <div className="flex items-center gap-2 text-sm text-muted-foreground mb-1">
-                        {insights.atRisk ? <AlertTriangle size={14} /> : <Shield size={14} />}
-                        Status
-                      </div>
-                      <p className={`text-lg font-bold ${insights.atRisk ? "text-destructive" : "text-accent"}`}>
-                        {insights.atRisk ? "Atenção" : "Em dia!"}
-                      </p>
-                      <p className="text-xs text-muted-foreground">
-                        {insights.atRisk
-                          ? `${insights.daysSinceLastSession}d sem estudar`
-                          : goals.dayOffAvailable ? "1 folga disponível" : "Folga usada"}
-                      </p>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Weekly Report */}
-                <div className="bg-card rounded-xl border p-5">
-                  <h3 className="font-semibold text-card-foreground mb-4 flex items-center gap-2">
-                    <BarChart3 size={18} className="text-accent" />
-                    Relatório da Semana
-                  </h3>
-                  <div className="grid sm:grid-cols-3 gap-4">
-                    <div>
-                      <p className="text-xs font-medium text-accent mb-2">✓ O que foi bem</p>
-                      <ul className="space-y-1">
-                        {weeklyReport.positives.length > 0 ? (
-                          weeklyReport.positives.map((p, i) => (
-                            <li key={i} className="text-sm text-muted-foreground">• {p}</li>
-                          ))
-                        ) : (
-                          <li className="text-sm text-muted-foreground">• Continue estudando!</li>
-                        )}
-                      </ul>
-                    </div>
-                    <div>
-                      <p className="text-xs font-medium text-muted-foreground mb-2">⚠ Precisa de foco</p>
-                      <ul className="space-y-1">
-                        {weeklyReport.needsFocus.length > 0 ? (
-                          weeklyReport.needsFocus.map((n, i) => (
-                            <li key={i} className="text-sm text-muted-foreground">• {n}</li>
-                          ))
-                        ) : (
-                          <li className="text-sm text-muted-foreground">• Tudo em ordem!</li>
-                        )}
-                      </ul>
-                    </div>
-                    <div>
-                      <p className="text-xs font-medium text-primary mb-2">→ Próximo passo</p>
-                      <ul className="space-y-1">
-                        {weeklyReport.suggestions.map((s, i) => (
-                          <li key={i} className="text-sm text-muted-foreground">• {s}</li>
-                        ))}
-                      </ul>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Stats Cards */}
-                <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-                  <StatCard
-                    icon={<Flame className="text-accent" size={24} />}
-                    value={`${streak}`}
-                    label="Dias de streak"
-                    sublabel={`Meta: ${goals.dailyGoal} min/dia`}
-                  />
-                  <StatCard
-                    icon={<Clock className="text-primary" size={24} />}
-                    value={`${Math.round(insights.totalMinutes7 / 60)}h`}
-                    label="Esta semana"
-                    sublabel={`${insights.weeklyProgress}% da meta`}
-                    trend={insights.deltaPercent !== 0 ? { value: insights.deltaPercent, positive: insights.deltaPercent > 0 } : undefined}
-                  />
-                  <StatCard
-                    icon={<CheckCircle2 className="text-accent" size={24} />}
-                    value={tracks.filter((t) => t.status === "Concluída").length.toString()}
-                    label="Trilhas concluídas"
-                    sublabel={`de ${tracks.length} trilhas`}
-                  />
-                  <StatCard
-                    icon={<Target className="text-primary" size={24} />}
-                    value={`${insights.avgAccuracy}%`}
-                    label="Precisão"
-                    sublabel="Em quizzes"
-                  />
-                </div>
-
-                {/* Chart */}
-                <div className="bg-card rounded-xl border p-5">
-                  <div className="flex items-center justify-between mb-2 flex-wrap gap-2">
-                    <h3 className="font-semibold text-card-foreground">Minutos estudados</h3>
-                    <div className="flex items-center gap-2">
-                      {(["7", "30", "90"] as const).map((p) => (
-                        <button
-                          key={p}
-                          onClick={() => { setPeriod(p); setChartAnchor(new Date().toISOString().split("T")[0]); }}
-                          className={`px-3 py-1 text-xs rounded-lg font-medium transition-colors ${
-                            period === p
-                              ? "bg-primary text-primary-foreground"
-                              : "bg-secondary text-secondary-foreground hover:bg-muted"
-                          }`}
-                        >
-                          {p}d
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-
-                  {/* Chart Summary */}
-                  <div className="flex flex-wrap gap-4 mb-4 text-sm">
-                    <div>
-                      <span className="text-muted-foreground">Total:</span>{" "}
-                      <span className="font-medium text-card-foreground">{Math.round(chartInfo.total / 60)}h {chartInfo.total % 60}min</span>
-                    </div>
-                    <div>
-                      <span className="text-muted-foreground">Média:</span>{" "}
-                      <span className="font-medium text-card-foreground">{chartInfo.avg}min/dia</span>
-                    </div>
-                    <div>
-                      <span className="text-muted-foreground">Melhor dia:</span>{" "}
-                      <span className="font-medium text-card-foreground">{chartInfo.best.label} ({chartInfo.best.minutes}min)</span>
-                    </div>
-                    {insights.deltaPercent !== 0 && (
-                      <div className={`flex items-center gap-1 ${insights.deltaPercent > 0 ? "text-accent" : "text-muted-foreground"}`}>
-                        {insights.deltaPercent > 0 ? <ArrowUpRight size={14} /> : <ArrowDownRight size={14} />}
-                        {Math.abs(insights.deltaPercent)}% vs anterior
-                      </div>
-                    )}
-                  </div>
-
-                  {/* Navigation */}
-                  <div className="flex items-center justify-between mb-3">
-                    <button
-                      onClick={() => navigateChart("prev")}
-                      className="flex items-center gap-1 px-2 py-1 text-xs text-muted-foreground hover:text-card-foreground hover:bg-muted rounded"
-                    >
-                      <ChevronLeft size={14} />
-                      Anterior
-                    </button>
-                    <span className="text-xs text-muted-foreground">
-                      {chartInfo.data[0]?.label} - {chartInfo.data[chartInfo.data.length - 1]?.label}
-                    </span>
-                    <button
-                      onClick={() => navigateChart("next")}
-                      disabled={!canNavigateNext}
-                      className="flex items-center gap-1 px-2 py-1 text-xs text-muted-foreground hover:text-card-foreground hover:bg-muted rounded disabled:opacity-50"
-                    >
-                      Próximo
-                      <ChevronRight size={14} />
-                    </button>
-                  </div>
-
-                  {/* Chart */}
-                  <div className="relative">
-                    {/* Goal line */}
-                    <div
-                      className="absolute left-0 right-0 border-t border-dashed border-accent/50 z-10"
-                      style={{ bottom: `${Math.min(100, (goals.dailyGoal / Math.max(...chartInfo.data.map((d) => d.minutes), goals.dailyGoal)) * 120)}px` }}
-                    >
-                      <span className="absolute -top-3 right-0 text-[10px] text-accent bg-card px-1">Meta {goals.dailyGoal}min</span>
-                    </div>
-
-                    <div className="flex items-end justify-between gap-1 h-40 overflow-x-auto pb-2">
-                      {chartInfo.data.map((item, i) => {
-                        const maxVal = Math.max(...chartInfo.data.map((d) => d.minutes), goals.dailyGoal);
-                        const height = maxVal > 0 ? (item.minutes / maxVal) * 120 : 0;
-                        return (
-                          <div key={i} className="flex-1 min-w-[24px] max-w-[50px] flex flex-col items-center gap-1 group">
-                            <div className="relative w-full flex justify-center">
-                              {/* Tooltip */}
-                              <div className="absolute -top-8 left-1/2 -translate-x-1/2 opacity-0 group-hover:opacity-100 transition-opacity bg-card border rounded px-2 py-1 text-xs whitespace-nowrap z-20 shadow-lg">
-                                {item.fullLabel} • {item.minutes}min
-                              </div>
-                              <div
-                                className={`w-full rounded-t-md transition-all ${item.isGoalMet ? "bg-accent" : "bg-primary/60"}`}
-                                style={{ height: `${Math.max(4, height)}px` }}
-                              />
-                            </div>
-                            <span className="text-[10px] text-muted-foreground">{item.label}</span>
-                          </div>
-                        );
-                      })}
-                    </div>
-                  </div>
-                </div>
-
-                {/* Recent Activity */}
-                <div className="bg-card rounded-xl border p-5 overflow-x-auto">
-                  <div className="flex items-center justify-between mb-4">
-                    <h3 className="font-semibold text-card-foreground">Atividade recente</h3>
-                    <button
-                      onClick={() => setActiveTab("sessoes")}
-                      className="text-sm text-accent hover:underline"
-                    >
-                      Ver todas
-                    </button>
-                  </div>
-                  {sortedSessions.length === 0 ? (
-                    <EmptyState
-                      icon={BookOpen}
-                      title="Nenhuma sessão registrada"
-                      description="Clique em 'Nova sessão' para começar."
-                    />
-                  ) : (
-                    <table className="w-full text-sm">
-                      <thead>
-                        <tr className="border-b text-left">
-                          <th className="pb-2 font-medium text-muted-foreground">Data</th>
-                          <th className="pb-2 font-medium text-muted-foreground">Tema</th>
-                          <th className="pb-2 font-medium text-muted-foreground hidden sm:table-cell">Tipo</th>
-                          <th className="pb-2 font-medium text-muted-foreground">Duração</th>
-                          <th className="pb-2 font-medium text-muted-foreground hidden sm:table-cell">Resultado</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {sortedSessions.slice(0, 5).map((session) => (
-                          <tr
-                            key={session.id}
-                            className="border-b last:border-0 cursor-pointer hover:bg-muted/50"
-                            onClick={() => setSessionDetailModal(session)}
-                          >
-                            <td className="py-3 text-card-foreground">{formatDateBR(session.date)}</td>
-                            <td className="py-3 text-card-foreground">{session.theme}</td>
-                            <td className="py-3 hidden sm:table-cell"><Badge variant="muted">{session.type}</Badge></td>
-                            <td className="py-3 text-muted-foreground">{session.duration}min</td>
-                            <td className="py-3 hidden sm:table-cell">
-                              {session.result ? <Badge>{session.result}</Badge> : "—"}
-                            </td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                  )}
-                </div>
-              </>
-            )}
-
-            {/* ============ TRILHAS TAB ============ */}
-            {activeTab === "trilhas" && (
+          {/* ====== TRILHAS VIEW ====== */}
+          {activeView === "trilhas" && (
+            <div className="space-y-6 max-w-4xl">
+              <h1 className="text-2xl font-bold text-card-foreground">Trilhas de Aprendizado</h1>
               <div className="space-y-4">
-                <div className="bg-card rounded-xl border p-5">
-                  <div className="flex items-center justify-between mb-4 flex-wrap gap-2">
-                    <h3 className="font-semibold text-card-foreground">Trilhas / Disciplinas</h3>
-                    <div className="relative">
-                      <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" size={16} />
-                      <input
-                        type="text"
-                        placeholder="Filtrar..."
-                        value={searchTerm}
-                        onChange={(e) => setSearchTerm(e.target.value)}
-                        className="pl-9 pr-4 py-2 bg-secondary border border-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary"
-                        aria-label="Filtrar trilhas"
-                      />
+                {tracks.map((track) => (
+                  <div key={track.id} className="bg-card border rounded-xl p-5">
+                    <div className="flex items-start justify-between gap-4 flex-wrap">
+                      <div className="flex-1 min-w-[200px]">
+                        <div className="flex items-center gap-3 mb-2">
+                          <BookOpen className="text-primary" size={20} />
+                          <span className="font-semibold text-card-foreground">{track.name}</span>
+                          <Badge variant={track.status === "Concluída" ? "accent" : "muted"}>{track.status}</Badge>
+                        </div>
+                        <div className="flex items-center gap-3 mb-3">
+                          <div className="flex-1 h-2.5 bg-muted rounded-full overflow-hidden max-w-xs">
+                            <div className="h-full bg-accent rounded-full" style={{ width: `${track.progress}%` }} />
+                          </div>
+                          <span className="text-sm font-medium text-muted-foreground">{track.progress}%</span>
+                        </div>
+                        <div className="flex flex-wrap gap-1.5">
+                          {track.skills.map((skill) => <Badge key={skill} variant="outline">{skill}</Badge>)}
+                        </div>
+                      </div>
+                      <button className="px-4 py-2 text-sm font-medium bg-primary text-primary-foreground rounded-lg hover:opacity-90">
+                        Continuar
+                      </button>
                     </div>
                   </div>
-                  <div className="space-y-4">
-                    {filteredTracks.length === 0 ? (
-                      <EmptyState icon={BookOpen} title="Nenhuma trilha encontrada" description="Tente outro termo." />
-                    ) : (
-                      filteredTracks.map((track) => (
-                        <div key={track.id} className="p-4 bg-secondary/50 rounded-lg">
-                          <div className="flex items-start justify-between gap-4 flex-wrap">
-                            <div className="flex-1 min-w-[200px]">
-                              <div className="flex items-center gap-3 mb-2">
-                                <BookOpen className="text-primary shrink-0" size={20} />
-                                <span className="font-medium text-card-foreground">{track.name}</span>
-                                <Badge variant={track.status === "Concluída" ? "accent" : track.status === "Em andamento" ? "default" : "muted"}>
-                                  {track.status}
-                                </Badge>
-                              </div>
-                              <div className="flex items-center gap-3 mb-3">
-                                <div className="flex-1 h-2.5 bg-muted rounded-full overflow-hidden max-w-xs">
-                                  <div className="h-full bg-accent rounded-full" style={{ width: `${track.progress}%` }} />
-                                </div>
-                                <span className="text-sm font-medium text-muted-foreground">{track.progress}%</span>
-                              </div>
-                              <div className="flex flex-wrap gap-1.5 mb-2">
-                                {track.skills.map((skill) => (
-                                  <Badge key={skill} variant="outline">{skill}</Badge>
-                                ))}
-                              </div>
-                              <div className="flex flex-wrap gap-2">
-                                {track.milestones.map((m, i) => (
-                                  <div
-                                    key={i}
-                                    className={`flex items-center gap-1 text-xs ${m.achieved ? "text-accent" : "text-muted-foreground"}`}
-                                  >
-                                    {m.achieved ? <CheckCircle2 size={12} /> : <Target size={12} />}
-                                    {m.label}
-                                  </div>
-                                ))}
-                              </div>
-                            </div>
-                            <button
-                              onClick={() => handleContinue(track.name)}
-                              className="px-4 py-2 text-sm font-medium bg-primary text-primary-foreground rounded-lg hover:opacity-90"
-                            >
-                              Continuar
-                            </button>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* ====== CURSOS/CONTEÚDOS VIEW ====== */}
+          {activeView === "cursos" && (
+            <div className="space-y-6 max-w-4xl">
+              <h1 className="text-2xl font-bold text-card-foreground">Conteúdos</h1>
+              
+              {/* Filters */}
+              <div className="flex flex-wrap gap-3 p-4 bg-card border rounded-xl">
+                <div className="relative flex-1 min-w-[200px]">
+                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" size={16} />
+                  <input
+                    type="text"
+                    placeholder="Buscar..."
+                    value={contentFilters.search}
+                    onChange={(e) => setContentFilters((f) => ({ ...f, search: e.target.value }))}
+                    className="w-full pl-9 pr-4 py-2 bg-secondary border border-border rounded-lg text-sm"
+                  />
+                </div>
+                <select
+                  value={contentFilters.track}
+                  onChange={(e) => setContentFilters((f) => ({ ...f, track: e.target.value }))}
+                  className="px-3 py-2 bg-secondary border border-border rounded-lg text-sm"
+                >
+                  <option value="all">Todas trilhas</option>
+                  {tracks.map((t) => <option key={t.id} value={t.name}>{t.name}</option>)}
+                </select>
+                <select
+                  value={contentFilters.difficulty}
+                  onChange={(e) => setContentFilters((f) => ({ ...f, difficulty: e.target.value }))}
+                  className="px-3 py-2 bg-secondary border border-border rounded-lg text-sm"
+                >
+                  <option value="all">Dificuldade</option>
+                  <option value="Fácil">Fácil</option>
+                  <option value="Médio">Médio</option>
+                  <option value="Difícil">Difícil</option>
+                </select>
+              </div>
+
+              {/* Content List */}
+              <div className="grid gap-4">
+                {filteredContent.length === 0 ? (
+                  <EmptyState icon={FolderOpen} title="Nenhum conteúdo encontrado" description="Ajuste os filtros." />
+                ) : (
+                  filteredContent.map((content) => (
+                    <div key={content.id} className="bg-card border rounded-xl p-4 hover:border-accent/30 transition-colors">
+                      <div className="flex items-start gap-4">
+                        <div className="flex-1">
+                          <h3 className="font-medium text-card-foreground mb-1">{content.title}</h3>
+                          <p className="text-sm text-muted-foreground mb-2">{content.summary}</p>
+                          <div className="flex flex-wrap gap-2">
+                            <Badge>{content.track}</Badge>
+                            <Badge variant="outline">{content.difficulty}</Badge>
                           </div>
                         </div>
-                      ))
-                    )}
-                  </div>
+                        <div className="flex flex-col gap-2">
+                          <button
+                            onClick={() => setContentDetailModal(content)}
+                            className="px-3 py-1.5 text-xs font-medium bg-primary text-primary-foreground rounded-lg"
+                          >
+                            Estudar
+                          </button>
+                          <button
+                            onClick={() => addToPlan(content)}
+                            disabled={isInPlan(content.id)}
+                            className="px-3 py-1.5 text-xs font-medium bg-secondary text-card-foreground rounded-lg disabled:opacity-50"
+                          >
+                            {isInPlan(content.id) ? "No plano" : "+ Plano"}
+                          </button>
+                          <button
+                            onClick={() => toggleBookmark(content)}
+                            className="p-1.5 hover:bg-muted rounded-lg"
+                            aria-label={isBookmarked(content.id) ? "Remover" : "Salvar"}
+                          >
+                            {isBookmarked(content.id) ? <BookmarkCheck size={16} className="text-accent" /> : <Bookmark size={16} className="text-muted-foreground" />}
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  ))
+                )}
+              </div>
+            </div>
+          )}
+
+          {/* ====== SESSÕES VIEW ====== */}
+          {activeView === "sessoes" && (
+            <div className="space-y-6 max-w-4xl">
+              <div className="flex items-center justify-between">
+                <h1 className="text-2xl font-bold text-card-foreground">Sessões de Estudo</h1>
+                <button
+                  onClick={() => openNewSessionModal()}
+                  className="flex items-center gap-2 px-4 py-2 text-sm font-medium bg-primary text-primary-foreground rounded-lg"
+                >
+                  <Plus size={16} />
+                  Nova sessão
+                </button>
+              </div>
+
+              {sortedSessions.length === 0 ? (
+                <EmptyState icon={Clock} title="Nenhuma sessão" description="Registre sua primeira sessão!" />
+              ) : (
+                <div className="space-y-3">
+                  {sortedSessions.map((session) => {
+                    const track = tracks.find((t) => t.id === session.trackId);
+                    return (
+                      <div key={session.id} className="bg-card border rounded-xl p-4">
+                        <div className="flex items-start justify-between gap-4">
+                          <div>
+                            <p className="font-medium text-card-foreground">{session.theme}</p>
+                            <p className="text-sm text-muted-foreground">{track?.name} • {session.type} • {session.duration}min</p>
+                            {session.result && <span className="mt-2"><Badge>{session.result}</Badge></span>}
+                          </div>
+                          <div className="text-right">
+                            <p className="text-sm font-medium text-card-foreground">{formatDateBR(session.date)}</p>
+                            <p className="text-xs text-muted-foreground">{formatFullDateBR(session.date)}</p>
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* ====== CALENDÁRIO VIEW ====== */}
+          {activeView === "calendario" && (
+            <div className="space-y-6 max-w-4xl">
+              <div className="flex items-center justify-between">
+                <h1 className="text-2xl font-bold text-card-foreground">Calendário</h1>
+                <div className="flex items-center gap-2">
+                  <button
+                    onClick={() => {
+                      const d = new Date(calendarYear, calendarMonthNum - 2, 1);
+                      setCalendarMonth(`${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`);
+                    }}
+                    className="p-2 hover:bg-muted rounded-lg"
+                    aria-label="Mês anterior"
+                  >
+                    <ChevronLeft size={18} />
+                  </button>
+                  <span className="font-medium text-card-foreground min-w-[120px] text-center">
+                    {new Date(calendarYear, calendarMonthNum - 1).toLocaleDateString("pt-BR", { month: "long", year: "numeric" })}
+                  </span>
+                  <button
+                    onClick={() => {
+                      const d = new Date(calendarYear, calendarMonthNum, 1);
+                      setCalendarMonth(`${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`);
+                    }}
+                    className="p-2 hover:bg-muted rounded-lg"
+                    aria-label="Próximo mês"
+                  >
+                    <ChevronRight size={18} />
+                  </button>
                 </div>
               </div>
-            )}
 
-            {/* ============ SESSÕES TAB ============ */}
-            {activeTab === "sessoes" && (
-              <div className="space-y-4">
-                <div className="bg-card rounded-xl border p-5">
-                  <div className="flex items-center justify-between mb-4 flex-wrap gap-2">
-                    <h3 className="font-semibold text-card-foreground">Histórico de Sessões</h3>
+              <div className="bg-card border rounded-xl p-4">
+                {/* Weekday headers */}
+                <div className="grid grid-cols-7 mb-2">
+                  {["Dom", "Seg", "Ter", "Qua", "Qui", "Sex", "Sáb"].map((d) => (
+                    <div key={d} className="text-center text-xs font-medium text-muted-foreground py-2">{d}</div>
+                  ))}
+                </div>
+
+                {/* Calendar grid */}
+                <div className="grid grid-cols-7 gap-1">
+                  {calendarDays.map((day, i) => {
+                    const dateStr = day.toISOString().split("T")[0];
+                    const isCurrentMonth = day.getMonth() === calendarMonthNum - 1;
+                    const isToday = dateStr === new Date().toISOString().split("T")[0];
+                    const daySessions = sessionsByDate.get(dateStr) || [];
+                    const hasSession = daySessions.length > 0;
+
+                    return (
+                      <button
+                        key={i}
+                        onClick={() => setSelectedCalendarDay(dateStr)}
+                        className={`
+                          aspect-square p-1 rounded-lg text-sm relative flex flex-col items-center justify-center
+                          ${isCurrentMonth ? "text-card-foreground" : "text-muted-foreground/50"}
+                          ${isToday ? "ring-2 ring-accent" : ""}
+                          ${selectedCalendarDay === dateStr ? "bg-accent/20" : "hover:bg-muted"}
+                        `}
+                      >
+                        <span className="font-medium">{day.getDate()}</span>
+                        {hasSession && (
+                          <div className="w-1.5 h-1.5 rounded-full bg-accent absolute bottom-1" />
+                        )}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+
+              {/* Selected day details */}
+              {selectedCalendarDay && (
+                <div className="bg-card border rounded-xl p-5">
+                  <div className="flex items-center justify-between mb-4">
+                    <h2 className="font-semibold text-card-foreground">
+                      {new Date(selectedCalendarDay + "T12:00:00").toLocaleDateString("pt-BR", { weekday: "long", day: "numeric", month: "long" })}
+                    </h2>
                     <button
-                      onClick={openNewSessionModal}
-                      className="flex items-center gap-2 px-3 py-2 text-sm bg-primary text-primary-foreground rounded-lg"
+                      onClick={() => openNewSessionModal(selectedCalendarDay)}
+                      className="flex items-center gap-2 px-3 py-1.5 text-xs font-medium bg-primary text-primary-foreground rounded-lg"
                     >
-                      <Plus size={16} />
-                      Nova
+                      <Plus size={14} />
+                      Adicionar sessão
                     </button>
                   </div>
-
-                  {/* Filters */}
-                  <div className="flex flex-wrap gap-3 mb-4 p-3 bg-secondary/50 rounded-lg">
-                    <div className="flex items-center gap-2">
-                      <Filter size={14} className="text-muted-foreground" />
-                      <select
-                        value={sessionFilters.track}
-                        onChange={(e) => setSessionFilters((f) => ({ ...f, track: e.target.value }))}
-                        className="px-2 py-1.5 bg-card border border-border rounded-lg text-sm"
-                        aria-label="Filtrar por trilha"
-                      >
-                        <option value="all">Todas trilhas</option>
-                        {tracks.map((t) => (
-                          <option key={t.id} value={t.id}>{t.name}</option>
-                        ))}
-                      </select>
-                    </div>
-                    <select
-                      value={sessionFilters.type}
-                      onChange={(e) => setSessionFilters((f) => ({ ...f, type: e.target.value }))}
-                      className="px-2 py-1.5 bg-card border border-border rounded-lg text-sm"
-                      aria-label="Filtrar por tipo"
-                    >
-                      <option value="all">Todos tipos</option>
-                      <option value="Estudo">Estudo</option>
-                      <option value="Revisão">Revisão</option>
-                      <option value="Simulado">Simulado</option>
-                    </select>
-                    <input
-                      type="date"
-                      value={sessionFilters.dateFrom}
-                      onChange={(e) => setSessionFilters((f) => ({ ...f, dateFrom: e.target.value }))}
-                      className="px-2 py-1.5 bg-card border border-border rounded-lg text-sm"
-                      aria-label="Data inicial"
-                    />
-                    <input
-                      type="date"
-                      value={sessionFilters.dateTo}
-                      onChange={(e) => setSessionFilters((f) => ({ ...f, dateTo: e.target.value }))}
-                      className="px-2 py-1.5 bg-card border border-border rounded-lg text-sm"
-                      aria-label="Data final"
-                    />
-                    <div className="relative flex-1 min-w-[150px]">
-                      <Search className="absolute left-2 top-1/2 -translate-y-1/2 text-muted-foreground" size={14} />
-                      <input
-                        type="text"
-                        placeholder="Buscar tema..."
-                        value={sessionFilters.search}
-                        onChange={(e) => setSessionFilters((f) => ({ ...f, search: e.target.value }))}
-                        className="w-full pl-8 pr-3 py-1.5 bg-card border border-border rounded-lg text-sm"
-                      />
-                    </div>
-                    <select
-                      value={sessionFilters.sort}
-                      onChange={(e) => setSessionFilters((f) => ({ ...f, sort: e.target.value as any }))}
-                      className="px-2 py-1.5 bg-card border border-border rounded-lg text-sm"
-                      aria-label="Ordenar por"
-                    >
-                      <option value="recent">Mais recente</option>
-                      <option value="oldest">Mais antigo</option>
-                      <option value="duration">Maior duração</option>
-                    </select>
-                  </div>
-
-                  {/* Sessions List */}
-                  {filteredSessions.length === 0 ? (
-                    <EmptyState icon={Clock} title="Nenhuma sessão encontrada" description="Ajuste os filtros ou registre uma sessão." />
+                  {(sessionsByDate.get(selectedCalendarDay) || []).length === 0 ? (
+                    <p className="text-sm text-muted-foreground">Nenhuma sessão neste dia.</p>
                   ) : (
                     <div className="space-y-2">
-                      {filteredSessions.map((session) => {
-                        const track = tracks.find((t) => t.id === session.trackId);
+                      {(sessionsByDate.get(selectedCalendarDay) || []).map((s) => {
+                        const track = tracks.find((t) => t.id === s.trackId);
                         return (
-                          <div
-                            key={session.id}
-                            className="p-4 bg-secondary/50 rounded-lg hover:bg-secondary transition-colors cursor-pointer"
-                            onClick={() => setSessionDetailModal(session)}
-                          >
-                            <div className="flex items-start justify-between gap-4">
-                              <div className="flex-1">
-                                <p className="font-medium text-card-foreground">{session.theme}</p>
-                                <p className="text-sm text-muted-foreground">
-                                  {track?.name} • {session.type} • {session.duration}min
-                                </p>
-                              </div>
-                              <div className="text-right shrink-0">
-                                <p className="text-sm text-muted-foreground">{formatDateBR(session.date)}</p>
-                                {session.result && <Badge>{session.result}</Badge>}
-                              </div>
+                          <div key={s.id} className="flex items-center gap-4 p-3 bg-secondary/50 rounded-lg">
+                            <div className="flex-1">
+                              <p className="font-medium text-card-foreground">{s.theme}</p>
+                              <p className="text-xs text-muted-foreground">{track?.name} • {s.duration}min</p>
                             </div>
+                            {s.result && <Badge>{s.result}</Badge>}
                           </div>
                         );
                       })}
+                      <p className="text-xs text-muted-foreground pt-2">
+                        Total: {(sessionsByDate.get(selectedCalendarDay) || []).reduce((a, s) => a + s.duration, 0)} minutos
+                      </p>
                     </div>
                   )}
                 </div>
-              </div>
-            )}
+              )}
+            </div>
+          )}
 
-            {/* ============ IA TAB ============ */}
-            {activeTab === "ia" && (
-              <div className="space-y-4">
-                <div className="bg-card rounded-xl border p-5">
-                  <div className="flex items-center gap-4 mb-4">
-                    <button
-                      onClick={() => setAiTab("search")}
-                      className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm font-medium ${
-                        aiTab === "search" ? "bg-primary text-primary-foreground" : "bg-secondary"
-                      }`}
+          {/* ====== METAS VIEW ====== */}
+          {activeView === "metas" && (
+            <div className="space-y-6 max-w-4xl">
+              <h1 className="text-2xl font-bold text-card-foreground">Metas e Plano</h1>
+
+              {/* Goals Config */}
+              <div className="bg-card border rounded-xl p-5">
+                <h2 className="font-semibold text-card-foreground mb-4">Configurar Metas</h2>
+                <div className="grid sm:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-card-foreground mb-1">Meta diária (min)</label>
+                    <select
+                      value={goals.dailyGoal}
+                      onChange={(e) => setGoals((g) => ({ ...g, dailyGoal: parseInt(e.target.value) }))}
+                      className="w-full px-3 py-2 bg-secondary border border-border rounded-lg"
                     >
-                      <Search size={14} />
-                      Buscar
-                    </button>
-                    <button
-                      onClick={() => setAiTab("saved")}
-                      className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm font-medium ${
-                        aiTab === "saved" ? "bg-primary text-primary-foreground" : "bg-secondary"
-                      }`}
-                    >
-                      <Bookmark size={14} />
-                      Salvos ({bookmarks.length})
-                    </button>
+                      {[30, 45, 60, 90, 120].map((v) => <option key={v} value={v}>{v} min</option>)}
+                    </select>
                   </div>
+                  <div>
+                    <label className="block text-sm font-medium text-card-foreground mb-1">Meta semanal (horas)</label>
+                    <select
+                      value={goals.weeklyGoal}
+                      onChange={(e) => setGoals((g) => ({ ...g, weeklyGoal: parseInt(e.target.value) }))}
+                      className="w-full px-3 py-2 bg-secondary border border-border rounded-lg"
+                    >
+                      {[180, 300, 420, 600].map((v) => <option key={v} value={v}>{v / 60}h</option>)}
+                    </select>
+                  </div>
+                </div>
+              </div>
 
-                  {aiTab === "search" && (
-                    <>
-                      {/* Search input */}
-                      <div className="flex gap-2 mb-4">
-                        <div className="relative flex-1">
-                          <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" size={18} />
-                          <input
-                            type="text"
-                            placeholder="Pergunte ou busque um tema..."
-                            value={aiQuery}
-                            onChange={(e) => setAiQuery(e.target.value)}
-                            onKeyDown={(e) => e.key === "Enter" && handleAiSearch()}
-                            className="w-full pl-10 pr-4 py-3 bg-secondary border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
-                          />
+              {/* Weekly Plan */}
+              <div className="bg-card border rounded-xl p-5">
+                <h2 className="font-semibold text-card-foreground mb-4">Plano da Semana</h2>
+                <div className="grid grid-cols-7 gap-2">
+                  {goals.weeklyPlan.map((day, i) => (
+                    <div key={i} className="text-center">
+                      <p className="text-xs font-medium text-muted-foreground mb-2">{day.day}</p>
+                      <div className="h-24 bg-muted rounded-lg relative overflow-hidden">
+                        <div
+                          className="absolute bottom-0 left-0 right-0 bg-accent/60 transition-all"
+                          style={{ height: `${day.target > 0 ? (day.completed / day.target) * 100 : 0}%` }}
+                        />
+                        <div className="absolute inset-0 flex items-center justify-center">
+                          <span className="text-xs font-medium text-card-foreground">{day.completed}/{day.target}</span>
                         </div>
-                        <button
-                          onClick={handleAiSearch}
-                          disabled={aiLoading}
-                          className="px-6 py-3 bg-primary text-primary-foreground rounded-lg font-medium hover:opacity-90 disabled:opacity-50"
-                        >
-                          {aiLoading ? <Loader2 size={18} className="animate-spin" /> : "Buscar"}
-                        </button>
                       </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
 
-                      {/* Quick suggestions */}
-                      <div className="flex flex-wrap gap-2 mb-4">
-                        {quickSuggestions.map((q, i) => (
-                          <button
-                            key={i}
-                            onClick={() => { setAiQuery(q); }}
-                            className="px-3 py-1.5 text-xs bg-accent/10 text-accent rounded-full hover:bg-accent/20"
-                          >
-                            {q}
+              {/* Plan Items */}
+              <div className="bg-card border rounded-xl p-5">
+                <h2 className="font-semibold text-card-foreground mb-4">Meu Plano de Estudo ({planItems.length})</h2>
+                {planItems.length === 0 ? (
+                  <p className="text-sm text-muted-foreground">Adicione conteúdos ao seu plano na aba Conteúdos.</p>
+                ) : (
+                  <div className="space-y-2">
+                    {planItems.map((item) => {
+                      const content = contentDatabase.find((c) => c.id === item.contentId);
+                      if (!content) return null;
+                      return (
+                        <div key={item.id} className={`flex items-center gap-4 p-3 rounded-lg ${item.completed ? "bg-muted" : "bg-secondary/50"}`}>
+                          <input
+                            type="checkbox"
+                            checked={item.completed}
+                            onChange={() => togglePlanComplete(item.id)}
+                            className="w-4 h-4 rounded"
+                          />
+                          <div className="flex-1">
+                            <p className={`font-medium ${item.completed ? "line-through text-muted-foreground" : "text-card-foreground"}`}>
+                              {content.title}
+                            </p>
+                            <p className="text-xs text-muted-foreground">{content.track}</p>
+                          </div>
+                          <button onClick={() => removePlanItem(item.id)} className="p-1 hover:bg-muted rounded">
+                            <Trash2 size={14} className="text-muted-foreground" />
                           </button>
-                        ))}
-                      </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
 
-                      {/* Filters */}
-                      <div className="flex flex-wrap gap-3 mb-4">
-                        <select
-                          value={aiFilters.track}
-                          onChange={(e) => setAiFilters((f) => ({ ...f, track: e.target.value }))}
-                          className="px-3 py-1.5 bg-secondary border border-border rounded-lg text-sm"
-                        >
-                          <option value="all">Todas trilhas</option>
-                          {tracks.map((t) => (
-                            <option key={t.id} value={t.name}>{t.name}</option>
-                          ))}
-                        </select>
-                        <select
-                          value={aiFilters.difficulty}
-                          onChange={(e) => setAiFilters((f) => ({ ...f, difficulty: e.target.value }))}
-                          className="px-3 py-1.5 bg-secondary border border-border rounded-lg text-sm"
-                        >
-                          <option value="all">Dificuldade</option>
-                          <option value="Fácil">Fácil</option>
-                          <option value="Médio">Médio</option>
-                          <option value="Difícil">Difícil</option>
-                        </select>
-                        <select
-                          value={aiFilters.sortBy}
-                          onChange={(e) => setAiFilters((f) => ({ ...f, sortBy: e.target.value as any }))}
-                          className="px-3 py-1.5 bg-secondary border border-border rounded-lg text-sm"
-                        >
-                          <option value="relevance">Relevância</option>
-                          <option value="recent">Mais recente</option>
-                        </select>
-                      </div>
+          {/* ====== REVISÕES VIEW ====== */}
+          {activeView === "revisoes" && (
+            <div className="space-y-6 max-w-4xl">
+              <h1 className="text-2xl font-bold text-card-foreground">Revisões (Spaced Repetition)</h1>
+              <p className="text-muted-foreground">Revisões sugeridas com base nas suas sessões recentes (D+1, D+3, D+7).</p>
 
-                      {/* Search History */}
-                      {searchHistory.length > 0 && !aiQuery && (
-                        <div className="mb-4">
-                          <p className="text-xs font-medium text-muted-foreground mb-2 flex items-center gap-1">
-                            <History size={12} />
-                            Buscas recentes
-                          </p>
-                          <div className="flex flex-wrap gap-2">
-                            {searchHistory.slice(0, 5).map((h) => (
-                              <button
-                                key={h.id}
-                                onClick={() => setAiQuery(h.query)}
-                                className="px-2 py-1 text-xs bg-muted rounded hover:bg-secondary"
+              {/* Today's Reviews */}
+              <div className="bg-card border rounded-xl p-5">
+                <h2 className="font-semibold text-card-foreground mb-4 flex items-center gap-2">
+                  <RefreshCw size={18} className="text-accent" />
+                  Revisar Hoje ({todayReviews.length})
+                </h2>
+                {todayReviews.length === 0 ? (
+                  <p className="text-sm text-muted-foreground">Nenhuma revisão pendente para hoje! 🎉</p>
+                ) : (
+                  <div className="space-y-2">
+                    {todayReviews.map((review) => {
+                      const track = tracks.find((t) => t.id === review.trackId);
+                      return (
+                        <div key={review.id} className="flex items-center gap-4 p-3 bg-accent/10 border border-accent/20 rounded-lg">
+                          <div className="flex-1">
+                            <p className="font-medium text-card-foreground">{review.theme}</p>
+                            <p className="text-xs text-muted-foreground">{track?.name} • Estudado em {formatDateBR(review.originalDate)}</p>
+                          </div>
+                          <button className="px-3 py-1.5 text-xs font-medium bg-primary text-primary-foreground rounded-lg">
+                            Revisar
+                          </button>
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
+              </div>
+
+              {/* All Reviews */}
+              <div className="bg-card border rounded-xl p-5">
+                <h2 className="font-semibold text-card-foreground mb-4">Todas as Revisões Programadas</h2>
+                {reviewSchedule.length === 0 ? (
+                  <p className="text-sm text-muted-foreground">Estude mais para gerar revisões automáticas.</p>
+                ) : (
+                  <div className="space-y-3">
+                    {reviewSchedule.slice(0, 10).map((review) => {
+                      const track = tracks.find((t) => t.id === review.trackId);
+                      return (
+                        <div key={review.id} className="p-3 bg-secondary/50 rounded-lg">
+                          <div className="flex items-center justify-between mb-2">
+                            <p className="font-medium text-card-foreground">{review.theme}</p>
+                            <Badge variant="muted">{track?.name}</Badge>
+                          </div>
+                          <div className="flex gap-2">
+                            {review.reviewDates.map((rd, i) => (
+                              <span
+                                key={i}
+                                className={`text-xs px-2 py-0.5 rounded ${rd.completed ? "bg-accent/20 text-accent" : "bg-muted text-muted-foreground"}`}
                               >
-                                {h.query}
-                              </button>
+                                D+{i === 0 ? 1 : i === 1 ? 3 : 7}: {formatDateBR(rd.date)}
+                              </span>
                             ))}
                           </div>
                         </div>
-                      )}
-                    </>
-                  )}
-                </div>
-
-                {/* Results / Saved */}
-                <div className="bg-card rounded-xl border p-5">
-                  {aiTab === "search" ? (
-                    <>
-                      {aiStreaming ? (
-                        <div className="flex items-center gap-3 py-8 justify-center">
-                          <Loader2 size={20} className="animate-spin text-accent" />
-                          <span className="text-sm text-muted-foreground">Gerando resposta...</span>
-                        </div>
-                      ) : aiLoading ? (
-                        <div className="space-y-3">
-                          {[1, 2, 3].map((i) => <Skeleton key={i} className="h-24" />)}
-                        </div>
-                      ) : aiResults.length === 0 ? (
-                        <EmptyState icon={Search} title="Nenhum resultado" description="Tente outros termos ou filtros." />
-                      ) : (
-                        <div className="grid gap-3">
-                          {aiResults.map((item) => (
-                            <div key={item.id} className="p-4 bg-secondary/50 rounded-lg hover:bg-secondary transition-colors">
-                              <div className="flex items-start justify-between gap-4">
-                                <div className="flex-1">
-                                  <h5 className="font-medium text-card-foreground mb-1">{item.title}</h5>
-                                  <p className="text-sm text-muted-foreground mb-2">{item.summary}</p>
-                                  <div className="flex flex-wrap gap-2">
-                                    <Badge>{item.track}</Badge>
-                                    <Badge variant="outline">{item.difficulty}</Badge>
-                                    {item.tags.slice(0, 2).map((tag) => (
-                                      <span key={tag} className="text-xs text-muted-foreground">#{tag}</span>
-                                    ))}
-                                  </div>
-                                </div>
-                                <div className="flex flex-col gap-2">
-                                  <button
-                                    onClick={() => toggleBookmark(item)}
-                                    className="p-2 hover:bg-muted rounded-lg"
-                                    aria-label={isBookmarked(item.id) ? "Remover dos salvos" : "Salvar"}
-                                  >
-                                    {isBookmarked(item.id) ? (
-                                      <BookmarkCheck size={18} className="text-accent" />
-                                    ) : (
-                                      <Bookmark size={18} className="text-muted-foreground" />
-                                    )}
-                                  </button>
-                                  <button className="px-3 py-1.5 text-sm bg-accent text-accent-foreground rounded-lg">
-                                    Estudar
-                                  </button>
-                                </div>
-                              </div>
-                            </div>
-                          ))}
-                        </div>
-                      )}
-                    </>
-                  ) : (
-                    <>
-                      {bookmarks.length === 0 ? (
-                        <EmptyState icon={Bookmark} title="Nada salvo" description="Salve conteúdos para acessar depois." />
-                      ) : (
-                        <div className="grid gap-3">
-                          {bookmarks.map((b) => (
-                            <div key={b.id} className="p-4 bg-secondary/50 rounded-lg">
-                              <div className="flex items-start justify-between gap-4">
-                                <div className="flex-1">
-                                  <h5 className="font-medium text-card-foreground mb-1">{b.content.title}</h5>
-                                  <p className="text-sm text-muted-foreground mb-2">{b.content.summary}</p>
-                                  <div className="flex gap-2">
-                                    <Badge>{b.content.track}</Badge>
-                                    <Badge variant="outline">{b.content.difficulty}</Badge>
-                                  </div>
-                                </div>
-                                <button
-                                  onClick={() => toggleBookmark(b.content)}
-                                  className="p-2 hover:bg-muted rounded-lg"
-                                  aria-label="Remover"
-                                >
-                                  <Trash2 size={16} className="text-muted-foreground" />
-                                </button>
-                              </div>
-                            </div>
-                          ))}
-                        </div>
-                      )}
-                    </>
-                  )}
-                </div>
+                      );
+                    })}
+                  </div>
+                )}
               </div>
-            )}
-          </main>
+            </div>
+          )}
 
-          {/* Sidebar */}
-          <aside
-            className={`
-              lg:w-72 shrink-0 space-y-4
-              fixed lg:static inset-0 top-[125px] z-40 bg-background lg:bg-transparent
-              transform transition-transform lg:transform-none
-              ${sidebarOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"}
-              ${sidebarCollapsed ? "lg:w-16" : "lg:w-72"}
-              p-4 lg:p-0 overflow-y-auto
-            `}
-          >
-            {/* Collapse toggle (desktop) */}
-            <button
-              onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
-              className="hidden lg:flex items-center justify-center w-full p-2 mb-2 text-muted-foreground hover:text-card-foreground hover:bg-muted rounded-lg"
-              aria-label={sidebarCollapsed ? "Expandir sidebar" : "Recolher sidebar"}
-            >
-              {sidebarCollapsed ? <ChevronRight size={18} /> : <ChevronLeft size={18} />}
-            </button>
+          {/* ====== IA VIEW ====== */}
+          {activeView === "ia" && (
+            <div className="space-y-6 max-w-4xl">
+              <h1 className="text-2xl font-bold text-card-foreground flex items-center gap-2">
+                <Sparkles size={24} className="text-accent" />
+                Busca Inteligente
+              </h1>
 
-            {!sidebarCollapsed && (
-              <>
-                {/* Demo Mode */}
-                {demoMode && (
-                  <div className="bg-card rounded-xl border p-4">
-                    <div className="flex items-center justify-between mb-3">
-                      <span className="text-sm font-medium text-card-foreground">Demo Mode</span>
-                      <button onClick={() => setDemoMode(false)} className="text-xs text-muted-foreground hover:text-card-foreground">
-                        Ocultar
-                      </button>
-                    </div>
-                    <div className="space-y-2">
-                      <button
-                        onClick={resetDemo}
-                        className="w-full flex items-center justify-center gap-2 px-3 py-2 text-sm bg-destructive/10 text-destructive rounded-lg hover:bg-destructive/20"
-                      >
-                        <RotateCcw size={14} />
-                        Resetar dados
-                      </button>
-                      <button
-                        onClick={generateDemoDataHandler}
-                        className="w-full flex items-center justify-center gap-2 px-3 py-2 text-sm bg-accent/10 text-accent rounded-lg hover:bg-accent/20"
-                      >
-                        <BarChart3 size={14} />
-                        Gerar 60 dias demo
-                      </button>
+              {/* Search */}
+              <div className="bg-card border rounded-xl p-5">
+                <div className="flex gap-2 mb-4">
+                  <div className="relative flex-1">
+                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" size={18} />
+                    <input
+                      type="text"
+                      placeholder="Pergunte ou busque um tema..."
+                      value={aiQuery}
+                      onChange={(e) => setAiQuery(e.target.value)}
+                      onKeyDown={(e) => e.key === "Enter" && handleAiSearch()}
+                      className="w-full pl-10 pr-4 py-3 bg-secondary border border-border rounded-lg"
+                    />
+                  </div>
+                  <button
+                    onClick={handleAiSearch}
+                    disabled={aiLoading}
+                    className="px-6 py-3 bg-primary text-primary-foreground rounded-lg font-medium disabled:opacity-50"
+                  >
+                    {aiLoading ? <Loader2 size={18} className="animate-spin" /> : "Buscar"}
+                  </button>
+                </div>
+
+                {/* Filters */}
+                <div className="flex flex-wrap gap-3">
+                  <select
+                    value={aiFilters.track}
+                    onChange={(e) => setAiFilters((f) => ({ ...f, track: e.target.value }))}
+                    className="px-3 py-1.5 bg-secondary border border-border rounded-lg text-sm"
+                  >
+                    <option value="all">Todas trilhas</option>
+                    {tracks.map((t) => <option key={t.id} value={t.name}>{t.name}</option>)}
+                  </select>
+                  <select
+                    value={aiFilters.difficulty}
+                    onChange={(e) => setAiFilters((f) => ({ ...f, difficulty: e.target.value }))}
+                    className="px-3 py-1.5 bg-secondary border border-border rounded-lg text-sm"
+                  >
+                    <option value="all">Dificuldade</option>
+                    <option value="Fácil">Fácil</option>
+                    <option value="Médio">Médio</option>
+                    <option value="Difícil">Difícil</option>
+                  </select>
+                </div>
+
+                {/* History */}
+                {searchHistory.length > 0 && !aiQuery && (
+                  <div className="mt-4 pt-4 border-t">
+                    <p className="text-xs font-medium text-muted-foreground mb-2 flex items-center gap-1">
+                      <History size={12} />
+                      Buscas recentes
+                    </p>
+                    <div className="flex flex-wrap gap-2">
+                      {searchHistory.slice(0, 5).map((h) => (
+                        <button key={h.id} onClick={() => setAiQuery(h.query)} className="px-2 py-1 text-xs bg-muted rounded hover:bg-secondary">
+                          {h.query}
+                        </button>
+                      ))}
                     </div>
                   </div>
                 )}
+              </div>
 
-                {/* Daily Goal */}
-                <div className="bg-card rounded-xl border p-5">
-                  <div className="flex items-center justify-between mb-3">
-                    <h3 className="font-semibold text-card-foreground">Meta diária</h3>
-                    <button
-                      onClick={() => { setTempGoals(goals); setEditingGoals(true); }}
-                      className="p-1 hover:bg-muted rounded"
-                      aria-label="Editar metas"
-                    >
-                      <Settings size={14} className="text-muted-foreground" />
-                    </button>
+              {/* Results */}
+              <div className="bg-card border rounded-xl p-5">
+                <h2 className="font-semibold text-card-foreground mb-4">{aiResults.length} resultados</h2>
+                {aiLoading ? (
+                  <div className="flex items-center justify-center py-8">
+                    <Loader2 size={24} className="animate-spin text-accent" />
                   </div>
-                  <div className="flex items-center justify-between mb-2">
-                    <span className="text-2xl font-bold text-primary">{goals.completed}/{goals.dailyGoal}</span>
-                    <span className="text-sm text-muted-foreground">min</span>
-                  </div>
-                  <div className="h-3 bg-muted rounded-full overflow-hidden">
-                    <div
-                      className="h-full bg-gradient-to-r from-primary to-accent rounded-full"
-                      style={{ width: `${Math.min(100, (goals.completed / goals.dailyGoal) * 100)}%` }}
-                    />
-                  </div>
-                  <p className="text-xs text-muted-foreground mt-2">
-                    {goals.completed >= goals.dailyGoal ? "🎉 Meta batida!" : `Faltam ${goals.dailyGoal - goals.completed}min`}
-                  </p>
-
-                  {/* Weekly Goal */}
-                  <div className="mt-4 pt-4 border-t">
-                    <div className="flex items-center justify-between mb-2">
-                      <span className="text-sm font-medium text-card-foreground">Meta semanal</span>
-                      <span className="text-sm text-muted-foreground">{insights.weeklyProgress}%</span>
-                    </div>
-                    <div className="h-2 bg-muted rounded-full overflow-hidden">
-                      <div
-                        className="h-full bg-accent rounded-full"
-                        style={{ width: `${Math.min(100, insights.weeklyProgress)}%` }}
-                      />
-                    </div>
-                    <p className="text-xs text-muted-foreground mt-1">
-                      {Math.round(insights.totalMinutes7 / 60)}h / {Math.round(goals.weeklyGoal / 60)}h
-                    </p>
-                  </div>
-                </div>
-
-                {/* Recommendation */}
-                <div className="bg-card rounded-xl border p-5">
-                  <h3 className="font-semibold text-card-foreground mb-3">Próxima recomendação</h3>
-                  <div className="p-3 bg-accent/10 rounded-lg">
-                    <p className="font-medium text-card-foreground text-sm">Quiz: Derivadas e Integrais</p>
-                    <p className="text-xs text-muted-foreground mt-1">15 questões • ~20 min</p>
-                    <button className="mt-3 w-full py-2 text-sm font-medium bg-accent text-accent-foreground rounded-lg hover:opacity-90">
-                      Iniciar
-                    </button>
-                  </div>
-                </div>
-
-                {/* Checklist */}
-                <div className="bg-card rounded-xl border p-5">
-                  <h3 className="font-semibold text-card-foreground mb-3">Checklist</h3>
+                ) : aiResults.length === 0 ? (
+                  <EmptyState icon={Search} title="Nenhum resultado" description="Tente outros termos." />
+                ) : (
                   <div className="space-y-3">
-                    {checklist.map((item) => (
-                      <label key={item.id} className="flex items-start gap-3 cursor-pointer">
-                        <input
-                          type="checkbox"
-                          checked={item.checked}
-                          onChange={() => toggleCheck(item.id)}
-                          className="mt-0.5 w-4 h-4 rounded border-2 border-muted-foreground checked:bg-accent checked:border-accent accent-accent"
-                        />
-                        <span className={`text-sm ${item.checked ? "text-muted-foreground line-through" : "text-card-foreground"}`}>
-                          {item.text}
-                        </span>
-                      </label>
+                    {aiResults.map((content) => (
+                      <div key={content.id} className="flex items-start gap-4 p-4 bg-secondary/50 rounded-lg">
+                        <div className="flex-1">
+                          <h3 className="font-medium text-card-foreground mb-1">{content.title}</h3>
+                          <p className="text-sm text-muted-foreground mb-2">{content.summary}</p>
+                          <div className="flex gap-2">
+                            <Badge>{content.track}</Badge>
+                            <Badge variant="outline">{content.difficulty}</Badge>
+                          </div>
+                        </div>
+                        <div className="flex flex-col gap-2">
+                          <button onClick={() => toggleBookmark(content)} className="p-2 hover:bg-muted rounded-lg">
+                            {isBookmarked(content.id) ? <BookmarkCheck size={16} className="text-accent" /> : <Bookmark size={16} className="text-muted-foreground" />}
+                          </button>
+                        </div>
+                      </div>
                     ))}
                   </div>
+                )}
+              </div>
+            </div>
+          )}
+
+          {/* ====== SALVOS VIEW ====== */}
+          {activeView === "salvos" && (
+            <div className="space-y-6 max-w-4xl">
+              <h1 className="text-2xl font-bold text-card-foreground flex items-center gap-2">
+                <Star size={24} className="text-accent" />
+                Salvos ({bookmarks.length})
+              </h1>
+
+              {bookmarks.length === 0 ? (
+                <EmptyState icon={Bookmark} title="Nada salvo ainda" description="Salve conteúdos para acessar depois." />
+              ) : (
+                <div className="grid gap-4">
+                  {bookmarks.map((b) => (
+                    <div key={b.id} className="bg-card border rounded-xl p-4">
+                      <div className="flex items-start gap-4">
+                        <div className="flex-1">
+                          <h3 className="font-medium text-card-foreground mb-1">{b.content.title}</h3>
+                          <p className="text-sm text-muted-foreground mb-2">{b.content.summary}</p>
+                          <div className="flex gap-2">
+                            <Badge>{b.content.track}</Badge>
+                            <Badge variant="outline">{b.content.difficulty}</Badge>
+                          </div>
+                        </div>
+                        <div className="flex flex-col gap-2">
+                          <button
+                            onClick={() => addToPlan(b.content)}
+                            disabled={isInPlan(b.id)}
+                            className="px-3 py-1.5 text-xs font-medium bg-secondary rounded-lg disabled:opacity-50"
+                          >
+                            + Plano
+                          </button>
+                          <button onClick={() => toggleBookmark(b.content)} className="p-2 hover:bg-muted rounded-lg">
+                            <Trash2 size={14} className="text-muted-foreground" />
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
                 </div>
-              </>
-            )}
-          </aside>
-        </div>
+              )}
+            </div>
+          )}
+
+          {/* ====== CONFIG VIEW ====== */}
+          {activeView === "config" && (
+            <div className="space-y-6 max-w-2xl">
+              <h1 className="text-2xl font-bold text-card-foreground">Configurações</h1>
+
+              <div className="bg-card border rounded-xl p-5 space-y-4">
+                <h2 className="font-semibold text-card-foreground">Perfil</h2>
+                <div>
+                  <label className="block text-sm font-medium text-card-foreground mb-1">Nome</label>
+                  <input
+                    type="text"
+                    value={userData.name}
+                    disabled
+                    className="w-full px-3 py-2 bg-secondary border border-border rounded-lg text-muted-foreground"
+                  />
+                </div>
+              </div>
+
+              <div className="bg-card border rounded-xl p-5">
+                <h2 className="font-semibold text-card-foreground mb-4">Demo</h2>
+                <button
+                  onClick={resetDemo}
+                  className="flex items-center gap-2 px-4 py-2 text-sm bg-destructive/10 text-destructive rounded-lg hover:bg-destructive/20"
+                >
+                  <RotateCcw size={14} />
+                  Resetar todos os dados
+                </button>
+              </div>
+            </div>
+          )}
+        </main>
       </div>
 
-      {/* Mobile sidebar overlay */}
-      {sidebarOpen && <div className="fixed inset-0 bg-black/30 z-30 lg:hidden" onClick={() => setSidebarOpen(false)} />}
+      {/* ============ MODALS ============ */}
 
-      {/* New/Edit Session Modal */}
+      {/* Session Modal */}
       <Modal
         open={sessionModalOpen}
         onClose={() => { setSessionModalOpen(false); setEditingSession(null); }}
@@ -2029,9 +1702,7 @@ const Dashboard = () => {
               type="date"
               value={sessionForm.date}
               onChange={(e) => setSessionForm((f) => ({ ...f, date: e.target.value }))}
-              className={`w-full px-3 py-2 bg-secondary border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary ${
-                formErrors.date ? "border-destructive" : "border-border"
-              }`}
+              className={`w-full px-3 py-2 bg-secondary border rounded-lg ${formErrors.date ? "border-destructive" : "border-border"}`}
             />
             {formErrors.date && <p className="text-xs text-destructive mt-1">{formErrors.date}</p>}
           </div>
@@ -2042,14 +1713,10 @@ const Dashboard = () => {
               id="session-track"
               value={sessionForm.trackId}
               onChange={(e) => setSessionForm((f) => ({ ...f, trackId: e.target.value }))}
-              className={`w-full px-3 py-2 bg-secondary border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary ${
-                formErrors.trackId ? "border-destructive" : "border-border"
-              }`}
+              className={`w-full px-3 py-2 bg-secondary border rounded-lg ${formErrors.trackId ? "border-destructive" : "border-border"}`}
             >
               <option value="">Selecione...</option>
-              {tracks.map((t) => (
-                <option key={t.id} value={t.id}>{t.name}</option>
-              ))}
+              {tracks.map((t) => <option key={t.id} value={t.id}>{t.name}</option>)}
             </select>
             {formErrors.trackId && <p className="text-xs text-destructive mt-1">{formErrors.trackId}</p>}
           </div>
@@ -2062,9 +1729,7 @@ const Dashboard = () => {
               value={sessionForm.theme}
               onChange={(e) => setSessionForm((f) => ({ ...f, theme: e.target.value }))}
               placeholder="Ex: Álgebra Linear"
-              className={`w-full px-3 py-2 bg-secondary border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary ${
-                formErrors.theme ? "border-destructive" : "border-border"
-              }`}
+              className={`w-full px-3 py-2 bg-secondary border rounded-lg ${formErrors.theme ? "border-destructive" : "border-border"}`}
             />
             {formErrors.theme && <p className="text-xs text-destructive mt-1">{formErrors.theme}</p>}
           </div>
@@ -2079,9 +1744,7 @@ const Dashboard = () => {
                 onChange={(e) => setSessionForm((f) => ({ ...f, duration: e.target.value }))}
                 placeholder="30"
                 min="1"
-                className={`w-full px-3 py-2 bg-secondary border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary ${
-                  formErrors.duration ? "border-destructive" : "border-border"
-                }`}
+                className={`w-full px-3 py-2 bg-secondary border rounded-lg ${formErrors.duration ? "border-destructive" : "border-border"}`}
               />
               {formErrors.duration && <p className="text-xs text-destructive mt-1">{formErrors.duration}</p>}
             </div>
@@ -2091,7 +1754,7 @@ const Dashboard = () => {
                 id="session-type"
                 value={sessionForm.type}
                 onChange={(e) => setSessionForm((f) => ({ ...f, type: e.target.value as Session["type"] }))}
-                className="w-full px-3 py-2 bg-secondary border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+                className="w-full px-3 py-2 bg-secondary border border-border rounded-lg"
               >
                 <option value="Estudo">Estudo</option>
                 <option value="Revisão">Revisão</option>
@@ -2108,7 +1771,7 @@ const Dashboard = () => {
               value={sessionForm.result}
               onChange={(e) => setSessionForm((f) => ({ ...f, result: e.target.value }))}
               placeholder="Ex: Quiz 8/10"
-              className="w-full px-3 py-2 bg-secondary border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+              className="w-full px-3 py-2 bg-secondary border border-border rounded-lg"
             />
           </div>
 
@@ -2119,161 +1782,68 @@ const Dashboard = () => {
               value={sessionForm.notes}
               onChange={(e) => setSessionForm((f) => ({ ...f, notes: e.target.value }))}
               placeholder="Anotações..."
-              rows={3}
-              className="w-full px-3 py-2 bg-secondary border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary resize-none"
+              rows={2}
+              className="w-full px-3 py-2 bg-secondary border border-border rounded-lg resize-none"
             />
           </div>
 
           <div className="flex gap-3 pt-2">
-            <button
-              onClick={() => { setSessionModalOpen(false); setEditingSession(null); }}
-              className="flex-1 px-4 py-2 text-sm border border-border rounded-lg hover:bg-muted"
-            >
+            <button onClick={() => { setSessionModalOpen(false); setEditingSession(null); }} className="flex-1 px-4 py-2 text-sm border border-border rounded-lg hover:bg-muted">
               Cancelar
             </button>
-            <button
-              onClick={handleSaveSession}
-              className="flex-1 px-4 py-2 text-sm bg-primary text-primary-foreground rounded-lg hover:opacity-90"
-            >
+            <button onClick={handleSaveSession} className="flex-1 px-4 py-2 text-sm bg-primary text-primary-foreground rounded-lg hover:opacity-90">
               {editingSession ? "Atualizar" : "Salvar"}
             </button>
           </div>
         </div>
       </Modal>
 
-      {/* Session Detail Modal */}
+      {/* Content Detail Modal */}
       <Modal
-        open={!!sessionDetailModal}
-        onClose={() => setSessionDetailModal(null)}
-        title="Detalhes da Sessão"
+        open={!!contentDetailModal}
+        onClose={() => setContentDetailModal(null)}
+        title={contentDetailModal?.title || "Conteúdo"}
+        size="lg"
       >
-        {sessionDetailModal && (
+        {contentDetailModal && (
           <div className="space-y-4">
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <p className="text-xs text-muted-foreground">Data</p>
-                <p className="font-medium text-card-foreground">{formatFullDateBR(sessionDetailModal.date)}</p>
-              </div>
-              <div>
-                <p className="text-xs text-muted-foreground">Duração</p>
-                <p className="font-medium text-card-foreground">{sessionDetailModal.duration} min</p>
-              </div>
+            <p className="text-muted-foreground">{contentDetailModal.summary}</p>
+            <div className="flex flex-wrap gap-2">
+              <Badge>{contentDetailModal.track}</Badge>
+              <Badge variant="outline">{contentDetailModal.difficulty}</Badge>
+              {contentDetailModal.tags.map((tag) => (
+                <span key={tag} className="text-xs text-muted-foreground">#{tag}</span>
+              ))}
             </div>
-            <div>
-              <p className="text-xs text-muted-foreground">Tema</p>
-              <p className="font-medium text-card-foreground">{sessionDetailModal.theme}</p>
+            <div className="p-4 bg-muted rounded-lg text-center text-muted-foreground">
+              <FileText size={32} className="mx-auto mb-2" />
+              <p className="text-sm">Conteúdo completo disponível na versão com backend.</p>
+              <p className="text-xs mt-1">// TODO API: Carregar conteúdo do servidor</p>
             </div>
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <p className="text-xs text-muted-foreground">Trilha</p>
-                <p className="font-medium text-card-foreground">
-                  {tracks.find((t) => t.id === sessionDetailModal.trackId)?.name}
-                </p>
-              </div>
-              <div>
-                <p className="text-xs text-muted-foreground">Tipo</p>
-                <Badge variant="muted">{sessionDetailModal.type}</Badge>
-              </div>
-            </div>
-            {sessionDetailModal.result && (
-              <div>
-                <p className="text-xs text-muted-foreground">Resultado</p>
-                <Badge>{sessionDetailModal.result}</Badge>
-              </div>
-            )}
-            {sessionDetailModal.notes && (
-              <div>
-                <p className="text-xs text-muted-foreground">Notas</p>
-                <p className="text-sm text-card-foreground bg-secondary/50 p-3 rounded-lg">
-                  {sessionDetailModal.notes}
-                </p>
-              </div>
-            )}
-
-            <div className="flex gap-2 pt-4 border-t">
+            <div className="flex gap-3">
               <button
-                onClick={() => openEditSessionModal(sessionDetailModal)}
-                className="flex-1 flex items-center justify-center gap-2 px-3 py-2 text-sm bg-secondary rounded-lg hover:bg-muted"
+                onClick={() => { addToPlan(contentDetailModal); setContentDetailModal(null); }}
+                disabled={isInPlan(contentDetailModal.id)}
+                className="flex-1 px-4 py-2 text-sm bg-secondary rounded-lg disabled:opacity-50"
               >
-                <Edit3 size={14} />
-                Editar
+                {isInPlan(contentDetailModal.id) ? "Já no plano" : "Adicionar ao plano"}
               </button>
               <button
-                onClick={() => duplicateSession(sessionDetailModal)}
-                className="flex-1 flex items-center justify-center gap-2 px-3 py-2 text-sm bg-secondary rounded-lg hover:bg-muted"
+                onClick={() => { toggleBookmark(contentDetailModal); setContentDetailModal(null); }}
+                className="flex-1 px-4 py-2 text-sm bg-primary text-primary-foreground rounded-lg"
               >
-                <Copy size={14} />
-                Duplicar
-              </button>
-              <button
-                onClick={() => setDeleteConfirm(sessionDetailModal)}
-                className="flex-1 flex items-center justify-center gap-2 px-3 py-2 text-sm bg-destructive/10 text-destructive rounded-lg hover:bg-destructive/20"
-              >
-                <Trash2 size={14} />
-                Excluir
+                {isBookmarked(contentDetailModal.id) ? "Remover dos salvos" : "Salvar"}
               </button>
             </div>
           </div>
         )}
-      </Modal>
-
-      {/* Delete Confirmation */}
-      <ConfirmDialog
-        open={!!deleteConfirm}
-        onClose={() => setDeleteConfirm(null)}
-        onConfirm={() => deleteConfirm && deleteSession(deleteConfirm)}
-        title="Excluir sessão?"
-        message="Esta ação não pode ser desfeita. Você pode recuperar a sessão clicando em 'Desfazer' na notificação."
-      />
-
-      {/* Goals Editing Modal */}
-      <Modal open={editingGoals} onClose={() => setEditingGoals(false)} title="Configurar Metas" size="sm">
-        <div className="space-y-4">
-          <div>
-            <label htmlFor="goal-daily" className="block text-sm font-medium text-card-foreground mb-1">Meta diária (min)</label>
-            <select
-              id="goal-daily"
-              value={tempGoals.dailyGoal}
-              onChange={(e) => setTempGoals((g) => ({ ...g, dailyGoal: parseInt(e.target.value) }))}
-              className="w-full px-3 py-2 bg-secondary border border-border rounded-lg"
-            >
-              <option value={30}>30 minutos</option>
-              <option value={45}>45 minutos</option>
-              <option value={60}>60 minutos</option>
-              <option value={90}>90 minutos</option>
-              <option value={120}>120 minutos</option>
-            </select>
-          </div>
-          <div>
-            <label htmlFor="goal-weekly" className="block text-sm font-medium text-card-foreground mb-1">Meta semanal (horas)</label>
-            <select
-              id="goal-weekly"
-              value={tempGoals.weeklyGoal}
-              onChange={(e) => setTempGoals((g) => ({ ...g, weeklyGoal: parseInt(e.target.value) }))}
-              className="w-full px-3 py-2 bg-secondary border border-border rounded-lg"
-            >
-              <option value={180}>3 horas</option>
-              <option value={300}>5 horas</option>
-              <option value={420}>7 horas</option>
-              <option value={600}>10 horas</option>
-            </select>
-          </div>
-          <div className="flex gap-3 pt-2">
-            <button onClick={() => setEditingGoals(false)} className="flex-1 px-4 py-2 text-sm border border-border rounded-lg hover:bg-muted">
-              Cancelar
-            </button>
-            <button onClick={saveGoals} className="flex-1 px-4 py-2 text-sm bg-primary text-primary-foreground rounded-lg hover:opacity-90">
-              Salvar
-            </button>
-          </div>
-        </div>
       </Modal>
     </div>
   );
 };
 
 // ============================================================================
-// WRAPPER WITH TOAST PROVIDER
+// WRAPPER
 // ============================================================================
 
 const Index = () => (
