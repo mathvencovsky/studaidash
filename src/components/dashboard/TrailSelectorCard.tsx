@@ -85,7 +85,7 @@ export function TrailSelectorCard({
                 Trocar trilha
               </Button>
             </DialogTrigger>
-            <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
+            <DialogContent className="max-w-2xl max-h-[85vh] overflow-y-auto mx-4 sm:mx-auto">
               <DialogHeader>
                 <DialogTitle className="flex items-center gap-2">
                   <Sparkles className="w-5 h-5 text-primary" />
@@ -102,14 +102,14 @@ export function TrailSelectorCard({
                     <button
                       key={trail.id}
                       onClick={() => handleSelectTrail(trail.id)}
-                      className={`w-full text-left p-4 rounded-xl border-2 transition-all hover:shadow-md ${
+                      className={`w-full text-left p-3 sm:p-4 rounded-xl border-2 transition-all hover:shadow-md touch-manipulation active:scale-[0.99] ${
                         isActive 
                           ? "border-primary bg-primary/5" 
                           : "border-border hover:border-primary/50"
                       }`}
                     >
-                      <div className="flex items-start gap-3">
-                        <div className={`w-12 h-12 rounded-xl bg-gradient-to-br ${trail.color} flex items-center justify-center text-2xl shrink-0`}>
+                      <div className="flex items-start gap-2 sm:gap-3">
+                        <div className={`w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-gradient-to-br ${trail.color} flex items-center justify-center text-xl sm:text-2xl shrink-0`}>
                           {trail.icon}
                         </div>
                         <div className="flex-1 min-w-0">

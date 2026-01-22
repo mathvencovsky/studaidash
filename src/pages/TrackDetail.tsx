@@ -111,15 +111,15 @@ export default function TrackDetail() {
   const totalModuleHours = track.modules.reduce((acc, m) => acc + m.estimatedHours, 0);
 
   return (
-    <div className="min-h-screen bg-background pb-20 md:pb-8">
+    <div className="min-h-screen bg-background pb-32 md:pb-8">
       {/* Hero */}
       <div className={`bg-gradient-to-br from-[#1A237E] to-[#255FF1] text-white`}>
-        <div className="container mx-auto px-4 py-6">
+        <div className="container mx-auto px-4 py-4 sm:py-6">
           {/* Back Button */}
           <Button
             variant="ghost"
             size="sm"
-            className="text-white/80 hover:text-white hover:bg-white/10 -ml-2 mb-4"
+            className="text-white/80 hover:text-white hover:bg-white/10 -ml-2 mb-3 sm:mb-4 h-9 touch-manipulation"
             onClick={() => navigate("/explorar")}
           >
             <ArrowLeft className="w-4 h-4 mr-2" />
@@ -127,52 +127,52 @@ export default function TrackDetail() {
           </Button>
 
           {/* Header */}
-          <div className="flex flex-col md:flex-row md:items-start gap-6">
+          <div className="flex flex-col lg:flex-row lg:items-start gap-4 sm:gap-6">
             <div className="flex-1">
               {/* Badges */}
-              <div className="flex flex-wrap gap-2 mb-3">
-                <Badge className="bg-white/20 text-white border-0">
+              <div className="flex flex-wrap gap-1.5 sm:gap-2 mb-2 sm:mb-3">
+                <Badge className="bg-white/20 text-white border-0 text-[10px] sm:text-xs">
                   {track.category}
                 </Badge>
-                <Badge className={`border-0 ${levelColors[track.level]}`}>
+                <Badge className={`border-0 text-[10px] sm:text-xs ${levelColors[track.level]}`}>
                   {track.level}
                 </Badge>
                 {track.badge && (
-                  <Badge className="bg-amber-400 text-amber-900 border-0">
+                  <Badge className="bg-amber-400 text-amber-900 border-0 text-[10px] sm:text-xs">
                     {track.badge === "popular" ? "Popular" : track.badge === "new" ? "Novo" : "Recomendado"}
                   </Badge>
                 )}
               </div>
 
               {/* Title */}
-              <h1 className="text-2xl md:text-3xl font-bold mb-3">{track.title}</h1>
+              <h1 className="text-xl sm:text-2xl md:text-3xl font-bold mb-2 sm:mb-3">{track.title}</h1>
               
               {/* Summary */}
-              <p className="text-white/80 text-base md:text-lg mb-4">{track.summary}</p>
+              <p className="text-white/80 text-sm sm:text-base md:text-lg mb-3 sm:mb-4">{track.summary}</p>
 
-              {/* Metrics */}
-              <div className="flex flex-wrap gap-4 text-sm">
-                <div className="flex items-center gap-1.5">
+              {/* Metrics - Grid on mobile */}
+              <div className="grid grid-cols-2 sm:flex sm:flex-wrap gap-2 sm:gap-4 text-xs sm:text-sm">
+                <div className="flex items-center gap-1.5 bg-white/10 rounded-lg px-2 py-1.5 sm:bg-transparent sm:p-0">
                   <Clock className="w-4 h-4" />
                   <span>{track.estimatedHours} horas</span>
                 </div>
-                <div className="flex items-center gap-1.5">
+                <div className="flex items-center gap-1.5 bg-white/10 rounded-lg px-2 py-1.5 sm:bg-transparent sm:p-0">
                   <Star className="w-4 h-4 fill-amber-400 text-amber-400" />
                   <span>{track.rating.toFixed(1)}</span>
                 </div>
-                <div className="flex items-center gap-1.5">
+                <div className="flex items-center gap-1.5 bg-white/10 rounded-lg px-2 py-1.5 sm:bg-transparent sm:p-0">
                   <Users className="w-4 h-4" />
                   <span>{track.reviewsCount.toLocaleString("pt-BR")} alunos</span>
                 </div>
-                <div className="flex items-center gap-1.5">
+                <div className="flex items-center gap-1.5 bg-white/10 rounded-lg px-2 py-1.5 sm:bg-transparent sm:p-0">
                   <BookOpen className="w-4 h-4" />
                   <span>{track.modules.length} módulos</span>
                 </div>
               </div>
             </div>
 
-            {/* CTA Card */}
-            <Card className="w-full md:w-80 shrink-0 shadow-xl">
+            {/* CTA Card - Hidden on mobile, shown inline on desktop */}
+            <Card className="hidden lg:block w-80 shrink-0 shadow-xl">
               <CardContent className="p-5 space-y-4">
                 {isInPlan ? (
                   <>
@@ -223,21 +223,54 @@ export default function TrackDetail() {
         </div>
       </div>
 
+      {/* Mobile Fixed CTA */}
+      <div className="lg:hidden fixed bottom-0 left-0 right-0 bg-card border-t p-3 z-40 safe-area-bottom">
+        <div className="flex gap-2 max-w-lg mx-auto">
+          {isInPlan ? (
+            <Button 
+              className="flex-1 gap-2 h-12 touch-manipulation" 
+              onClick={handleStudyWithAI}
+            >
+              <Play className="w-4 h-4" />
+              Continuar estudando
+            </Button>
+          ) : (
+            <>
+              <Button 
+                variant="outline"
+                className="flex-1 gap-2 h-12 touch-manipulation" 
+                onClick={handleStudyWithAI}
+              >
+                <Sparkles className="w-4 h-4" />
+                Estudar
+              </Button>
+              <Button 
+                className="flex-1 gap-2 h-12 touch-manipulation" 
+                onClick={() => setIsModalOpen(true)}
+              >
+                <Target className="w-4 h-4" />
+                Adicionar
+              </Button>
+            </>
+          )}
+        </div>
+      </div>
+
       {/* Content */}
-      <div className="container mx-auto px-4 py-8">
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+      <div className="container mx-auto px-4 py-6 sm:py-8">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 sm:gap-8">
           {/* Main Content */}
-          <div className="lg:col-span-2 space-y-8">
+          <div className="lg:col-span-2 space-y-6 sm:space-y-8">
             {/* What you'll learn */}
             <Card>
-              <CardHeader>
-                <CardTitle className="text-lg flex items-center gap-2">
-                  <CheckCircle2 className="w-5 h-5 text-primary" />
+              <CardHeader className="pb-3 sm:pb-6">
+                <CardTitle className="text-base sm:text-lg flex items-center gap-2">
+                  <CheckCircle2 className="w-4 h-4 sm:w-5 sm:h-5 text-primary" />
                   O que você vai aprender
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-3">
                   {track.skills.map((skill, i) => (
                     <div key={i} className="flex items-start gap-2">
                       <CheckCircle2 className="w-4 h-4 text-primary shrink-0 mt-0.5" />
@@ -250,38 +283,36 @@ export default function TrackDetail() {
 
             {/* Modules */}
             <Card>
-              <CardHeader>
-                <CardTitle className="text-lg flex items-center gap-2">
-                  <BookOpen className="w-5 h-5 text-primary" />
+              <CardHeader className="pb-3 sm:pb-6">
+                <CardTitle className="text-base sm:text-lg flex items-center gap-2">
+                  <BookOpen className="w-4 h-4 sm:w-5 sm:h-5 text-primary" />
                   Estrutura do Curso
                 </CardTitle>
               </CardHeader>
-              <CardContent className="space-y-4">
+              <CardContent className="space-y-3 sm:space-y-4">
                 {track.modules.map((module, index) => {
-                  const progressPercent = (module.estimatedHours / totalModuleHours) * 100;
-                  
                   return (
-                    <div key={index} className="border rounded-lg p-4">
+                    <div key={index} className="border rounded-lg p-3 sm:p-4">
                       <div className="flex items-start justify-between mb-2">
-                        <div className="flex items-center gap-3">
-                          <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center text-primary font-semibold text-sm">
+                        <div className="flex items-center gap-2 sm:gap-3">
+                          <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-primary/10 flex items-center justify-center text-primary font-semibold text-xs sm:text-sm">
                             {index + 1}
                           </div>
-                          <div>
-                            <h4 className="font-medium">{module.title}</h4>
-                            <p className="text-xs text-muted-foreground">
+                          <div className="min-w-0">
+                            <h4 className="font-medium text-sm sm:text-base truncate">{module.title}</h4>
+                            <p className="text-[10px] sm:text-xs text-muted-foreground">
                               {module.estimatedHours}h • {module.topics.length} tópicos
                             </p>
                           </div>
                         </div>
-                        <ChevronRight className="w-5 h-5 text-muted-foreground" />
+                        <ChevronRight className="w-4 h-4 sm:w-5 sm:h-5 text-muted-foreground shrink-0" />
                       </div>
                       
-                      <div className="flex flex-wrap gap-1.5 mt-3">
+                      <div className="flex flex-wrap gap-1 sm:gap-1.5 mt-2 sm:mt-3">
                         {module.topics.map((topic, i) => (
                           <span 
                             key={i}
-                            className="text-[10px] px-2 py-0.5 bg-muted rounded-full text-muted-foreground"
+                            className="text-[9px] sm:text-[10px] px-1.5 sm:px-2 py-0.5 bg-muted rounded-full text-muted-foreground"
                           >
                             {topic}
                           </span>
