@@ -6,6 +6,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AppLayout } from "@/components/layout/AppLayout";
 import Index from "./pages/Index";
 import Trilha from "./pages/Trilha";
+import TrailOverview from "./pages/TrailOverview";
 import Quizzes from "./pages/Quizzes";
 import QuizSession from "./pages/QuizSession";
 import EstudarComIA from "./pages/EstudarComIA";
@@ -31,6 +32,7 @@ const App = () => (
           {/* Main app routes with layout */}
           <Route element={<AppLayout><Index /></AppLayout>} path="/" />
           <Route element={<AppLayout><Trilha /></AppLayout>} path="/trilha" />
+          <Route element={<AppLayout><TrailOverview /></AppLayout>} path="/trilha/visao-geral" />
           <Route element={<AppLayout><Quizzes /></AppLayout>} path="/quizzes" />
           <Route element={<AppLayout><Relatorios /></AppLayout>} path="/relatorios" />
           <Route element={<AppLayout><Ranking /></AppLayout>} path="/ranking" />
