@@ -5,3 +5,6 @@ export { QuizzesCard } from "./QuizzesCard";
 export { SimuladosCard } from "./SimuladosCard";
 export { SmartFeedbackCard } from "./SmartFeedbackCard";
 export { CFADashboard } from "./CFADashboard";
+export { CompletionPlanCard } from "./CompletionPlanCard";
+export { CurrentPaceCard } from "./CurrentPaceCard";
+export { ModulesProgressCard } from "./ModulesProgressCard";
