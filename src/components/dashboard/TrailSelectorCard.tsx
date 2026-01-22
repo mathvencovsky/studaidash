@@ -71,7 +71,7 @@ export function TrailSelectorCard({
   };
 
   return (
-    <Card className="border-2 border-primary/20 bg-gradient-to-br from-primary/5 to-transparent h-full">
+    <Card className="border-2 border-primary/20 bg-gradient-to-br from-primary/5 to-transparent lg:self-start">
       <CardContent className="p-4">
         {/* Header row */}
         <div className="flex items-center justify-between mb-3">
