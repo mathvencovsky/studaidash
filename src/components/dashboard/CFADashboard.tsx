@@ -282,21 +282,21 @@ export function CFADashboard() {
       </header>
 
       {/* Main Content */}
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 pb-24 md:pb-8">
+      <main className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 py-4 sm:py-6 pb-20 md:pb-8">
         {/* Welcome Message */}
-        <div className="mb-6">
-          <h1 className="text-2xl md:text-3xl font-bold text-card-foreground">
+        <div className="mb-4 sm:mb-6">
+          <h1 className="text-xl sm:text-2xl md:text-3xl font-bold text-card-foreground">
             Olá, João! 👋
           </h1>
-          <p className="text-muted-foreground mt-1">
-            Continue de onde parou. Sua missão do dia está esperando!
+          <p className="text-sm sm:text-base text-muted-foreground mt-0.5 sm:mt-1">
+            Continue de onde parou. Sua missão está esperando!
           </p>
         </div>
 
         {/* Grid Layout */}
-        <div className="grid lg:grid-cols-12 gap-6">
+        <div className="grid lg:grid-cols-12 gap-4 sm:gap-6">
           {/* Left Column - Primary Actions */}
-          <div className="lg:col-span-5 space-y-6">
+          <div className="lg:col-span-5 space-y-4 sm:space-y-6">
             {/* 1. DAILY MISSION - Most Important */}
             <DailyMissionCard
               mission={mission}
@@ -312,7 +312,7 @@ export function CFADashboard() {
           </div>
 
           {/* Right Column - Supporting Info */}
-          <div className="lg:col-span-7 space-y-6">
+          <div className="lg:col-span-7 space-y-4 sm:space-y-6">
             {/* 2. Trail Progress */}
             <TrailProgressCard
               modules={modules}
@@ -343,41 +343,41 @@ export function CFADashboard() {
       </main>
 
       {/* Mobile Bottom Nav */}
-      <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-card border-t z-50">
-        <div className="flex items-center justify-around py-2">
-          <button className="flex flex-col items-center gap-1 p-2 text-primary">
-            <Home size={20} />
-            <span className="text-[10px] font-medium">Início</span>
+      <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-card border-t z-50 safe-area-bottom">
+        <div className="flex items-center justify-around py-1.5 pb-safe">
+          <button className="flex flex-col items-center gap-0.5 p-2 text-primary min-w-[60px] active:opacity-70 transition-opacity">
+            <Home size={22} />
+            <span className="text-[9px] font-medium">Início</span>
           </button>
-          <button className="flex flex-col items-center gap-1 p-2 text-muted-foreground">
-            <BookOpen size={20} />
-            <span className="text-[10px] font-medium">Trilha</span>
+          <button className="flex flex-col items-center gap-0.5 p-2 text-muted-foreground min-w-[60px] active:opacity-70 transition-opacity">
+            <BookOpen size={22} />
+            <span className="text-[9px] font-medium">Trilha</span>
           </button>
-          <button className="flex flex-col items-center gap-1 p-2 text-muted-foreground">
-            <HelpCircle size={20} />
-            <span className="text-[10px] font-medium">Quizzes</span>
+          <button className="flex flex-col items-center gap-0.5 p-2 text-muted-foreground min-w-[60px] active:opacity-70 transition-opacity">
+            <HelpCircle size={22} />
+            <span className="text-[9px] font-medium">Quizzes</span>
           </button>
-          <button className="flex flex-col items-center gap-1 p-2 text-muted-foreground">
-            <Trophy size={20} />
-            <span className="text-[10px] font-medium">Ranking</span>
+          <button className="flex flex-col items-center gap-0.5 p-2 text-muted-foreground min-w-[60px] active:opacity-70 transition-opacity">
+            <Trophy size={22} />
+            <span className="text-[9px] font-medium">Ranking</span>
           </button>
-          <button className="flex flex-col items-center gap-1 p-2 text-muted-foreground">
-            <User size={20} />
-            <span className="text-[10px] font-medium">Perfil</span>
+          <button className="flex flex-col items-center gap-0.5 p-2 text-muted-foreground min-w-[60px] active:opacity-70 transition-opacity">
+            <User size={22} />
+            <span className="text-[9px] font-medium">Perfil</span>
           </button>
         </div>
       </nav>
 
       {/* Toast Notifications */}
-      <div className="fixed bottom-20 md:bottom-4 right-4 z-[100] space-y-2 max-w-sm">
+      <div className="fixed bottom-16 sm:bottom-20 md:bottom-4 left-4 right-4 sm:left-auto sm:right-4 z-[100] space-y-2 max-w-sm mx-auto sm:mx-0">
         {toasts.map((toast) => (
           <div
             key={toast.id}
-            className="p-4 rounded-xl shadow-lg border bg-card animate-in slide-in-from-right-full"
+            className="p-3 sm:p-4 rounded-xl shadow-lg border bg-card animate-in slide-in-from-bottom-full sm:slide-in-from-right-full"
           >
             <div className="flex items-center gap-2">
-              <Sparkles size={16} className="text-accent" />
-              <p className="text-sm font-medium text-card-foreground">{toast.message}</p>
+              <Sparkles size={14} className="sm:w-4 sm:h-4 text-accent shrink-0" />
+              <p className="text-xs sm:text-sm font-medium text-card-foreground">{toast.message}</p>
             </div>
           </div>
         ))}
