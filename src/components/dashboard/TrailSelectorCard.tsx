@@ -79,8 +79,8 @@ export function TrailSelectorCard({
   const displayModule = currentModule || nextModule;
 
   return (
-    <Card className="border-2 border-primary/20 bg-gradient-to-br from-primary/5 to-transparent h-full flex flex-col">
-      <CardContent className="p-4 flex flex-col flex-1">
+    <Card className="border-2 border-primary/20 bg-gradient-to-br from-primary/5 to-transparent">
+      <CardContent className="p-4">
         {/* Header row */}
         <div className="flex items-center justify-between mb-3">
           <div className="flex items-center gap-2">
@@ -207,41 +207,35 @@ export function TrailSelectorCard({
           </span>
         </div>
 
-        {/* Next step section - fills remaining space */}
-        <div className="mt-auto pt-4 border-t mt-4">
-          {displayModule ? (
-            <div className="space-y-2">
-              <p className="text-[10px] uppercase tracking-wide text-muted-foreground font-medium">
-                {currentModule ? "Continuar estudando" : "Próximo módulo"}
-              </p>
-              <div className="flex items-center gap-3">
-                <div className="w-9 h-9 rounded-lg bg-accent/10 flex items-center justify-center shrink-0">
-                  <Play size={16} className="text-accent" />
-                </div>
-                <div className="flex-1 min-w-0">
-                  <p className="text-sm font-medium truncate">{displayModule.title}</p>
-                  <p className="text-xs text-muted-foreground">
-                    {currentModule 
-                      ? `${Math.round((displayModule.completedHours / displayModule.estimatedHours) * 100)}% concluído`
-                      : `${displayModule.estimatedHours}h estimadas`
-                    }
-                  </p>
-                </div>
-                <Button 
-                  size="sm" 
-                  className="shrink-0 h-8 text-xs"
-                  onClick={() => navigate("/estudar")}
-                >
-                  Estudar
-                </Button>
+        {/* Next step section - compact (no stretching) */}
+        {displayModule ? (
+          <div className="mt-3 p-3 rounded-lg bg-muted/40">
+            <div className="flex items-center justify-between gap-3">
+              <div className="min-w-0">
+                <p className="text-[10px] uppercase tracking-wide text-muted-foreground font-medium">
+                  {currentModule ? "Continuar estudando" : "Próximo módulo"}
+                </p>
+                <p className="text-sm font-medium truncate">{displayModule.title}</p>
+                <p className="text-xs text-muted-foreground truncate">
+                  {currentModule
+                    ? `${Math.round((displayModule.completedHours / displayModule.estimatedHours) * 100)}% concluído`
+                    : `${displayModule.estimatedHours}h estimadas`}
+                </p>
               </div>
+              <Button
+                size="sm"
+                className="shrink-0 h-8 text-xs"
+                onClick={() => navigate("/estudar")}
+              >
+                Estudar
+              </Button>
             </div>
-          ) : (
-            <div className="text-center py-2">
-              <p className="text-sm text-muted-foreground">🎉 Trilha concluída!</p>
-            </div>
-          )}
-        </div>
+          </div>
+        ) : (
+          <div className="mt-3 p-3 rounded-lg bg-muted/40 text-center">
+            <p className="text-sm text-muted-foreground">🎉 Trilha concluída!</p>
+          </div>
+        )}
       </CardContent>
     </Card>
   );
