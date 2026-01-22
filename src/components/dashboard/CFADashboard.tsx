@@ -1,20 +1,5 @@
 import { useState, useCallback, useMemo, useEffect } from "react";
-import { 
-  Menu, 
-  X, 
-  Home, 
-  BookOpen, 
-  Trophy, 
-  HelpCircle,
-  FileText,
-  Settings,
-  User,
-  Bell,
-  Search,
-  Sparkles,
-  ChevronDown,
-  LogOut
-} from "lucide-react";
+import { Sparkles } from "lucide-react";
 import { DailyMissionCard } from "./DailyMissionCard";
 import { TrailProgressCard } from "./TrailProgressCard";
 import { GamificationCard } from "./GamificationCard";
@@ -78,7 +63,6 @@ export function CFADashboard() {
   const [quizzes] = useState<Quiz[]>(CFA_QUIZZES);
   const [simulados] = useState<Simulado[]>(CFA_SIMULADOS);
   const [feedback] = useState<SmartFeedback>(getSmartFeedback);
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [toasts, setToasts] = useState<Toast[]>([]);
 
   // Calculate overall progress
@@ -176,200 +160,67 @@ export function CFADashboard() {
   }, [addToast]);
 
   return (
-    <div className="min-h-screen bg-background">
-      {/* Header */}
-      <header className="sticky top-0 z-50 bg-card border-b">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between h-16">
-            {/* Logo */}
-            <div className="flex items-center gap-3">
-              <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-primary to-accent flex items-center justify-center">
-                <Sparkles size={18} className="text-white" />
-              </div>
-              <span className="text-xl font-bold text-primary">StudAI</span>
-            </div>
+    <div className="p-4 sm:p-6 pb-24 md:pb-6">
+      {/* Welcome Message */}
+      <div className="mb-4 sm:mb-6">
+        <h1 className="text-xl sm:text-2xl md:text-3xl font-bold text-card-foreground">
+          Olá, João! 👋
+        </h1>
+        <p className="text-sm sm:text-base text-muted-foreground mt-0.5 sm:mt-1">
+          Continue de onde parou. Sua missão está esperando!
+        </p>
+      </div>
 
-            {/* Desktop Nav */}
-            <nav className="hidden md:flex items-center gap-1">
-              <button className="px-4 py-2 text-sm font-medium text-primary bg-accent/10 rounded-lg">
-                <Home size={16} className="inline mr-2" />
-                Dashboard
-              </button>
-              <button className="px-4 py-2 text-sm font-medium text-muted-foreground hover:text-card-foreground hover:bg-secondary rounded-lg transition-colors">
-                <BookOpen size={16} className="inline mr-2" />
-                Trilha
-              </button>
-              <button className="px-4 py-2 text-sm font-medium text-muted-foreground hover:text-card-foreground hover:bg-secondary rounded-lg transition-colors">
-                <Trophy size={16} className="inline mr-2" />
-                Conquistas
-              </button>
-              <button className="px-4 py-2 text-sm font-medium text-muted-foreground hover:text-card-foreground hover:bg-secondary rounded-lg transition-colors">
-                <HelpCircle size={16} className="inline mr-2" />
-                Avaliações
-              </button>
-            </nav>
+      {/* Grid Layout */}
+      <div className="grid lg:grid-cols-12 gap-4 sm:gap-6">
+        {/* Left Column - Primary Actions */}
+        <div className="lg:col-span-5 space-y-4 sm:space-y-6">
+          {/* 1. DAILY MISSION - Most Important */}
+          <DailyMissionCard
+            mission={mission}
+            onStartMission={handleStartMission}
+            onToggleTask={handleToggleTask}
+          />
 
-            {/* Right side */}
-            <div className="flex items-center gap-3">
-              {/* Search - Desktop */}
-              <button className="hidden md:flex items-center gap-2 px-3 py-2 text-sm text-muted-foreground bg-secondary rounded-lg hover:bg-muted transition-colors">
-                <Search size={16} />
-                <span>Buscar...</span>
-              </button>
-
-              {/* Notifications */}
-              <button className="p-2 text-muted-foreground hover:text-card-foreground hover:bg-secondary rounded-lg transition-colors relative">
-                <Bell size={20} />
-                <span className="absolute top-1 right-1 w-2 h-2 bg-accent rounded-full" />
-              </button>
-
-              {/* Profile */}
-              <button className="hidden md:flex items-center gap-2 p-1.5 pr-3 bg-secondary rounded-full hover:bg-muted transition-colors">
-                <div className="w-7 h-7 rounded-full bg-primary text-primary-foreground flex items-center justify-center text-xs font-bold">
-                  JS
-                </div>
-                <span className="text-sm font-medium text-card-foreground">João</span>
-                <ChevronDown size={14} className="text-muted-foreground" />
-              </button>
-
-              {/* Mobile Menu Toggle */}
-              <button 
-                onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-                className="md:hidden p-2 text-muted-foreground hover:text-card-foreground hover:bg-secondary rounded-lg"
-              >
-                {mobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
-              </button>
-            </div>
-          </div>
+          {/* Smart Feedback */}
+          <SmartFeedbackCard
+            feedback={feedback}
+            onActionClick={handleFeedbackAction}
+          />
         </div>
 
-        {/* Mobile Menu */}
-        {mobileMenuOpen && (
-          <div className="md:hidden border-t bg-card">
-            <nav className="p-4 space-y-2">
-              <button className="w-full px-4 py-3 text-sm font-medium text-primary bg-accent/10 rounded-lg text-left flex items-center gap-3">
-                <Home size={18} />
-                Dashboard
-              </button>
-              <button className="w-full px-4 py-3 text-sm font-medium text-muted-foreground hover:bg-secondary rounded-lg text-left flex items-center gap-3 transition-colors">
-                <BookOpen size={18} />
-                Trilha
-              </button>
-              <button className="w-full px-4 py-3 text-sm font-medium text-muted-foreground hover:bg-secondary rounded-lg text-left flex items-center gap-3 transition-colors">
-                <Trophy size={18} />
-                Conquistas
-              </button>
-              <button className="w-full px-4 py-3 text-sm font-medium text-muted-foreground hover:bg-secondary rounded-lg text-left flex items-center gap-3 transition-colors">
-                <HelpCircle size={18} />
-                Avaliações
-              </button>
-              <button className="w-full px-4 py-3 text-sm font-medium text-muted-foreground hover:bg-secondary rounded-lg text-left flex items-center gap-3 transition-colors">
-                <FileText size={18} />
-                Simulados
-              </button>
-              <div className="border-t my-2" />
-              <button className="w-full px-4 py-3 text-sm font-medium text-muted-foreground hover:bg-secondary rounded-lg text-left flex items-center gap-3 transition-colors">
-                <Settings size={18} />
-                Configurações
-              </button>
-              <button className="w-full px-4 py-3 text-sm font-medium text-muted-foreground hover:bg-secondary rounded-lg text-left flex items-center gap-3 transition-colors">
-                <User size={18} />
-                Meu Perfil
-              </button>
-            </nav>
-          </div>
-        )}
-      </header>
+        {/* Right Column - Supporting Info */}
+        <div className="lg:col-span-7 space-y-4 sm:space-y-6">
+          {/* 2. Trail Progress */}
+          <TrailProgressCard
+            modules={modules}
+            overallProgress={overallProgress}
+            onModuleClick={handleModuleClick}
+          />
 
-      {/* Main Content */}
-      <main className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 py-4 sm:py-6 pb-20 md:pb-8">
-        {/* Welcome Message */}
-        <div className="mb-4 sm:mb-6">
-          <h1 className="text-xl sm:text-2xl md:text-3xl font-bold text-card-foreground">
-            Olá, João! 👋
-          </h1>
-          <p className="text-sm sm:text-base text-muted-foreground mt-0.5 sm:mt-1">
-            Continue de onde parou. Sua missão está esperando!
-          </p>
+          {/* 3. Gamification */}
+          <GamificationCard
+            progress={userProgress}
+            onViewAllBadges={handleViewAllBadges}
+          />
+
+          {/* 4. Quizzes */}
+          <QuizzesCard
+            quizzes={quizzes}
+            onStartQuiz={handleStartQuiz}
+            onViewAll={handleViewAllQuizzes}
+          />
+
+          {/* 5. Simulados */}
+          <SimuladosCard
+            simulados={simulados}
+            onStartSimulado={handleStartSimulado}
+          />
         </div>
-
-        {/* Grid Layout */}
-        <div className="grid lg:grid-cols-12 gap-4 sm:gap-6">
-          {/* Left Column - Primary Actions */}
-          <div className="lg:col-span-5 space-y-4 sm:space-y-6">
-            {/* 1. DAILY MISSION - Most Important */}
-            <DailyMissionCard
-              mission={mission}
-              onStartMission={handleStartMission}
-              onToggleTask={handleToggleTask}
-            />
-
-            {/* Smart Feedback */}
-            <SmartFeedbackCard
-              feedback={feedback}
-              onActionClick={handleFeedbackAction}
-            />
-          </div>
-
-          {/* Right Column - Supporting Info */}
-          <div className="lg:col-span-7 space-y-4 sm:space-y-6">
-            {/* 2. Trail Progress */}
-            <TrailProgressCard
-              modules={modules}
-              overallProgress={overallProgress}
-              onModuleClick={handleModuleClick}
-            />
-
-            {/* 3. Gamification */}
-            <GamificationCard
-              progress={userProgress}
-              onViewAllBadges={handleViewAllBadges}
-            />
-
-            {/* 4. Quizzes */}
-            <QuizzesCard
-              quizzes={quizzes}
-              onStartQuiz={handleStartQuiz}
-              onViewAll={handleViewAllQuizzes}
-            />
-
-            {/* 5. Simulados */}
-            <SimuladosCard
-              simulados={simulados}
-              onStartSimulado={handleStartSimulado}
-            />
-          </div>
-        </div>
-      </main>
-
-      {/* Mobile Bottom Nav */}
-      <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-card border-t z-50 safe-area-bottom">
-        <div className="flex items-center justify-around py-1.5 pb-safe">
-          <button className="flex flex-col items-center gap-0.5 p-2 text-primary min-w-[60px] active:opacity-70 transition-opacity">
-            <Home size={22} />
-            <span className="text-[9px] font-medium">Início</span>
-          </button>
-          <button className="flex flex-col items-center gap-0.5 p-2 text-muted-foreground min-w-[60px] active:opacity-70 transition-opacity">
-            <BookOpen size={22} />
-            <span className="text-[9px] font-medium">Trilha</span>
-          </button>
-          <button className="flex flex-col items-center gap-0.5 p-2 text-muted-foreground min-w-[60px] active:opacity-70 transition-opacity">
-            <HelpCircle size={22} />
-            <span className="text-[9px] font-medium">Quizzes</span>
-          </button>
-          <button className="flex flex-col items-center gap-0.5 p-2 text-muted-foreground min-w-[60px] active:opacity-70 transition-opacity">
-            <Trophy size={22} />
-            <span className="text-[9px] font-medium">Ranking</span>
-          </button>
-          <button className="flex flex-col items-center gap-0.5 p-2 text-muted-foreground min-w-[60px] active:opacity-70 transition-opacity">
-            <User size={22} />
-            <span className="text-[9px] font-medium">Perfil</span>
-          </button>
-        </div>
-      </nav>
+      </div>
 
       {/* Toast Notifications */}
-      <div className="fixed bottom-16 sm:bottom-20 md:bottom-4 left-4 right-4 sm:left-auto sm:right-4 z-[100] space-y-2 max-w-sm mx-auto sm:mx-0">
+      <div className="fixed bottom-20 md:bottom-4 left-4 right-4 sm:left-auto sm:right-4 z-[100] space-y-2 max-w-sm mx-auto sm:mx-0">
         {toasts.map((toast) => (
           <div
             key={toast.id}
