@@ -11,6 +11,8 @@ import MeuObjetivo from "./pages/MeuObjetivo";
 import Quizzes from "./pages/Quizzes";
 import QuizSession from "./pages/QuizSession";
 import EstudarComIA from "./pages/EstudarComIA";
+import ExplorarTrilhas from "./pages/ExplorarTrilhas";
+import TrackDetail from "./pages/TrackDetail";
 import Relatorios from "./pages/Relatorios";
 import Engajamento from "./pages/Engajamento";
 import Ranking from "./pages/Ranking";
@@ -37,6 +39,8 @@ const App = () => (
           <Route element={<AppLayout><Trilha /></AppLayout>} path="/trilha" />
           <Route element={<AppLayout><TrailOverview /></AppLayout>} path="/trilha/visao-geral" />
           <Route element={<AppLayout><Quizzes /></AppLayout>} path="/quizzes" />
+          <Route element={<AppLayout><ExplorarTrilhas /></AppLayout>} path="/explorar" />
+          <Route element={<AppLayout><TrackDetail /></AppLayout>} path="/explorar/:trackId" />
           <Route element={<AppLayout><Relatorios /></AppLayout>} path="/relatorios" />
           <Route element={<AppLayout><Engajamento /></AppLayout>} path="/engajamento" />
           <Route element={<AppLayout><Ranking /></AppLayout>} path="/ranking" />
