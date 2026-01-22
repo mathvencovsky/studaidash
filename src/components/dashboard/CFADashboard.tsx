@@ -6,6 +6,7 @@ import { GamificationCard } from "./GamificationCard";
 import { QuizzesCard } from "./QuizzesCard";
 import { SimuladosCard } from "./SimuladosCard";
 import { SmartFeedbackCard } from "./SmartFeedbackCard";
+import { CompletionPlanCard } from "./CompletionPlanCard";
 import type { DailyMission, CFAModule, UserProgress, Quiz, Simulado, SmartFeedback } from "@/types/studai";
 import { 
   CFA_MODULES, 
@@ -16,6 +17,11 @@ import {
   getSmartFeedback,
   calculateTrailProgress 
 } from "@/data/cfa-mock-data";
+import { 
+  MOCK_TRAIL_PLAN, 
+  MOCK_STUDY_DATA, 
+  calculateTrailMetrics 
+} from "@/data/trail-planning-data";
 
 // Storage keys
 const STORAGE_KEYS = {
@@ -67,6 +73,12 @@ export function CFADashboard() {
 
   // Calculate overall progress
   const overallProgress = useMemo(() => calculateTrailProgress(modules), [modules]);
+  
+  // Calculate trail planning metrics
+  const trailCalculations = useMemo(() => 
+    calculateTrailMetrics(MOCK_TRAIL_PLAN, MOCK_STUDY_DATA), 
+    []
+  );
 
   // Toast helpers
   const addToast = useCallback((message: string, type: Toast["type"] = "success") => {
@@ -169,6 +181,15 @@ export function CFADashboard() {
         <p className="text-sm sm:text-base text-muted-foreground mt-0.5 sm:mt-1">
           Continue de onde parou. Sua missão está esperando!
         </p>
+      </div>
+
+      {/* Compact Plan Overview - Full Width */}
+      <div className="mb-4 sm:mb-6">
+        <CompletionPlanCard 
+          trail={MOCK_TRAIL_PLAN}
+          calculations={trailCalculations}
+          compact={true}
+        />
       </div>
 
       {/* Grid Layout */}
