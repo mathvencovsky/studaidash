@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { 
@@ -71,19 +71,19 @@ export function TrailSelectorCard({
   };
 
   return (
-    <Card className="border-2 border-primary/20 bg-gradient-to-br from-primary/5 to-transparent">
-      <CardContent className="p-4 sm:p-5">
+    <Card className="border-2 border-primary/20 bg-gradient-to-br from-primary/5 to-transparent h-full">
+      <CardContent className="p-4">
         {/* Header row */}
         <div className="flex items-center justify-between mb-3">
           <div className="flex items-center gap-2">
-            <Target className="w-4 h-4 sm:w-5 sm:h-5 text-primary" />
-            <span className="font-semibold text-sm sm:text-base text-card-foreground">Minha Trilha</span>
+            <Target className="w-4 h-4 text-primary" />
+            <span className="font-semibold text-sm text-card-foreground">Minha Trilha</span>
           </div>
           <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
             <DialogTrigger asChild>
               <Button variant="ghost" size="sm" className="text-xs gap-1 h-7 px-2 text-muted-foreground hover:text-primary">
                 <Plus size={12} />
-                Trocar trilha
+                Trocar
               </Button>
             </DialogTrigger>
             <DialogContent className="max-w-2xl max-h-[85vh] overflow-y-auto mx-4 sm:mx-auto">
@@ -135,7 +135,7 @@ export function TrailSelectorCard({
                           <p className="text-xs text-muted-foreground mt-1 line-clamp-2">
                             {trail.description}
                           </p>
-                          <div className="flex items-center gap-3 mt-2 text-xs text-muted-foreground">
+                          <div className="flex items-center gap-3 mt-2 text-xs text-muted-foreground flex-wrap">
                             <span className="flex items-center gap-1">
                               <CategoryIcon size={12} />
                               {categoryLabels[trail.category]}
@@ -163,16 +163,16 @@ export function TrailSelectorCard({
           </Dialog>
         </div>
 
-        {/* Trail info - compact horizontal layout */}
-        <div className="flex items-center gap-3 p-3 bg-card rounded-xl border">
-          <div className={`w-11 h-11 sm:w-12 sm:h-12 rounded-lg bg-gradient-to-br ${activeTrail.color} flex items-center justify-center text-xl sm:text-2xl shrink-0`}>
+        {/* Trail info - compact */}
+        <div className="flex items-center gap-3">
+          <div className={`w-12 h-12 rounded-xl bg-gradient-to-br ${activeTrail.color} flex items-center justify-center text-2xl shrink-0`}>
             {activeTrail.icon}
           </div>
           <div className="flex-1 min-w-0">
-            <h3 className="font-bold text-xs sm:text-sm truncate">{activeTrail.name}</h3>
-            <p className="text-[10px] sm:text-xs text-muted-foreground truncate">{activeTrail.description}</p>
+            <h3 className="font-bold text-sm truncate">{activeTrail.name}</h3>
+            <p className="text-xs text-muted-foreground truncate">{activeTrail.description}</p>
           </div>
-          <span className="text-lg sm:text-xl font-bold text-primary shrink-0">{progressPercent}%</span>
+          <span className="text-xl font-bold text-primary shrink-0">{progressPercent}%</span>
         </div>
 
         {/* Progress bar */}
@@ -184,19 +184,19 @@ export function TrailSelectorCard({
         </div>
         
         {/* Quick stats - inline */}
-        <div className="flex items-center justify-between mt-3 text-xs">
-          <div className="flex items-center gap-1 text-muted-foreground">
-            <BookOpen size={12} />
-            <span><strong className="text-card-foreground">{activeTrail.modules.length}</strong> Módulos</span>
-          </div>
-          <div className="flex items-center gap-1 text-muted-foreground">
-            <Clock size={12} />
-            <span><strong className="text-card-foreground">{Math.round(activeTrail.completedHours)}h</strong> Estudadas</span>
-          </div>
-          <div className="flex items-center gap-1 text-muted-foreground">
-            <Target size={12} />
-            <span><strong className="text-card-foreground">{Math.round(activeTrail.totalEstimatedHours - activeTrail.completedHours)}h</strong> Restantes</span>
-          </div>
+        <div className="flex items-center justify-between mt-3 text-xs text-muted-foreground">
+          <span className="flex items-center gap-1">
+            <BookOpen size={11} />
+            <strong className="text-card-foreground">{activeTrail.modules.length}</strong> Módulos
+          </span>
+          <span className="flex items-center gap-1">
+            <Clock size={11} />
+            <strong className="text-card-foreground">{Math.round(activeTrail.completedHours)}h</strong> Estudadas
+          </span>
+          <span className="flex items-center gap-1">
+            <Target size={11} />
+            <strong className="text-card-foreground">{Math.round(activeTrail.totalEstimatedHours - activeTrail.completedHours)}h</strong> Restantes
+          </span>
         </div>
       </CardContent>
     </Card>
