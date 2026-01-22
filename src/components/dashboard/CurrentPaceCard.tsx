@@ -93,18 +93,18 @@ export function CurrentPaceCard({
       </CardHeader>
       <CardContent className="space-y-4">
         {/* Current Pace Stats */}
-        <div className="grid grid-cols-2 gap-3">
-          <div className="p-3 bg-muted/50 rounded-lg text-center">
-            <p className="text-2xl font-bold text-primary">
+        <div className="flex gap-2 sm:grid sm:grid-cols-2 sm:gap-3 overflow-x-auto scrollbar-hide pb-1 -mx-1 px-1">
+          <div className="p-2.5 sm:p-3 bg-muted/50 rounded-lg text-center min-w-[120px] flex-shrink-0 sm:min-w-0 sm:flex-shrink">
+            <p className="text-xl sm:text-2xl font-bold text-primary whitespace-nowrap">
               {formatMinutesToHoursMinutes(currentDailyAvgMinutes)}
             </p>
-            <p className="text-xs text-muted-foreground">média/dia (7 dias)</p>
+            <p className="text-[10px] sm:text-xs text-muted-foreground whitespace-nowrap">média/dia (7 dias)</p>
           </div>
-          <div className="p-3 bg-muted/50 rounded-lg text-center">
-            <p className="text-2xl font-bold text-primary">
+          <div className="p-2.5 sm:p-3 bg-muted/50 rounded-lg text-center min-w-[100px] flex-shrink-0 sm:min-w-0 sm:flex-shrink">
+            <p className="text-xl sm:text-2xl font-bold text-primary whitespace-nowrap">
               {studyDaysLast7}/7
             </p>
-            <p className="text-xs text-muted-foreground">dias estudados</p>
+            <p className="text-[10px] sm:text-xs text-muted-foreground whitespace-nowrap">dias estudados</p>
           </div>
         </div>
 

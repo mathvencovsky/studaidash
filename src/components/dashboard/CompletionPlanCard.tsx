@@ -167,31 +167,31 @@ export function CompletionPlanCard({
         </div>
 
         {/* Key Metrics Grid */}
-        <div className="grid grid-cols-2 gap-3">
-          <div className="p-3 bg-muted/50 rounded-lg text-center">
+        <div className="flex gap-2 sm:grid sm:grid-cols-2 sm:gap-3 overflow-x-auto scrollbar-hide pb-1 -mx-1 px-1">
+          <div className="p-2.5 sm:p-3 bg-muted/50 rounded-lg text-center min-w-[100px] flex-shrink-0 sm:min-w-0 sm:flex-shrink">
             <Clock className="w-4 h-4 mx-auto mb-1 text-muted-foreground" />
-            <p className="text-lg font-bold">{formatHoursMinutes(remainingHours)}</p>
-            <p className="text-xs text-muted-foreground">restantes</p>
+            <p className="text-base sm:text-lg font-bold whitespace-nowrap">{formatHoursMinutes(remainingHours)}</p>
+            <p className="text-[10px] sm:text-xs text-muted-foreground whitespace-nowrap">restantes</p>
           </div>
-          <div className="p-3 bg-muted/50 rounded-lg text-center">
+          <div className="p-2.5 sm:p-3 bg-muted/50 rounded-lg text-center min-w-[100px] flex-shrink-0 sm:min-w-0 sm:flex-shrink">
             <Calendar className="w-4 h-4 mx-auto mb-1 text-muted-foreground" />
-            <p className="text-lg font-bold">{daysUntilTarget}</p>
-            <p className="text-xs text-muted-foreground">dias até a meta</p>
+            <p className="text-base sm:text-lg font-bold whitespace-nowrap">{daysUntilTarget}</p>
+            <p className="text-[10px] sm:text-xs text-muted-foreground whitespace-nowrap">dias até a meta</p>
           </div>
         </div>
 
         {/* Required Pace */}
-        <div className={`p-4 rounded-lg border ${status.border} ${status.bg}`}>
-          <p className="text-sm text-muted-foreground mb-2">Para terminar no prazo, estude:</p>
-          <div className="flex items-baseline gap-4">
+        <div className={`p-3 sm:p-4 rounded-lg border ${status.border} ${status.bg}`}>
+          <p className="text-xs sm:text-sm text-muted-foreground mb-2">Para terminar no prazo, estude:</p>
+          <div className="flex flex-wrap items-baseline gap-2 sm:gap-4">
             <div>
-              <span className="text-2xl font-bold">{formatMinutesToHoursMinutes(requiredMinutesPerDay)}</span>
-              <span className="text-sm text-muted-foreground">/dia</span>
+              <span className="text-xl sm:text-2xl font-bold">{formatMinutesToHoursMinutes(requiredMinutesPerDay)}</span>
+              <span className="text-xs sm:text-sm text-muted-foreground">/dia</span>
             </div>
-            <span className="text-muted-foreground">ou</span>
+            <span className="text-muted-foreground text-sm">ou</span>
             <div>
-              <span className="text-2xl font-bold">{formatHoursMinutes(requiredHoursPerWeek)}</span>
-              <span className="text-sm text-muted-foreground">/semana</span>
+              <span className="text-xl sm:text-2xl font-bold">{formatHoursMinutes(requiredHoursPerWeek)}</span>
+              <span className="text-xs sm:text-sm text-muted-foreground">/semana</span>
             </div>
           </div>
         </div>

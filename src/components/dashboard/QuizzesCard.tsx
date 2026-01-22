@@ -33,21 +33,21 @@ export function QuizzesCard({ quizzes, onStartQuiz, onViewAll }: QuizzesCardProp
   const displayQuizzes = quizzes.slice(0, 4);
 
   return (
-    <div className="bg-card border rounded-2xl p-4 sm:p-6 shadow-sm">
+    <div className="bg-card border rounded-2xl p-3 sm:p-6 shadow-sm w-full overflow-hidden">
       {/* Header */}
-      <div className="flex items-center justify-between mb-4 sm:mb-5">
-        <div className="flex items-center gap-2.5 sm:gap-3">
-          <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-accent/10 flex items-center justify-center">
-            <HelpCircle size={18} className="sm:w-5 sm:h-5 text-accent" />
+      <div className="flex items-center justify-between mb-3 sm:mb-5">
+        <div className="flex items-center gap-2 sm:gap-3 min-w-0">
+          <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-xl bg-accent/10 flex items-center justify-center shrink-0">
+            <HelpCircle size={16} className="sm:w-5 sm:h-5 text-accent" />
           </div>
-          <div>
-            <h2 className="text-base sm:text-lg font-semibold text-card-foreground">Avaliações</h2>
+          <div className="min-w-0">
+            <h2 className="text-sm sm:text-lg font-semibold text-card-foreground">Avaliações</h2>
             <p className="text-[10px] sm:text-xs text-muted-foreground">Quizzes CFA-Style</p>
           </div>
         </div>
         <button 
           onClick={onViewAll}
-          className="text-[10px] sm:text-xs text-accent font-medium hover:underline flex items-center gap-0.5 sm:gap-1"
+          className="text-[10px] sm:text-xs text-accent font-medium hover:underline flex items-center gap-0.5 sm:gap-1 shrink-0"
         >
           Ver todos
           <ChevronRight size={12} className="sm:w-3.5 sm:h-3.5" />
@@ -63,10 +63,10 @@ export function QuizzesCard({ quizzes, onStartQuiz, onViewAll }: QuizzesCardProp
           return (
             <div 
               key={quiz.id}
-              className="flex items-center gap-3 sm:gap-4 p-3 sm:p-4 bg-secondary/30 rounded-xl hover:bg-secondary/50 transition-colors"
+              className="flex items-center gap-2 sm:gap-4 p-2.5 sm:p-4 bg-secondary/30 rounded-xl hover:bg-secondary/50 transition-colors"
             >
               {/* Status indicator */}
-              <div className={`w-9 h-9 sm:w-10 sm:h-10 rounded-lg flex items-center justify-center shrink-0 ${
+              <div className={`w-8 h-8 sm:w-10 sm:h-10 rounded-lg flex items-center justify-center shrink-0 ${
                 quiz.status === "completed" 
                   ? "bg-status-success text-status-success-text" 
                   : quiz.status === "in_progress"
@@ -74,29 +74,27 @@ export function QuizzesCard({ quizzes, onStartQuiz, onViewAll }: QuizzesCardProp
                     : "bg-muted text-muted-foreground"
               }`}>
                 {quiz.status === "completed" ? (
-                  <CheckCircle2 size={16} className="sm:w-[18px] sm:h-[18px]" />
+                  <CheckCircle2 size={14} className="sm:w-[18px] sm:h-[18px]" />
                 ) : (
-                  <HelpCircle size={16} className="sm:w-[18px] sm:h-[18px]" />
+                  <HelpCircle size={14} className="sm:w-[18px] sm:h-[18px]" />
                 )}
               </div>
 
               {/* Quiz Info */}
               <div className="flex-1 min-w-0">
-                <p className="font-medium text-xs sm:text-sm text-card-foreground truncate">
+                <p className="font-medium text-[11px] sm:text-sm text-card-foreground line-clamp-1">
                   {quiz.moduleName}
                 </p>
-                <div className="flex items-center gap-2 sm:gap-3 mt-0.5 sm:mt-1">
-                  <span className="text-[10px] sm:text-xs text-muted-foreground">
+                <div className="flex items-center gap-1.5 sm:gap-3 mt-0.5">
+                  <span className="text-[9px] sm:text-xs text-muted-foreground whitespace-nowrap">
                     {quiz.totalQuestions} questões
                   </span>
                   {quiz.lastScore !== undefined && (
-                    <>
-                      <span className={`text-[10px] sm:text-xs font-semibold ${
-                        quiz.lastScore >= 70 ? "text-status-success-text" : "text-warning"
-                      }`}>
-                        {quiz.lastScore}%
-                      </span>
-                    </>
+                    <span className={`text-[9px] sm:text-xs font-semibold ${
+                      quiz.lastScore >= 70 ? "text-status-success-text" : "text-warning"
+                    }`}>
+                      {quiz.lastScore}%
+                    </span>
                   )}
                 </div>
               </div>
@@ -104,10 +102,10 @@ export function QuizzesCard({ quizzes, onStartQuiz, onViewAll }: QuizzesCardProp
               {/* Action Button */}
               <button
                 onClick={() => onStartQuiz(quiz.id)}
-                className={`px-2.5 sm:px-4 py-1.5 sm:py-2 rounded-lg text-[10px] sm:text-sm font-medium flex items-center gap-1.5 sm:gap-2 shrink-0 transition-opacity hover:opacity-90 active:scale-95 ${config.bg} ${config.text}`}
+                className={`px-2 sm:px-4 py-1.5 sm:py-2 rounded-lg text-[9px] sm:text-sm font-medium flex items-center gap-1 sm:gap-2 shrink-0 transition-opacity hover:opacity-90 active:scale-95 touch-manipulation min-h-[32px] sm:min-h-[36px] ${config.bg} ${config.text}`}
               >
-                <Icon size={12} className="sm:w-3.5 sm:h-3.5" />
-                {config.label}
+                <Icon size={10} className="sm:w-3.5 sm:h-3.5" />
+                <span className="hidden xs:inline">{config.label}</span>
               </button>
             </div>
           );

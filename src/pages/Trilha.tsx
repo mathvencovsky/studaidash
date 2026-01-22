@@ -42,30 +42,30 @@ export default function Trilha() {
         <p className="text-muted-foreground mt-1">{MOCK_TRAIL_PLAN.name}</p>
       </div>
 
-      {/* Quick Stats Row */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-        <Card>
-          <CardContent className="p-4 text-center">
-            <p className="text-2xl font-bold text-primary">{calculations.progressPercent}%</p>
-            <p className="text-xs text-muted-foreground">Concluído</p>
+      {/* Quick Stats Row - Horizontal scroll on mobile */}
+      <div className="flex gap-2 sm:grid sm:grid-cols-4 sm:gap-3 overflow-x-auto scrollbar-hide pb-1 -mx-4 px-4 sm:mx-0 sm:px-0">
+        <Card className="min-w-[100px] flex-shrink-0 sm:min-w-0 sm:flex-shrink">
+          <CardContent className="p-3 sm:p-4 text-center">
+            <p className="text-xl sm:text-2xl font-bold text-primary">{calculations.progressPercent}%</p>
+            <p className="text-[10px] sm:text-xs text-muted-foreground whitespace-nowrap">Concluído</p>
           </CardContent>
         </Card>
-        <Card>
-          <CardContent className="p-4 text-center">
-            <p className="text-2xl font-bold">{formatHoursMinutes(calculations.remainingHours)}</p>
-            <p className="text-xs text-muted-foreground">Restantes</p>
+        <Card className="min-w-[100px] flex-shrink-0 sm:min-w-0 sm:flex-shrink">
+          <CardContent className="p-3 sm:p-4 text-center">
+            <p className="text-xl sm:text-2xl font-bold whitespace-nowrap">{formatHoursMinutes(calculations.remainingHours)}</p>
+            <p className="text-[10px] sm:text-xs text-muted-foreground whitespace-nowrap">Restantes</p>
           </CardContent>
         </Card>
-        <Card>
-          <CardContent className="p-4 text-center">
-            <p className="text-2xl font-bold">{calculations.daysUntilTarget}</p>
-            <p className="text-xs text-muted-foreground">Dias p/ meta</p>
+        <Card className="min-w-[100px] flex-shrink-0 sm:min-w-0 sm:flex-shrink">
+          <CardContent className="p-3 sm:p-4 text-center">
+            <p className="text-xl sm:text-2xl font-bold">{calculations.daysUntilTarget}</p>
+            <p className="text-[10px] sm:text-xs text-muted-foreground whitespace-nowrap">Dias p/ meta</p>
           </CardContent>
         </Card>
-        <Card>
-          <CardContent className="p-4 text-center">
-            <p className="text-2xl font-bold">{MOCK_STUDY_DATA.streak}</p>
-            <p className="text-xs text-muted-foreground">Dias de streak</p>
+        <Card className="min-w-[100px] flex-shrink-0 sm:min-w-0 sm:flex-shrink">
+          <CardContent className="p-3 sm:p-4 text-center">
+            <p className="text-xl sm:text-2xl font-bold">{MOCK_STUDY_DATA.streak}</p>
+            <p className="text-[10px] sm:text-xs text-muted-foreground whitespace-nowrap">Dias de streak</p>
           </CardContent>
         </Card>
       </div>

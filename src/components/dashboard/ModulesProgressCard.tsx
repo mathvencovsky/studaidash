@@ -105,43 +105,43 @@ export function ModulesProgressCard({
             <button
               key={module.id}
               onClick={() => onModuleClick?.(module.id)}
-              className={`w-full p-3 rounded-lg border text-left transition-all hover:shadow-sm ${
+              className={`w-full p-2.5 sm:p-3 rounded-lg border text-left transition-all hover:shadow-sm touch-manipulation ${
                 module.status === "in_progress" 
                   ? "border-primary/30 bg-primary/5" 
                   : "border-border hover:border-primary/20"
               }`}
             >
-              <div className="flex items-start gap-3">
-                <div className={`p-2 rounded-full ${config.bg} shrink-0`}>
-                  <StatusIcon className={`w-4 h-4 ${config.color}`} />
+              <div className="flex items-start gap-2 sm:gap-3">
+                <div className={`p-1.5 sm:p-2 rounded-full ${config.bg} shrink-0`}>
+                  <StatusIcon className={`w-3.5 h-3.5 sm:w-4 sm:h-4 ${config.color}`} />
                 </div>
-                <div className="flex-1 min-w-0 space-y-2">
-                  <div className="flex items-start justify-between gap-2">
-                    <div className="min-w-0">
-                      <p className="font-medium text-sm truncate">
+                <div className="flex-1 min-w-0 space-y-1.5 sm:space-y-2">
+                  <div className="flex items-start justify-between gap-1.5 sm:gap-2">
+                    <div className="min-w-0 flex-1">
+                      <p className="font-medium text-xs sm:text-sm leading-tight line-clamp-2 sm:truncate sm:line-clamp-none">
                         {index + 1}. {module.title}
                       </p>
-                      <div className="flex items-center gap-2 mt-0.5 text-xs text-muted-foreground">
-                        <Clock className="w-3 h-3" />
-                        <span>{formatHoursMinutes(module.estimatedHours)}</span>
+                      <div className="flex items-center gap-1.5 sm:gap-2 mt-0.5 text-[10px] sm:text-xs text-muted-foreground">
+                        <Clock className="w-3 h-3 shrink-0" />
+                        <span className="whitespace-nowrap">{formatHoursMinutes(module.estimatedHours)}</span>
                         {module.status !== "not_started" && (
                           <>
                             <span>•</span>
-                            <span>{formatHoursMinutes(module.completedHours)} feitas</span>
+                            <span className="whitespace-nowrap">{formatHoursMinutes(module.completedHours)} feitas</span>
                           </>
                         )}
                       </div>
                     </div>
-                    <div className="flex items-center gap-2 shrink-0">
-                      <Badge className={config.badgeBg} variant="secondary">
-                        {module.status === "not_started" ? config.label : `${progress}%`}
+                    <div className="flex items-center gap-1 shrink-0">
+                      <Badge className={`${config.badgeBg} text-[10px] sm:text-xs px-1.5 sm:px-2`} variant="secondary">
+                        {module.status === "not_started" ? "" : `${progress}%`}
                       </Badge>
-                      <ChevronRight className="w-4 h-4 text-muted-foreground" />
+                      <ChevronRight className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-muted-foreground hidden sm:block" />
                     </div>
                   </div>
                   
                   {module.status !== "not_started" && (
-                    <Progress value={progress} className="h-1.5" />
+                    <Progress value={progress} className="h-1 sm:h-1.5" />
                   )}
                 </div>
               </div>

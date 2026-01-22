@@ -8,14 +8,14 @@ interface SimuladosCardProps {
 
 export function SimuladosCard({ simulados, onStartSimulado }: SimuladosCardProps) {
   return (
-    <div className="bg-card border rounded-2xl p-4 sm:p-6 shadow-sm">
+    <div className="bg-card border rounded-2xl p-3 sm:p-6 shadow-sm w-full overflow-hidden">
       {/* Header */}
-      <div className="flex items-center gap-2.5 sm:gap-3 mb-4 sm:mb-5">
-        <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-primary/10 flex items-center justify-center">
-          <FileText size={18} className="sm:w-5 sm:h-5 text-primary" />
+      <div className="flex items-center gap-2.5 sm:gap-3 mb-3 sm:mb-5">
+        <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
+          <FileText size={16} className="sm:w-5 sm:h-5 text-primary" />
         </div>
-        <div>
-          <h2 className="text-base sm:text-lg font-semibold text-card-foreground">Simulados</h2>
+        <div className="min-w-0">
+          <h2 className="text-sm sm:text-lg font-semibold text-card-foreground">Simulados</h2>
           <p className="text-[10px] sm:text-xs text-muted-foreground">Teste em condições reais</p>
         </div>
       </div>
@@ -29,25 +29,23 @@ export function SimuladosCard({ simulados, onStartSimulado }: SimuladosCardProps
           return (
             <div 
               key={simulado.id}
-              className={`p-3.5 sm:p-5 rounded-xl border-2 transition-all ${
+              className={`p-3 sm:p-5 rounded-xl border-2 transition-all ${
                 isPartial 
                   ? "bg-accent/5 border-accent/20 hover:border-accent/40" 
                   : "bg-primary/5 border-primary/20 hover:border-primary/40"
               }`}
             >
               {/* Header */}
-              <div className="flex items-start justify-between gap-2 mb-2 sm:mb-3">
-                <div className="min-w-0">
-                  <div className="flex items-center gap-1.5 sm:gap-2 mb-0.5 sm:mb-1 flex-wrap">
-                    <h3 className="font-semibold text-sm sm:text-base text-card-foreground">{simulado.name}</h3>
-                    <span className={`text-[8px] sm:text-[10px] font-bold uppercase px-1.5 sm:px-2 py-0.5 rounded-full shrink-0 ${
-                      isPartial ? "bg-accent/20 text-accent" : "bg-primary/20 text-primary"
-                    }`}>
-                      {isPartial ? "Parcial" : "Completo"}
-                    </span>
-                  </div>
-                  <p className="text-xs sm:text-sm text-muted-foreground line-clamp-2">{simulado.description}</p>
+              <div className="mb-2 sm:mb-3">
+                <div className="flex items-start gap-1.5 sm:gap-2 mb-0.5 sm:mb-1 flex-wrap">
+                  <h3 className="font-semibold text-xs sm:text-base text-card-foreground leading-tight">{simulado.name}</h3>
+                  <span className={`text-[8px] sm:text-[10px] font-bold uppercase px-1.5 py-0.5 rounded-full shrink-0 ${
+                    isPartial ? "bg-accent/20 text-accent" : "bg-primary/20 text-primary"
+                  }`}>
+                    {isPartial ? "Parcial" : "Completo"}
+                  </span>
                 </div>
+                <p className="text-[10px] sm:text-sm text-muted-foreground line-clamp-2">{simulado.description}</p>
               </div>
 
               {/* Stats */}

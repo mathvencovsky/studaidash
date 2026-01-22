@@ -33,20 +33,20 @@ export function TrailProgressCard({ modules, overallProgress, onModuleClick }: T
   };
 
   return (
-    <div className="bg-card border rounded-2xl p-4 sm:p-6 shadow-sm">
+    <div className="bg-card border rounded-2xl p-3 sm:p-6 shadow-sm w-full overflow-hidden">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4 mb-4 sm:mb-6">
-        <div className="min-w-0">
-          <h2 className="text-base sm:text-lg font-semibold text-card-foreground leading-tight">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 sm:gap-4 mb-3 sm:mb-6">
+        <div className="min-w-0 flex-1">
+          <h2 className="text-sm sm:text-lg font-semibold text-card-foreground leading-tight">
             CFA Level I – Quantitative Methods
           </h2>
-          <p className="text-xs sm:text-sm text-muted-foreground mt-0.5 sm:mt-1">
+          <p className="text-[10px] sm:text-sm text-muted-foreground mt-0.5">
             {modules.filter(m => m.status === "completed").length} de {modules.length} módulos concluídos
           </p>
         </div>
         <div className="flex items-center sm:block sm:text-right gap-2">
-          <p className="text-2xl sm:text-3xl font-bold text-primary">{overallProgress}%</p>
-          <p className="text-[10px] sm:text-xs text-muted-foreground">progresso geral</p>
+          <p className="text-xl sm:text-3xl font-bold text-primary">{overallProgress}%</p>
+          <p className="text-[9px] sm:text-xs text-muted-foreground">progresso geral</p>
         </div>
       </div>
 
@@ -72,39 +72,35 @@ export function TrailProgressCard({ modules, overallProgress, onModuleClick }: T
               key={module.id}
               onClick={() => isClickable && onModuleClick(module.id)}
               disabled={!isClickable}
-              className={`w-full flex items-center gap-3 sm:gap-4 p-3 sm:p-4 rounded-xl border transition-all duration-200 text-left ${
+              className={`w-full flex items-center gap-2 sm:gap-4 p-2.5 sm:p-4 rounded-xl border transition-all duration-200 text-left touch-manipulation ${
                 isClickable 
                   ? `hover:bg-secondary/50 active:scale-[0.99] ${colors.border}` 
                   : "opacity-60 cursor-not-allowed"
               }`}
             >
               {/* Status Icon */}
-              <div className={`w-9 h-9 sm:w-10 sm:h-10 rounded-xl flex items-center justify-center shrink-0 ${colors.bg} ${colors.text}`}>
-                <Icon size={16} className="sm:w-[18px] sm:h-[18px]" />
+              <div className={`w-8 h-8 sm:w-10 sm:h-10 rounded-xl flex items-center justify-center shrink-0 ${colors.bg} ${colors.text}`}>
+                <Icon size={14} className="sm:w-[18px] sm:h-[18px]" />
               </div>
 
               {/* Module Info */}
               <div className="flex-1 min-w-0">
-                <p className={`font-medium text-xs sm:text-sm truncate ${
+                <p className={`font-medium text-[11px] sm:text-sm line-clamp-1 ${
                   module.status === "locked" ? "text-muted-foreground" : "text-card-foreground"
                 }`}>
                   {module.name}
                 </p>
-                <div className="flex items-center gap-2 sm:gap-3 mt-0.5 sm:mt-1">
-                  <span className="text-[10px] sm:text-xs text-muted-foreground">
+                <div className="flex items-center gap-1.5 sm:gap-3 mt-0.5">
+                  <span className="text-[9px] sm:text-xs text-muted-foreground whitespace-nowrap">
                     {module.completedLessons}/{module.totalLessons} aulas
-                  </span>
-                  <span className="text-[10px] sm:text-xs text-muted-foreground hidden sm:inline">•</span>
-                  <span className="text-[10px] sm:text-xs text-muted-foreground hidden sm:inline">
-                    ~{module.estimatedHours}h
                   </span>
                 </div>
               </div>
 
               {/* Progress */}
-              <div className="flex items-center gap-2 sm:gap-3 shrink-0">
+              <div className="flex items-center gap-1.5 sm:gap-3 shrink-0">
                 {module.status !== "locked" && (
-                  <div className="w-12 sm:w-16">
+                  <div className="w-10 sm:w-16">
                     <div className="h-1 sm:h-1.5 bg-secondary rounded-full overflow-hidden">
                       <div 
                         className={`h-full rounded-full transition-all ${
@@ -113,7 +109,7 @@ export function TrailProgressCard({ modules, overallProgress, onModuleClick }: T
                         style={{ width: `${module.progress}%` }}
                       />
                     </div>
-                    <p className={`text-[9px] sm:text-[10px] text-right mt-0.5 ${
+                    <p className={`text-[8px] sm:text-[10px] text-right mt-0.5 ${
                       module.status === "completed" ? "text-status-success-text" : "text-muted-foreground"
                     }`}>
                       {module.progress}%
@@ -121,7 +117,7 @@ export function TrailProgressCard({ modules, overallProgress, onModuleClick }: T
                   </div>
                 )}
                 {isClickable && (
-                  <ChevronRight size={16} className="sm:w-[18px] sm:h-[18px] text-muted-foreground" />
+                  <ChevronRight size={14} className="sm:w-[18px] sm:h-[18px] text-muted-foreground hidden sm:block" />
                 )}
               </div>
             </button>
