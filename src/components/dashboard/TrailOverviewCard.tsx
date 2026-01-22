@@ -108,23 +108,23 @@ export function TrailOverviewCard({
           </div>
         </div>
 
-        {/* Key metrics grid */}
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-3">
-          <div className="p-2 sm:p-3 bg-muted/50 rounded-lg text-center">
-            <p className="text-lg sm:text-xl font-bold">{progressPercent}%</p>
-            <p className="text-[10px] sm:text-xs text-muted-foreground">Concluído</p>
+        {/* Key metrics grid - Horizontal scroll on mobile */}
+        <div className="flex gap-2 sm:grid sm:grid-cols-4 sm:gap-3 overflow-x-auto scrollbar-hide pb-1 -mx-1 px-1">
+          <div className="p-2 sm:p-3 bg-muted/50 rounded-lg text-center min-w-[80px] flex-shrink-0 sm:min-w-0 sm:flex-shrink">
+            <p className="text-base sm:text-xl font-bold whitespace-nowrap">{progressPercent}%</p>
+            <p className="text-[10px] sm:text-xs text-muted-foreground whitespace-nowrap">Concluído</p>
           </div>
-          <div className="p-2 sm:p-3 bg-muted/50 rounded-lg text-center">
-            <p className="text-lg sm:text-xl font-bold">{formatHoursMinutes(remainingHours)}</p>
-            <p className="text-[10px] sm:text-xs text-muted-foreground">Restantes</p>
+          <div className="p-2 sm:p-3 bg-muted/50 rounded-lg text-center min-w-[80px] flex-shrink-0 sm:min-w-0 sm:flex-shrink">
+            <p className="text-base sm:text-xl font-bold whitespace-nowrap">{formatHoursMinutes(remainingHours)}</p>
+            <p className="text-[10px] sm:text-xs text-muted-foreground whitespace-nowrap">Restantes</p>
           </div>
-          <div className="p-2 sm:p-3 bg-muted/50 rounded-lg text-center">
-            <p className="text-lg sm:text-xl font-bold">{daysUntilTarget}</p>
-            <p className="text-[10px] sm:text-xs text-muted-foreground">Dias p/ meta</p>
+          <div className="p-2 sm:p-3 bg-muted/50 rounded-lg text-center min-w-[80px] flex-shrink-0 sm:min-w-0 sm:flex-shrink">
+            <p className="text-base sm:text-xl font-bold whitespace-nowrap">{daysUntilTarget}</p>
+            <p className="text-[10px] sm:text-xs text-muted-foreground whitespace-nowrap">Dias p/ meta</p>
           </div>
-          <div className="p-2 sm:p-3 bg-muted/50 rounded-lg text-center">
-            <p className="text-lg sm:text-xl font-bold">{formatHoursMinutes(totalHours)}</p>
-            <p className="text-[10px] sm:text-xs text-muted-foreground">Total trilha</p>
+          <div className="p-2 sm:p-3 bg-muted/50 rounded-lg text-center min-w-[80px] flex-shrink-0 sm:min-w-0 sm:flex-shrink">
+            <p className="text-base sm:text-xl font-bold whitespace-nowrap">{formatHoursMinutes(totalHours)}</p>
+            <p className="text-[10px] sm:text-xs text-muted-foreground whitespace-nowrap">Total</p>
           </div>
         </div>
 

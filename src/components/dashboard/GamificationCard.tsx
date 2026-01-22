@@ -14,34 +14,34 @@ export function GamificationCard({ progress, onViewAllBadges }: GamificationCard
   const recentBadges = unlockedBadges.slice(0, 4);
 
   return (
-    <div className="bg-card border rounded-2xl p-4 sm:p-6 shadow-sm">
-      {/* Header Stats */}
-      <div className="grid grid-cols-3 gap-2 sm:gap-4 mb-4 sm:mb-6">
+    <div className="bg-card border rounded-2xl p-3 sm:p-6 shadow-sm w-full overflow-hidden">
+      {/* Header Stats - Horizontal scroll on mobile */}
+      <div className="flex gap-2 sm:grid sm:grid-cols-3 sm:gap-4 mb-4 sm:mb-6 overflow-x-auto scrollbar-hide pb-1 -mx-1 px-1">
         {/* XP */}
-        <div className="text-center p-2.5 sm:p-4 bg-accent/5 rounded-xl">
+        <div className="text-center p-2.5 sm:p-4 bg-accent/5 rounded-xl min-w-[100px] flex-shrink-0 sm:min-w-0 sm:flex-shrink">
           <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-accent/10 flex items-center justify-center mx-auto mb-1.5 sm:mb-2">
             <Zap size={16} className="sm:w-5 sm:h-5 text-accent" />
           </div>
-          <p className="text-lg sm:text-2xl font-bold text-card-foreground">{progress.xp.toLocaleString()}</p>
-          <p className="text-[10px] sm:text-xs text-muted-foreground">XP Total</p>
+          <p className="text-base sm:text-2xl font-bold text-card-foreground whitespace-nowrap">{progress.xp.toLocaleString()}</p>
+          <p className="text-[10px] sm:text-xs text-muted-foreground whitespace-nowrap">XP Total</p>
         </div>
 
         {/* Level */}
-        <div className="text-center p-2.5 sm:p-4 bg-primary/5 rounded-xl">
+        <div className="text-center p-2.5 sm:p-4 bg-primary/5 rounded-xl min-w-[100px] flex-shrink-0 sm:min-w-0 sm:flex-shrink">
           <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-1.5 sm:mb-2">
             <Star size={16} className="sm:w-5 sm:h-5 text-primary" />
           </div>
-          <p className="text-lg sm:text-2xl font-bold text-card-foreground">Nv {progress.level}</p>
-          <p className="text-[10px] sm:text-xs text-muted-foreground">Estudante</p>
+          <p className="text-base sm:text-2xl font-bold text-card-foreground whitespace-nowrap">Nv {progress.level}</p>
+          <p className="text-[10px] sm:text-xs text-muted-foreground whitespace-nowrap">Estudante</p>
         </div>
 
         {/* Streak */}
-        <div className="text-center p-2.5 sm:p-4 bg-warning/10 rounded-xl">
+        <div className="text-center p-2.5 sm:p-4 bg-warning/10 rounded-xl min-w-[100px] flex-shrink-0 sm:min-w-0 sm:flex-shrink">
           <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-warning/20 flex items-center justify-center mx-auto mb-1.5 sm:mb-2">
             <Flame size={16} className="sm:w-5 sm:h-5 text-warning" />
           </div>
-          <p className="text-lg sm:text-2xl font-bold text-card-foreground">{progress.streak}</p>
-          <p className="text-[10px] sm:text-xs text-muted-foreground">Dias</p>
+          <p className="text-base sm:text-2xl font-bold text-card-foreground whitespace-nowrap">{progress.streak}</p>
+          <p className="text-[10px] sm:text-xs text-muted-foreground whitespace-nowrap">Dias</p>
         </div>
       </div>
 
@@ -97,17 +97,17 @@ export function GamificationCard({ progress, onViewAllBadges }: GamificationCard
           </button>
         </div>
 
-        <div className="grid grid-cols-4 gap-2 sm:gap-3">
+        <div className="flex gap-2 sm:grid sm:grid-cols-4 sm:gap-3 overflow-x-auto scrollbar-hide pb-1 -mx-1 px-1">
           {recentBadges.map((badge) => (
             <div 
               key={badge.id}
-              className="flex flex-col items-center p-2 sm:p-3 bg-secondary/50 rounded-xl hover:bg-secondary transition-colors cursor-pointer group active:scale-95"
+              className="flex flex-col items-center p-2 sm:p-3 bg-secondary/50 rounded-xl hover:bg-secondary transition-colors cursor-pointer group active:scale-95 min-w-[72px] flex-shrink-0 sm:min-w-0 sm:flex-shrink"
               title={badge.description}
             >
               <span className="text-xl sm:text-2xl mb-0.5 sm:mb-1 group-hover:scale-110 transition-transform">
                 {badge.icon}
               </span>
-              <p className="text-[8px] sm:text-[10px] text-center text-muted-foreground font-medium leading-tight line-clamp-2">
+              <p className="text-[8px] sm:text-[10px] text-center text-muted-foreground font-medium leading-tight line-clamp-2 max-w-[64px]">
                 {badge.name}
               </p>
             </div>
