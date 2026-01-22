@@ -3,12 +3,13 @@ import { NavLink } from "@/components/NavLink";
 import { 
   Home, 
   Map, 
+  Sparkles,
   FileQuestion, 
   Trophy, 
   User, 
   Settings, 
   Menu, 
-  X,
+  BarChart3,
   GraduationCap
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -19,9 +20,11 @@ interface AppLayoutProps {
 }
 
 const navItems = [
-  { to: "/", icon: Home, label: "Home" },
-  { to: "/trilha", icon: Map, label: "Trilha" },
-  { to: "/quizzes", icon: FileQuestion, label: "Quizzes" },
+  { to: "/", icon: Home, label: "Dashboard" },
+  { to: "/trilha", icon: Map, label: "Minha Trilha" },
+  { to: "/estudar", icon: Sparkles, label: "Estudar com IA" },
+  { to: "/quizzes", icon: FileQuestion, label: "Simulados" },
+  { to: "/relatorios", icon: BarChart3, label: "Relatórios" },
   { to: "/ranking", icon: Trophy, label: "Ranking" },
   { to: "/perfil", icon: User, label: "Perfil" },
   { to: "/configuracoes", icon: Settings, label: "Configurações" },
