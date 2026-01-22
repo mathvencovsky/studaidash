@@ -1,10 +1,14 @@
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { useNavigate } from "react-router-dom";
+import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { FileQuestion, CheckCircle2, Clock, RotateCcw, Play } from "lucide-react";
+import { FileQuestion, CheckCircle2, RotateCcw, Play } from "lucide-react";
 import { CFA_QUIZZES } from "@/data/cfa-mock-data";
+import { getQuizQuestions } from "@/data/quiz-questions-data";
 
 export default function Quizzes() {
+  const navigate = useNavigate();
+
   const getStatusBadge = (status: string) => {
     switch (status) {
       case "completed":
@@ -18,27 +22,53 @@ export default function Quizzes() {
     }
   };
 
-  const getActionButton = (status: string) => {
+  const handleStartQuiz = (quizId: string) => {
+    const questions = getQuizQuestions(quizId);
+    if (questions.length > 0) {
+      navigate(`/quiz/${quizId}`);
+    }
+  };
+
+  const getActionButton = (quizId: string, status: string) => {
+    const questions = getQuizQuestions(quizId);
+    const hasQuestions = questions.length > 0;
+
     switch (status) {
       case "completed":
         return (
-          <Button variant="outline" size="sm" className="gap-1">
+          <Button 
+            variant="outline" 
+            size="sm" 
+            className="gap-1"
+            onClick={() => handleStartQuiz(quizId)}
+            disabled={!hasQuestions}
+          >
             <RotateCcw size={14} />
             Refazer
           </Button>
         );
       case "in_progress":
         return (
-          <Button size="sm" className="gap-1">
+          <Button 
+            size="sm" 
+            className="gap-1"
+            onClick={() => handleStartQuiz(quizId)}
+            disabled={!hasQuestions}
+          >
             <Play size={14} />
             Continuar
           </Button>
         );
       case "not_started":
         return (
-          <Button size="sm" className="gap-1">
+          <Button 
+            size="sm" 
+            className="gap-1"
+            onClick={() => handleStartQuiz(quizId)}
+            disabled={!hasQuestions}
+          >
             <Play size={14} />
-            Iniciar
+            {hasQuestions ? "Iniciar" : "Em breve"}
           </Button>
         );
       default:
@@ -79,50 +109,57 @@ export default function Quizzes() {
       {/* Quiz List */}
       <div className="space-y-3">
         <h2 className="text-lg font-semibold">Quizzes por Módulo</h2>
-        {CFA_QUIZZES.map((quiz) => (
-          <Card key={quiz.id} className="hover:shadow-md transition-shadow">
-            <CardContent className="p-4">
-              <div className="flex items-start gap-3">
-                <div className="flex items-center justify-center w-10 h-10 rounded-full bg-primary/10 shrink-0">
-                  <FileQuestion className="w-5 h-5 text-primary" />
-                </div>
-                <div className="flex-1 min-w-0 space-y-2">
-                  <div className="flex items-start justify-between gap-2">
-                    <div className="min-w-0">
-                      <h3 className="font-medium text-sm sm:text-base truncate">{quiz.moduleName}</h3>
-                      <div className="flex items-center gap-2 mt-1 text-xs text-muted-foreground">
-                        <span>{quiz.totalQuestions} questões</span>
-                        {quiz.attempts > 0 && (
-                          <>
-                            <span>•</span>
-                            <span>{quiz.attempts} tentativa{quiz.attempts > 1 ? "s" : ""}</span>
-                          </>
+        {CFA_QUIZZES.map((quiz) => {
+          const questions = getQuizQuestions(quiz.id);
+          const hasQuestions = questions.length > 0;
+          
+          return (
+            <Card key={quiz.id} className={`transition-shadow ${hasQuestions ? "hover:shadow-md cursor-pointer" : "opacity-70"}`}>
+              <CardContent className="p-4">
+                <div className="flex items-start gap-3">
+                  <div className={`flex items-center justify-center w-10 h-10 rounded-full shrink-0 ${
+                    hasQuestions ? "bg-primary/10" : "bg-muted"
+                  }`}>
+                    <FileQuestion className={`w-5 h-5 ${hasQuestions ? "text-primary" : "text-muted-foreground"}`} />
+                  </div>
+                  <div className="flex-1 min-w-0 space-y-2">
+                    <div className="flex items-start justify-between gap-2">
+                      <div className="min-w-0">
+                        <h3 className="font-medium text-sm sm:text-base truncate">{quiz.moduleName}</h3>
+                        <div className="flex items-center gap-2 mt-1 text-xs text-muted-foreground">
+                          <span>{hasQuestions ? `${questions.length} questões` : "Em breve"}</span>
+                          {quiz.attempts > 0 && (
+                            <>
+                              <span>•</span>
+                              <span>{quiz.attempts} tentativa{quiz.attempts > 1 ? "s" : ""}</span>
+                            </>
+                          )}
+                        </div>
+                      </div>
+                      {getStatusBadge(quiz.status)}
+                    </div>
+                    
+                    {quiz.lastScore !== undefined && (
+                      <div className="flex items-center gap-2 text-sm">
+                        <CheckCircle2 className="w-4 h-4 text-green-500" />
+                        <span>Última nota: <strong>{quiz.lastScore}%</strong></span>
+                        {quiz.lastAttemptDate && (
+                          <span className="text-muted-foreground text-xs">
+                            ({new Date(quiz.lastAttemptDate).toLocaleDateString("pt-BR")})
+                          </span>
                         )}
                       </div>
-                    </div>
-                    {getStatusBadge(quiz.status)}
-                  </div>
-                  
-                  {quiz.lastScore !== undefined && (
-                    <div className="flex items-center gap-2 text-sm">
-                      <CheckCircle2 className="w-4 h-4 text-green-500" />
-                      <span>Última nota: <strong>{quiz.lastScore}%</strong></span>
-                      {quiz.lastAttemptDate && (
-                        <span className="text-muted-foreground text-xs">
-                          ({new Date(quiz.lastAttemptDate).toLocaleDateString("pt-BR")})
-                        </span>
-                      )}
-                    </div>
-                  )}
+                    )}
 
-                  <div className="flex justify-end">
-                    {getActionButton(quiz.status)}
+                    <div className="flex justify-end">
+                      {getActionButton(quiz.id, quiz.status)}
+                    </div>
                   </div>
                 </div>
-              </div>
-            </CardContent>
-          </Card>
-        ))}
+              </CardContent>
+            </Card>
+          );
+        })}
       </div>
     </div>
   );

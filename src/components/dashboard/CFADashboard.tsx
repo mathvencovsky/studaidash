@@ -1,4 +1,5 @@
 import { useState, useCallback, useMemo, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { Sparkles } from "lucide-react";
 import { DailyMissionCard } from "./DailyMissionCard";
 import { TrailProgressCard } from "./TrailProgressCard";
@@ -8,6 +9,7 @@ import { SimuladosCard } from "./SimuladosCard";
 import { SmartFeedbackCard } from "./SmartFeedbackCard";
 import { CompletionPlanCard } from "./CompletionPlanCard";
 import type { DailyMission, CFAModule, UserProgress, Quiz, Simulado, SmartFeedback } from "@/types/studai";
+import { getQuizQuestions } from "@/data/quiz-questions-data";
 import { 
   CFA_MODULES, 
   DEFAULT_USER_PROGRESS, 
@@ -58,6 +60,8 @@ interface Toast {
 }
 
 export function CFADashboard() {
+  const navigate = useNavigate();
+  
   // State
   const [mission, setMission] = useState<DailyMission>(() => 
     loadState(STORAGE_KEYS.mission, getTodayMission())
@@ -150,15 +154,17 @@ export function CFADashboard() {
   }, [addToast]);
 
   const handleStartQuiz = useCallback((quizId: string) => {
-    const quiz = quizzes.find(q => q.id === quizId);
-    addToast(`Iniciando quiz: ${quiz?.moduleName || "Quiz"}`, "info");
-    // TODO API: Start quiz session
-  }, [addToast, quizzes]);
+    const questions = getQuizQuestions(quizId);
+    if (questions.length > 0) {
+      navigate(`/quiz/${quizId}`);
+    } else {
+      addToast("Quiz em desenvolvimento", "info");
+    }
+  }, [navigate, addToast]);
 
   const handleViewAllQuizzes = useCallback(() => {
-    addToast("Ver todas as avaliações", "info");
-    // TODO API: Navigate to quizzes page
-  }, [addToast]);
+    navigate("/quizzes");
+  }, [navigate]);
 
   const handleStartSimulado = useCallback((simuladoId: string) => {
     const simulado = simulados.find(s => s.id === simuladoId);
