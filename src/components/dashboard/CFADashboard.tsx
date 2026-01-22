@@ -215,7 +215,7 @@ export function CFADashboard() {
       </div>
 
       {/* Trail Selector + Overview Grid - Equal columns */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-5 lg:gap-6 mb-5 sm:mb-6">
+      <div className="grid grid-cols-1 lg:grid-cols-2 items-start gap-4 sm:gap-5 lg:gap-6 mb-5 sm:mb-6">
         {/* Trail Selector */}
         <TrailSelectorCard 
           activeTrail={activeTrail}
