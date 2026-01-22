@@ -7,10 +7,12 @@ import { AppLayout } from "@/components/layout/AppLayout";
 import Index from "./pages/Index";
 import Trilha from "./pages/Trilha";
 import TrailOverview from "./pages/TrailOverview";
+import MeuObjetivo from "./pages/MeuObjetivo";
 import Quizzes from "./pages/Quizzes";
 import QuizSession from "./pages/QuizSession";
 import EstudarComIA from "./pages/EstudarComIA";
 import Relatorios from "./pages/Relatorios";
+import Engajamento from "./pages/Engajamento";
 import Ranking from "./pages/Ranking";
 import Perfil from "./pages/Perfil";
 import Configuracoes from "./pages/Configuracoes";
@@ -31,10 +33,12 @@ const App = () => (
           
           {/* Main app routes with layout */}
           <Route element={<AppLayout><Index /></AppLayout>} path="/" />
+          <Route element={<AppLayout><MeuObjetivo /></AppLayout>} path="/objetivo" />
           <Route element={<AppLayout><Trilha /></AppLayout>} path="/trilha" />
           <Route element={<AppLayout><TrailOverview /></AppLayout>} path="/trilha/visao-geral" />
           <Route element={<AppLayout><Quizzes /></AppLayout>} path="/quizzes" />
           <Route element={<AppLayout><Relatorios /></AppLayout>} path="/relatorios" />
+          <Route element={<AppLayout><Engajamento /></AppLayout>} path="/engajamento" />
           <Route element={<AppLayout><Ranking /></AppLayout>} path="/ranking" />
           <Route element={<AppLayout><Perfil /></AppLayout>} path="/perfil" />
           <Route element={<AppLayout><Configuracoes /></AppLayout>} path="/configuracoes" />

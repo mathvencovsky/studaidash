@@ -9,3 +9,5 @@ export { TrailSelectorCard } from "./TrailSelectorCard";
 export { CompletionPlanCard } from "./CompletionPlanCard";
 export { CurrentPaceCard } from "./CurrentPaceCard";
 export { ModulesProgressCard } from "./ModulesProgressCard";
+export { GoalSelectorCard } from "./GoalSelectorCard";
+export { AICopilotCard } from "./AICopiloCard";
