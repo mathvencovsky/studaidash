@@ -67,7 +67,7 @@ export function TrailOverviewCard({
   const StatusIcon = status.icon;
 
   return (
-    <Card>
+    <Card className="h-full flex flex-col">
       <CardHeader className="pb-2">
         <div className="flex items-center justify-between">
           <CardTitle className="text-base sm:text-lg flex items-center gap-2">
@@ -81,7 +81,7 @@ export function TrailOverviewCard({
         </div>
         <p className="text-xs sm:text-sm text-muted-foreground">{trailName}</p>
       </CardHeader>
-      <CardContent className="space-y-4">
+      <CardContent className="space-y-4 flex-1 flex flex-col">
         {/* Timeline */}
         <div className="flex items-center justify-between text-xs sm:text-sm">
           <div className="text-center">
