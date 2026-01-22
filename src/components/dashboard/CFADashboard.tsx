@@ -194,9 +194,9 @@ export function CFADashboard() {
   }, [addToast]);
 
   return (
-    <div className="p-4 sm:p-6 pb-24 md:pb-6">
+    <div className="px-4 sm:px-6 lg:px-8 py-4 sm:py-6 pb-24 md:pb-8 max-w-7xl mx-auto">
       {/* Welcome + Tagline */}
-      <div className="mb-4 sm:mb-6">
+      <div className="mb-5 sm:mb-6">
         <h1 className="text-xl sm:text-2xl md:text-3xl font-bold text-card-foreground">
           Olá, João! 👋
         </h1>
@@ -206,7 +206,7 @@ export function CFADashboard() {
       </div>
 
       {/* CTA Principal - Estudar com IA */}
-      <div className="mb-4 sm:mb-6">
+      <div className="mb-5 sm:mb-6">
         <AIStudyCTACard 
           recommendation={aiRecommendation}
           onStartWithAI={() => navigate("/estudar")}
@@ -214,8 +214,8 @@ export function CFADashboard() {
         />
       </div>
 
-      {/* Trail Selector + Overview Grid */}
-      <div className="grid lg:grid-cols-2 gap-4 sm:gap-6 mb-4 sm:mb-6">
+      {/* Trail Selector + Overview Grid - Equal columns */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-5 lg:gap-6 mb-5 sm:mb-6">
         {/* Trail Selector */}
         <TrailSelectorCard 
           activeTrail={activeTrail}
@@ -234,10 +234,10 @@ export function CFADashboard() {
         />
       </div>
 
-      {/* Grid Layout */}
-      <div className="grid lg:grid-cols-12 gap-4 sm:gap-6">
+      {/* Main Grid Layout - Equal 6/6 columns for balance */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-5 lg:gap-6">
         {/* Left Column - Primary Actions */}
-        <div className="lg:col-span-5 space-y-4 sm:space-y-6">
+        <div className="space-y-4 sm:space-y-5 lg:space-y-6">
           {/* 1. DAILY MISSION - Most Important */}
           <DailyMissionCard
             mission={mission}
@@ -250,10 +250,17 @@ export function CFADashboard() {
             feedback={feedback}
             onActionClick={handleFeedbackAction}
           />
+
+          {/* Quizzes */}
+          <QuizzesCard
+            quizzes={quizzes}
+            onStartQuiz={handleStartQuiz}
+            onViewAll={handleViewAllQuizzes}
+          />
         </div>
 
         {/* Right Column - Supporting Info */}
-        <div className="lg:col-span-7 space-y-4 sm:space-y-6">
+        <div className="space-y-4 sm:space-y-5 lg:space-y-6">
           {/* 2. Trail Progress */}
           <TrailProgressCard
             modules={modules}
@@ -267,14 +274,7 @@ export function CFADashboard() {
             onViewAllBadges={handleViewAllBadges}
           />
 
-          {/* 4. Quizzes */}
-          <QuizzesCard
-            quizzes={quizzes}
-            onStartQuiz={handleStartQuiz}
-            onViewAll={handleViewAllQuizzes}
-          />
-
-          {/* 5. Simulados */}
+          {/* 4. Simulados */}
           <SimuladosCard
             simulados={simulados}
             onStartSimulado={handleStartSimulado}
