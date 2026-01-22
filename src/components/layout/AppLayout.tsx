@@ -14,7 +14,8 @@ import {
   Target,
   Eye,
   PlayCircle,
-  Activity
+  Activity,
+  Compass
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
@@ -30,7 +31,8 @@ const mainNavItems = [
   { to: "/objetivo", icon: Target, label: "Meu Objetivo" },
   { to: "/trilha/visao-geral", icon: Eye, label: "Visão Geral" },
   { to: "/estudar", icon: Sparkles, label: "Estudar com IA" },
-  { to: "/trilha", icon: Map, label: "Trilhas" },
+  { to: "/explorar", icon: Compass, label: "Explorar Trilhas" },
+  { to: "/trilha", icon: Map, label: "Minhas Trilhas" },
   { to: "/quizzes", icon: FileQuestion, label: "Simulados" },
 ];
 
