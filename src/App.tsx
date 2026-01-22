@@ -8,6 +8,8 @@ import Index from "./pages/Index";
 import Trilha from "./pages/Trilha";
 import Quizzes from "./pages/Quizzes";
 import QuizSession from "./pages/QuizSession";
+import EstudarComIA from "./pages/EstudarComIA";
+import Relatorios from "./pages/Relatorios";
 import Ranking from "./pages/Ranking";
 import Perfil from "./pages/Perfil";
 import Configuracoes from "./pages/Configuracoes";
@@ -22,17 +24,18 @@ const App = () => (
       <Sonner />
       <BrowserRouter>
         <Routes>
-          {/* Quiz session runs outside AppLayout for fullscreen experience */}
+          {/* Fullscreen routes */}
           <Route path="/quiz/:quizId" element={<QuizSession />} />
+          <Route path="/estudar" element={<EstudarComIA />} />
           
           {/* Main app routes with layout */}
           <Route element={<AppLayout><Index /></AppLayout>} path="/" />
           <Route element={<AppLayout><Trilha /></AppLayout>} path="/trilha" />
           <Route element={<AppLayout><Quizzes /></AppLayout>} path="/quizzes" />
+          <Route element={<AppLayout><Relatorios /></AppLayout>} path="/relatorios" />
           <Route element={<AppLayout><Ranking /></AppLayout>} path="/ranking" />
           <Route element={<AppLayout><Perfil /></AppLayout>} path="/perfil" />
           <Route element={<AppLayout><Configuracoes /></AppLayout>} path="/configuracoes" />
-          {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>

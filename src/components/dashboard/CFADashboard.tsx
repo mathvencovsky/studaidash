@@ -7,9 +7,11 @@ import { GamificationCard } from "./GamificationCard";
 import { QuizzesCard } from "./QuizzesCard";
 import { SimuladosCard } from "./SimuladosCard";
 import { SmartFeedbackCard } from "./SmartFeedbackCard";
-import { CompletionPlanCard } from "./CompletionPlanCard";
+import { AIStudyCTACard } from "./AIStudyCTACard";
+import { TrailOverviewCard } from "./TrailOverviewCard";
 import type { DailyMission, CFAModule, UserProgress, Quiz, Simulado, SmartFeedback } from "@/types/studai";
 import { getQuizQuestions } from "@/data/quiz-questions-data";
+import { getNextAIStudyAction } from "@/data/ai-study-data";
 import { 
   CFA_MODULES, 
   DEFAULT_USER_PROGRESS, 
@@ -61,6 +63,9 @@ interface Toast {
 
 export function CFADashboard() {
   const navigate = useNavigate();
+  
+  // AI Recommendation
+  const aiRecommendation = useMemo(() => getNextAIStudyAction(), []);
   
   // State
   const [mission, setMission] = useState<DailyMission>(() => 
@@ -179,22 +184,34 @@ export function CFADashboard() {
 
   return (
     <div className="p-4 sm:p-6 pb-24 md:pb-6">
-      {/* Welcome Message */}
+      {/* Welcome + Tagline */}
       <div className="mb-4 sm:mb-6">
         <h1 className="text-xl sm:text-2xl md:text-3xl font-bold text-card-foreground">
           Olá, João! 👋
         </h1>
         <p className="text-sm sm:text-base text-muted-foreground mt-0.5 sm:mt-1">
-          Continue de onde parou. Sua missão está esperando!
+          O StudAI usa IA para adaptar seus estudos ao seu objetivo e ritmo.
         </p>
       </div>
 
-      {/* Compact Plan Overview - Full Width */}
+      {/* CTA Principal - Estudar com IA */}
       <div className="mb-4 sm:mb-6">
-        <CompletionPlanCard 
-          trail={MOCK_TRAIL_PLAN}
+        <AIStudyCTACard 
+          recommendation={aiRecommendation}
+          onStartWithAI={() => navigate("/estudar")}
+          onViewTrail={() => navigate("/trilha")}
+        />
+      </div>
+
+      {/* Visão Geral da Trilha */}
+      <div className="mb-4 sm:mb-6">
+        <TrailOverviewCard 
+          trailName={MOCK_TRAIL_PLAN.name}
+          startDate={MOCK_TRAIL_PLAN.startDate}
+          targetDate={MOCK_TRAIL_PLAN.targetDate}
           calculations={trailCalculations}
-          compact={true}
+          totalHours={MOCK_TRAIL_PLAN.totalEstimatedHours}
+          completedHours={MOCK_TRAIL_PLAN.completedHours}
         />
       </div>
 
