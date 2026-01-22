@@ -93,28 +93,28 @@ export function CompletionPlanCard({
 
   if (compact) {
     return (
-      <Card className={`${status.bg} ${status.border} border`}>
-        <CardContent className="p-4">
-          <div className="flex items-center justify-between gap-3">
-            <div className="flex items-center gap-3 min-w-0">
-              <div className={`p-2 rounded-full ${status.bg}`}>
-                <StatusIcon className={`w-5 h-5 ${status.color}`} />
+      <Card className={`${status.bg} ${status.border} border overflow-hidden`}>
+        <CardContent className="p-3 sm:p-4">
+          <div className="flex items-center justify-between gap-2">
+            <div className="flex items-center gap-2 sm:gap-3 min-w-0 flex-1">
+              <div className={`p-1.5 sm:p-2 rounded-full ${status.bg} shrink-0`}>
+                <StatusIcon className={`w-4 h-4 sm:w-5 sm:h-5 ${status.color}`} />
               </div>
-              <div className="min-w-0">
-                <div className="flex items-center gap-2">
-                  <span className={`font-semibold ${status.color}`}>{status.label}</span>
-                  <Badge variant="secondary" className="text-xs">
+              <div className="min-w-0 flex-1">
+                <div className="flex items-center gap-1.5 sm:gap-2 flex-wrap">
+                  <span className={`text-xs sm:text-sm font-semibold ${status.color}`}>{status.label}</span>
+                  <Badge variant="secondary" className="text-[10px] sm:text-xs px-1.5 py-0">
                     {progressPercent}% concluído
                   </Badge>
                 </div>
-                <p className="text-sm text-muted-foreground truncate">
+                <p className="text-[10px] sm:text-sm text-muted-foreground truncate">
                   Faltam {formatHoursMinutes(remainingHours)} • Meta: {formatDateBR(trail.targetDate)}
                 </p>
               </div>
             </div>
             <div className="text-right shrink-0">
-              <p className="text-lg font-bold">{formatMinutesToHoursMinutes(requiredMinutesPerDay)}</p>
-              <p className="text-xs text-muted-foreground">por dia</p>
+              <p className="text-sm sm:text-lg font-bold">{formatMinutesToHoursMinutes(requiredMinutesPerDay)}</p>
+              <p className="text-[9px] sm:text-xs text-muted-foreground">por dia</p>
             </div>
           </div>
         </CardContent>
