@@ -85,67 +85,69 @@ export default function ExplorarTrilhas() {
   }, [tracks]);
 
   return (
-    <div className="min-h-screen bg-background pb-20 md:pb-8">
-      {/* Hero Section */}
+    <div className="min-h-screen bg-background pb-24 md:pb-8">
+      {/* Hero Section - More compact on mobile */}
       <div className="bg-gradient-to-br from-[#1A237E] to-[#255FF1] text-white">
-        <div className="container mx-auto px-4 py-8 md:py-12">
-          <div className="flex items-center gap-3 mb-4">
-            <div className="w-12 h-12 rounded-xl bg-white/20 flex items-center justify-center">
-              <Compass className="w-6 h-6" />
+        <div className="container mx-auto px-4 py-6 sm:py-8 md:py-12">
+          <div className="flex items-center gap-2 sm:gap-3 mb-3 sm:mb-4">
+            <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-white/20 flex items-center justify-center">
+              <Compass className="w-5 h-5 sm:w-6 sm:h-6" />
             </div>
             <div>
-              <h1 className="text-2xl md:text-3xl font-bold">Explorar Trilhas</h1>
-              <p className="text-white/80 text-sm md:text-base">
+              <h1 className="text-xl sm:text-2xl md:text-3xl font-bold">Explorar Trilhas</h1>
+              <p className="text-white/80 text-xs sm:text-sm md:text-base">
                 Descubra sua próxima jornada de aprendizado
               </p>
             </div>
           </div>
 
-          {/* Stats */}
-          <div className="grid grid-cols-3 gap-4 mt-6">
-            <div className="bg-white/10 rounded-lg p-3 text-center">
-              <div className="flex items-center justify-center gap-1 mb-1">
-                <BookOpen className="w-4 h-4" />
-                <span className="text-xl font-bold">{tracks.length}</span>
+          {/* Stats - Smaller on mobile */}
+          <div className="grid grid-cols-3 gap-2 sm:gap-4 mt-4 sm:mt-6">
+            <div className="bg-white/10 rounded-lg p-2 sm:p-3 text-center">
+              <div className="flex items-center justify-center gap-1 mb-0.5 sm:mb-1">
+                <BookOpen className="w-3 h-3 sm:w-4 sm:h-4" />
+                <span className="text-lg sm:text-xl font-bold">{tracks.length}</span>
               </div>
-              <p className="text-[10px] text-white/70 uppercase tracking-wide">Trilhas</p>
+              <p className="text-[8px] sm:text-[10px] text-white/70 uppercase tracking-wide">Trilhas</p>
             </div>
-            <div className="bg-white/10 rounded-lg p-3 text-center">
-              <div className="flex items-center justify-center gap-1 mb-1">
-                <TrendingUp className="w-4 h-4" />
-                <span className="text-xl font-bold">6</span>
+            <div className="bg-white/10 rounded-lg p-2 sm:p-3 text-center">
+              <div className="flex items-center justify-center gap-1 mb-0.5 sm:mb-1">
+                <TrendingUp className="w-3 h-3 sm:w-4 sm:h-4" />
+                <span className="text-lg sm:text-xl font-bold">6</span>
               </div>
-              <p className="text-[10px] text-white/70 uppercase tracking-wide">Categorias</p>
+              <p className="text-[8px] sm:text-[10px] text-white/70 uppercase tracking-wide">Categorias</p>
             </div>
-            <div className="bg-white/10 rounded-lg p-3 text-center">
-              <div className="flex items-center justify-center gap-1 mb-1">
-                <Sparkles className="w-4 h-4" />
-                <span className="text-xl font-bold">IA</span>
+            <div className="bg-white/10 rounded-lg p-2 sm:p-3 text-center">
+              <div className="flex items-center justify-center gap-1 mb-0.5 sm:mb-1">
+                <Sparkles className="w-3 h-3 sm:w-4 sm:h-4" />
+                <span className="text-lg sm:text-xl font-bold">IA</span>
               </div>
-              <p className="text-[10px] text-white/70 uppercase tracking-wide">Copiloto</p>
+              <p className="text-[8px] sm:text-[10px] text-white/70 uppercase tracking-wide">Copiloto</p>
             </div>
           </div>
         </div>
       </div>
 
       {/* Main Content */}
-      <div className="container mx-auto px-4 py-6">
-        {/* Filters */}
-        <TrackFilters 
-          filters={filters} 
-          onFiltersChange={setFilters} 
-          resultCount={filteredTracks.length} 
-        />
+      <div className="container mx-auto px-3 sm:px-4 py-4 sm:py-6">
+        {/* Filters - Sticky on mobile */}
+        <div className="sticky top-0 z-30 bg-background -mx-3 sm:-mx-4 px-3 sm:px-4 py-3 sm:py-0 sm:static sm:bg-transparent border-b sm:border-b-0 mb-4 sm:mb-0">
+          <TrackFilters 
+            filters={filters} 
+            onFiltersChange={setFilters} 
+            resultCount={filteredTracks.length} 
+          />
+        </div>
 
-        <div className="mt-6 flex gap-6">
+        <div className="mt-4 sm:mt-6 flex gap-6">
           {/* Desktop Sidebar Filters */}
-          <aside className="hidden md:block w-64 shrink-0">
+          <aside className="hidden lg:block w-64 shrink-0">
             <div className="sticky top-4">
               <DesktopFilters filters={filters} onFiltersChange={setFilters} />
             </div>
           </aside>
 
-          {/* Tracks Grid */}
+          {/* Tracks Grid - Better responsive */}
           <div className="flex-1 min-w-0">
             {isLoading ? (
               <TrackGridSkeleton count={6} />
@@ -155,7 +157,7 @@ export default function ExplorarTrilhas() {
                 onClearFilters={() => setFilters(getDefaultFilters())} 
               />
             ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+              <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4 sm:gap-6">
                 {filteredTracks.map((track) => (
                   <TrackCard
                     key={track.id}

@@ -86,28 +86,28 @@ export function AddToPlanModal({ track, isOpen, onClose, onSuccess }: AddToPlanM
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-md">
+      <DialogContent className="sm:max-w-md max-h-[90vh] overflow-y-auto mx-4 sm:mx-auto">
         <DialogHeader>
-          <DialogTitle className="flex items-center gap-2">
-            <Target className="w-5 h-5 text-primary" />
+          <DialogTitle className="flex items-center gap-2 text-base sm:text-lg">
+            <Target className="w-4 h-4 sm:w-5 sm:h-5 text-primary" />
             Adicionar ao Plano
           </DialogTitle>
-          <DialogDescription>
+          <DialogDescription className="text-xs sm:text-sm">
             Configure como você quer estudar "{track.title}"
           </DialogDescription>
         </DialogHeader>
 
-        <div className="space-y-4 py-4">
+        <div className="space-y-4 py-3 sm:py-4">
           {/* Goal Selection */}
           <div className="space-y-2">
-            <Label htmlFor="goal" className="text-sm font-medium">
+            <Label htmlFor="goal" className="text-xs sm:text-sm font-medium">
               Vincular a um objetivo (opcional)
             </Label>
             <Select value={goalId} onValueChange={setGoalId}>
-              <SelectTrigger id="goal">
+              <SelectTrigger id="goal" className="h-10 sm:h-9">
                 <SelectValue placeholder="Selecione um objetivo..." />
               </SelectTrigger>
-              <SelectContent>
+              <SelectContent className="bg-popover z-50">
                 <SelectItem value="none">Sem objetivo específico</SelectItem>
                 {loadStudyGoals().map((goal: StudyGoal) => (
                   <SelectItem key={goal.id} value={goal.id}>
@@ -120,15 +120,15 @@ export function AddToPlanModal({ track, isOpen, onClose, onSuccess }: AddToPlanM
 
           {/* Daily Minutes */}
           <div className="space-y-2">
-            <Label htmlFor="dailyMinutes" className="text-sm font-medium flex items-center gap-2">
+            <Label htmlFor="dailyMinutes" className="text-xs sm:text-sm font-medium flex items-center gap-2">
               <Clock className="w-4 h-4" />
               Minutos por dia disponíveis
             </Label>
             <Select value={dailyMinutes} onValueChange={setDailyMinutes}>
-              <SelectTrigger id="dailyMinutes">
+              <SelectTrigger id="dailyMinutes" className="h-10 sm:h-9">
                 <SelectValue />
               </SelectTrigger>
-              <SelectContent>
+              <SelectContent className="bg-popover z-50">
                 <SelectItem value="30">30 min/dia</SelectItem>
                 <SelectItem value="45">45 min/dia</SelectItem>
                 <SelectItem value="60">1 hora/dia</SelectItem>
@@ -141,7 +141,7 @@ export function AddToPlanModal({ track, isOpen, onClose, onSuccess }: AddToPlanM
 
           {/* Target Date */}
           <div className="space-y-2">
-            <Label htmlFor="targetDate" className="text-sm font-medium flex items-center gap-2">
+            <Label htmlFor="targetDate" className="text-xs sm:text-sm font-medium flex items-center gap-2">
               <Calendar className="w-4 h-4" />
               Data alvo (opcional)
             </Label>
@@ -151,9 +151,10 @@ export function AddToPlanModal({ track, isOpen, onClose, onSuccess }: AddToPlanM
               value={targetDate}
               onChange={(e) => setTargetDate(e.target.value)}
               min={new Date().toISOString().split("T")[0]}
+              className="h-10 sm:h-9"
             />
             {suggestedDate && !targetDate && (
-              <p className="text-xs text-muted-foreground">
+              <p className="text-[10px] sm:text-xs text-muted-foreground">
                 Sugestão: {new Date(suggestedDate).toLocaleDateString("pt-BR")} 
                 {" "}(baseado em {dailyMinutes}min/dia)
               </p>
@@ -161,9 +162,9 @@ export function AddToPlanModal({ track, isOpen, onClose, onSuccess }: AddToPlanM
           </div>
 
           {/* Summary */}
-          <div className="bg-muted/50 rounded-lg p-4 space-y-2">
-            <p className="text-sm font-medium">Resumo do plano:</p>
-            <ul className="text-sm text-muted-foreground space-y-1">
+          <div className="bg-muted/50 rounded-lg p-3 sm:p-4 space-y-1.5 sm:space-y-2">
+            <p className="text-xs sm:text-sm font-medium">Resumo do plano:</p>
+            <ul className="text-xs sm:text-sm text-muted-foreground space-y-1">
               <li>• {track.estimatedHours} horas de conteúdo</li>
               <li>• {track.modules.length} módulos</li>
               <li>• ~{Math.ceil((track.estimatedHours * 60) / parseInt(dailyMinutes || "60"))} dias para conclusão</li>
@@ -171,11 +172,20 @@ export function AddToPlanModal({ track, isOpen, onClose, onSuccess }: AddToPlanM
           </div>
         </div>
 
-        <DialogFooter className="flex-col sm:flex-row gap-2">
-          <Button variant="outline" onClick={onClose} disabled={isSubmitting}>
+        <DialogFooter className="flex-col-reverse sm:flex-row gap-2 pt-2">
+          <Button 
+            variant="outline" 
+            onClick={onClose} 
+            disabled={isSubmitting}
+            className="h-11 sm:h-10 touch-manipulation"
+          >
             Cancelar
           </Button>
-          <Button onClick={handleSubmit} disabled={isSubmitting} className="gap-2">
+          <Button 
+            onClick={handleSubmit} 
+            disabled={isSubmitting} 
+            className="gap-2 h-11 sm:h-10 touch-manipulation"
+          >
             <Sparkles className="w-4 h-4" />
             {isSubmitting ? "Adicionando..." : "Adicionar ao plano"}
           </Button>

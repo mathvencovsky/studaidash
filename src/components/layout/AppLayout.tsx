@@ -153,18 +153,18 @@ export function AppLayout({ children }: AppLayoutProps) {
           {children}
         </main>
 
-        {/* Mobile Bottom Navigation */}
-        <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-card border-t flex justify-around items-center py-2 px-1 z-40 safe-area-bottom">
+        {/* Mobile Bottom Navigation - Improved touch targets */}
+        <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-card border-t flex justify-around items-center py-1.5 px-1 z-40 safe-area-bottom">
           {mobileNavItems.map((item) => (
             <NavLink
               key={item.to}
               to={item.to}
               end={item.to === "/"}
-              className="flex flex-col items-center gap-0.5 p-2 rounded-lg text-muted-foreground hover:text-foreground transition-colors min-w-[56px]"
+              className="flex flex-col items-center gap-0.5 p-2 rounded-lg text-muted-foreground hover:text-foreground transition-colors min-w-[52px] min-h-[48px] justify-center touch-manipulation active:scale-95"
               activeClassName="text-primary"
             >
-              <item.icon size={20} />
-              <span className="text-[10px]">{item.label}</span>
+              <item.icon size={22} />
+              <span className="text-[10px] font-medium">{item.label}</span>
             </NavLink>
           ))}
         </nav>

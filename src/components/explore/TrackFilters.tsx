@@ -206,72 +206,74 @@ export function TrackFilters({ filters, onFiltersChange, resultCount }: TrackFil
   );
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-3 sm:space-y-4">
       {/* Search and Sort Row */}
-      <div className="flex flex-col sm:flex-row gap-3">
-        {/* Search */}
+      <div className="flex flex-col sm:flex-row gap-2 sm:gap-3">
+        {/* Search - Full width on mobile */}
         <div className="relative flex-1">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
           <Input
-            placeholder="Buscar trilhas, habilidades, tags..."
+            placeholder="Buscar trilhas..."
             value={filters.search}
             onChange={(e) => updateFilter("search", e.target.value)}
-            className="pl-10 bg-background"
+            className="pl-10 bg-background h-10 sm:h-9 text-base sm:text-sm"
           />
           {filters.search && (
             <button
               onClick={() => updateFilter("search", "")}
-              className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground p-1 touch-manipulation"
             >
               <X className="w-4 h-4" />
             </button>
           )}
         </div>
 
-        {/* Sort */}
-        <Select
-          value={filters.sortBy}
-          onValueChange={(value) => updateFilter("sortBy", value as SortOption)}
-        >
-          <SelectTrigger className="w-full sm:w-[180px]">
-            <SelectValue placeholder="Ordenar por" />
-          </SelectTrigger>
-          <SelectContent>
-            {sortOptions.map((option) => (
-              <SelectItem key={option.value} value={option.value}>
-                {option.label}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
+        {/* Sort + Filter row on mobile */}
+        <div className="flex gap-2">
+          {/* Sort */}
+          <Select
+            value={filters.sortBy}
+            onValueChange={(value) => updateFilter("sortBy", value as SortOption)}
+          >
+            <SelectTrigger className="flex-1 sm:w-[180px] h-10 sm:h-9">
+              <SelectValue placeholder="Ordenar" />
+            </SelectTrigger>
+            <SelectContent className="bg-popover z-50">
+              {sortOptions.map((option) => (
+                <SelectItem key={option.value} value={option.value}>
+                  {option.label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
 
-        {/* Mobile Filters Button */}
-        <Sheet open={isOpen} onOpenChange={setIsOpen}>
-          <SheetTrigger asChild>
-            <Button variant="outline" className="md:hidden relative">
-              <SlidersHorizontal className="w-4 h-4 mr-2" />
-              Filtros
-              {activeFiltersCount > 0 && (
-                <Badge 
-                  variant="secondary" 
-                  className="absolute -top-2 -right-2 h-5 w-5 p-0 flex items-center justify-center text-[10px]"
-                >
-                  {activeFiltersCount}
-                </Badge>
-              )}
-            </Button>
-          </SheetTrigger>
-          <SheetContent side="left" className="w-80">
-            <SheetHeader>
-              <SheetTitle>Filtros</SheetTitle>
-            </SheetHeader>
-            <div className="mt-6">
-              <FiltersContent />
-            </div>
-          </SheetContent>
-        </Sheet>
+          {/* Mobile Filters Button */}
+          <Sheet open={isOpen} onOpenChange={setIsOpen}>
+            <SheetTrigger asChild>
+              <Button variant="outline" className="lg:hidden relative h-10 sm:h-9 px-3 touch-manipulation">
+                <SlidersHorizontal className="w-4 h-4 sm:mr-2" />
+                <span className="hidden sm:inline">Filtros</span>
+                {activeFiltersCount > 0 && (
+                  <Badge 
+                    variant="secondary" 
+                    className="absolute -top-2 -right-2 h-5 w-5 p-0 flex items-center justify-center text-[10px] bg-primary text-primary-foreground"
+                  >
+                    {activeFiltersCount}
+                  </Badge>
+                )}
+              </Button>
+            </SheetTrigger>
+            <SheetContent side="left" className="w-80">
+              <SheetHeader>
+                <SheetTitle>Filtros</SheetTitle>
+              </SheetHeader>
+              <div className="mt-6">
+                <FiltersContent />
+              </div>
+            </SheetContent>
+          </Sheet>
+        </div>
       </div>
-
       {/* Active Filters Pills */}
       {activeFiltersCount > 0 && (
         <div className="flex flex-wrap gap-2">
