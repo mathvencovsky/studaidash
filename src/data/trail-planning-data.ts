@@ -18,17 +18,121 @@ export interface StudyLogEntry {
 export interface TrailPlan {
   id: string;
   name: string;
+  description: string;
+  category: "certification" | "concurso" | "career" | "skill";
+  icon: string;
+  color: string;
   totalEstimatedHours: number;
   completedHours: number;
   targetDate: string; // YYYY-MM-DD
   startDate: string; // YYYY-MM-DD
   modules: TrailModule[];
+  isActive: boolean;
 }
 
 export interface UserStudyData {
   studyLog: StudyLogEntry[];
   streak: number;
+  activeTrailId: string;
 }
+
+// ============================================================================
+// AVAILABLE TRAILS / PROGRAMS
+// ============================================================================
+
+export interface AvailableTrail {
+  id: string;
+  name: string;
+  shortName: string;
+  description: string;
+  category: "certification" | "concurso" | "career" | "skill";
+  icon: string;
+  color: string;
+  totalModules: number;
+  totalHours: number;
+  difficulty: "beginner" | "intermediate" | "advanced";
+  isPopular?: boolean;
+  isNew?: boolean;
+}
+
+export const AVAILABLE_TRAILS: AvailableTrail[] = [
+  {
+    id: "cfa-level1",
+    name: "CFA Level I – Quantitative Methods",
+    shortName: "CFA Level I",
+    description: "Preparação completa para a certificação CFA, focando em métodos quantitativos",
+    category: "certification",
+    icon: "📊",
+    color: "from-blue-600 to-indigo-700",
+    totalModules: 7,
+    totalHours: 44,
+    difficulty: "advanced",
+    isPopular: true,
+  },
+  {
+    id: "bacen-analista",
+    name: "Concurso BACEN – Analista",
+    shortName: "BACEN Analista",
+    description: "Trilha completa para o concurso do Banco Central do Brasil",
+    category: "concurso",
+    icon: "🏛️",
+    color: "from-emerald-600 to-teal-700",
+    totalModules: 12,
+    totalHours: 120,
+    difficulty: "advanced",
+    isPopular: true,
+  },
+  {
+    id: "data-science",
+    name: "Data Science Foundations",
+    shortName: "Data Science",
+    description: "Fundamentos de ciência de dados: Python, estatística e machine learning",
+    category: "career",
+    icon: "🤖",
+    color: "from-purple-600 to-pink-700",
+    totalModules: 10,
+    totalHours: 80,
+    difficulty: "intermediate",
+    isNew: true,
+  },
+  {
+    id: "oab-1fase",
+    name: "OAB – 1ª Fase",
+    shortName: "OAB 1ª Fase",
+    description: "Preparação intensiva para o Exame de Ordem dos Advogados",
+    category: "concurso",
+    icon: "⚖️",
+    color: "from-amber-600 to-orange-700",
+    totalModules: 17,
+    totalHours: 200,
+    difficulty: "intermediate",
+  },
+  {
+    id: "pmp-cert",
+    name: "PMP Certification",
+    shortName: "PMP",
+    description: "Project Management Professional certification prep",
+    category: "certification",
+    icon: "📋",
+    color: "from-sky-600 to-cyan-700",
+    totalModules: 8,
+    totalHours: 60,
+    difficulty: "intermediate",
+  },
+  {
+    id: "aws-cloud",
+    name: "AWS Cloud Practitioner",
+    shortName: "AWS Cloud",
+    description: "Certificação de entrada para Amazon Web Services",
+    category: "certification",
+    icon: "☁️",
+    color: "from-orange-500 to-yellow-600",
+    totalModules: 6,
+    totalHours: 30,
+    difficulty: "beginner",
+    isNew: true,
+  },
+];
 
 // ============================================================================
 // MOCK DATA
@@ -56,6 +160,7 @@ const generateStudyLog = (): StudyLogEntry[] => {
 export const MOCK_STUDY_DATA: UserStudyData = {
   studyLog: generateStudyLog(),
   streak: 12,
+  activeTrailId: "cfa-quant-methods",
 };
 
 // Target date: 60 days from now
@@ -69,10 +174,15 @@ startDate.setDate(startDate.getDate() - 30);
 export const MOCK_TRAIL_PLAN: TrailPlan = {
   id: "cfa-quant-methods",
   name: "CFA Level I – Quantitative Methods",
+  description: "Preparação completa para a certificação CFA, focando em métodos quantitativos",
+  category: "certification",
+  icon: "📊",
+  color: "from-blue-600 to-indigo-700",
   totalEstimatedHours: 44, // Sum of all module hours
   completedHours: 18.5,
   targetDate: formatDate(targetDate),
   startDate: formatDate(startDate),
+  isActive: true,
   modules: [
     {
       id: "qm-1",

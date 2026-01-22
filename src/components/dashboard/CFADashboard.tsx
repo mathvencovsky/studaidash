@@ -9,6 +9,7 @@ import { SimuladosCard } from "./SimuladosCard";
 import { SmartFeedbackCard } from "./SmartFeedbackCard";
 import { AIStudyCTACard } from "./AIStudyCTACard";
 import { TrailOverviewCard } from "./TrailOverviewCard";
+import { TrailSelectorCard } from "./TrailSelectorCard";
 import type { DailyMission, CFAModule, UserProgress, Quiz, Simulado, SmartFeedback } from "@/types/studai";
 import { getQuizQuestions } from "@/data/quiz-questions-data";
 import { getNextAIStudyAction } from "@/data/ai-study-data";
@@ -24,6 +25,7 @@ import {
 import { 
   MOCK_TRAIL_PLAN, 
   MOCK_STUDY_DATA, 
+  AVAILABLE_TRAILS,
   calculateTrailMetrics 
 } from "@/data/trail-planning-data";
 
@@ -79,6 +81,7 @@ export function CFADashboard() {
   const [simulados] = useState<Simulado[]>(CFA_SIMULADOS);
   const [feedback] = useState<SmartFeedback>(getSmartFeedback);
   const [toasts, setToasts] = useState<Toast[]>([]);
+  const [activeTrail, setActiveTrail] = useState(MOCK_TRAIL_PLAN);
 
   // Calculate overall progress
   const overallProgress = useMemo(() => calculateTrailProgress(modules), [modules]);
@@ -182,6 +185,14 @@ export function CFADashboard() {
     // TODO API: Navigate to practice module
   }, [addToast]);
 
+  const handleSelectTrail = useCallback((trailId: string) => {
+    const trail = AVAILABLE_TRAILS.find(t => t.id === trailId);
+    if (trail) {
+      addToast(`Trilha "${trail.shortName}" selecionada! 🎯`, "success");
+      // TODO API: Load trail data from backend
+    }
+  }, [addToast]);
+
   return (
     <div className="p-4 sm:p-6 pb-24 md:pb-6">
       {/* Welcome + Tagline */}
@@ -203,15 +214,23 @@ export function CFADashboard() {
         />
       </div>
 
-      {/* Visão Geral da Trilha */}
-      <div className="mb-4 sm:mb-6">
+      {/* Trail Selector + Overview Grid */}
+      <div className="grid lg:grid-cols-2 gap-4 sm:gap-6 mb-4 sm:mb-6">
+        {/* Trail Selector */}
+        <TrailSelectorCard 
+          activeTrail={activeTrail}
+          availableTrails={AVAILABLE_TRAILS}
+          onSelectTrail={handleSelectTrail}
+        />
+        
+        {/* Visão Geral da Trilha */}
         <TrailOverviewCard 
-          trailName={MOCK_TRAIL_PLAN.name}
-          startDate={MOCK_TRAIL_PLAN.startDate}
-          targetDate={MOCK_TRAIL_PLAN.targetDate}
+          trailName={activeTrail.name}
+          startDate={activeTrail.startDate}
+          targetDate={activeTrail.targetDate}
           calculations={trailCalculations}
-          totalHours={MOCK_TRAIL_PLAN.totalEstimatedHours}
-          completedHours={MOCK_TRAIL_PLAN.completedHours}
+          totalHours={activeTrail.totalEstimatedHours}
+          completedHours={activeTrail.completedHours}
         />
       </div>
 
