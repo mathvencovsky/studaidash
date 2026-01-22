@@ -72,16 +72,17 @@ export function TrailSelectorCard({
 
   return (
     <Card className="border-2 border-primary/20 bg-gradient-to-br from-primary/5 to-transparent">
-      <CardHeader className="pb-2">
-        <div className="flex items-center justify-between">
-          <CardTitle className="text-base sm:text-lg flex items-center gap-2">
-            <Target className="w-5 h-5 text-primary" />
-            Minha Trilha
-          </CardTitle>
+      <CardContent className="p-4 sm:p-5">
+        {/* Header row */}
+        <div className="flex items-center justify-between mb-3">
+          <div className="flex items-center gap-2">
+            <Target className="w-4 h-4 sm:w-5 sm:h-5 text-primary" />
+            <span className="font-semibold text-sm sm:text-base text-card-foreground">Minha Trilha</span>
+          </div>
           <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
             <DialogTrigger asChild>
-              <Button variant="outline" size="sm" className="text-xs gap-1">
-                <Plus size={14} />
+              <Button variant="ghost" size="sm" className="text-xs gap-1 h-7 px-2 text-muted-foreground hover:text-primary">
+                <Plus size={12} />
                 Trocar trilha
               </Button>
             </DialogTrigger>
@@ -161,40 +162,40 @@ export function TrailSelectorCard({
             </DialogContent>
           </Dialog>
         </div>
-      </CardHeader>
-      <CardContent>
-        <div className="flex items-center gap-3">
-          <div className={`w-14 h-14 sm:w-16 sm:h-16 rounded-xl bg-gradient-to-br ${activeTrail.color} flex items-center justify-center text-2xl sm:text-3xl shrink-0`}>
+
+        {/* Trail info - compact horizontal layout */}
+        <div className="flex items-center gap-3 p-3 bg-card rounded-xl border">
+          <div className={`w-11 h-11 sm:w-12 sm:h-12 rounded-lg bg-gradient-to-br ${activeTrail.color} flex items-center justify-center text-xl sm:text-2xl shrink-0`}>
             {activeTrail.icon}
           </div>
           <div className="flex-1 min-w-0">
-            <h3 className="font-bold text-sm sm:text-base truncate">{activeTrail.name}</h3>
-            <p className="text-xs text-muted-foreground mt-0.5 line-clamp-1">{activeTrail.description}</p>
-            <div className="flex items-center gap-2 mt-2">
-              <div className="flex-1 h-2 bg-muted rounded-full overflow-hidden">
-                <div 
-                  className="h-full bg-primary rounded-full transition-all duration-500"
-                  style={{ width: `${progressPercent}%` }}
-                />
-              </div>
-              <span className="text-xs font-semibold text-primary shrink-0">{progressPercent}%</span>
-            </div>
+            <h3 className="font-bold text-xs sm:text-sm truncate">{activeTrail.name}</h3>
+            <p className="text-[10px] sm:text-xs text-muted-foreground truncate">{activeTrail.description}</p>
           </div>
+          <span className="text-lg sm:text-xl font-bold text-primary shrink-0">{progressPercent}%</span>
+        </div>
+
+        {/* Progress bar */}
+        <div className="h-1.5 bg-muted rounded-full overflow-hidden mt-3">
+          <div 
+            className="h-full bg-gradient-to-r from-primary to-accent rounded-full transition-all duration-500"
+            style={{ width: `${progressPercent}%` }}
+          />
         </div>
         
-        {/* Quick stats */}
-        <div className="grid grid-cols-3 gap-2 mt-4 pt-3 border-t">
-          <div className="text-center">
-            <p className="text-lg font-bold text-primary">{activeTrail.modules.length}</p>
-            <p className="text-[10px] text-muted-foreground">Módulos</p>
+        {/* Quick stats - inline */}
+        <div className="flex items-center justify-between mt-3 text-xs">
+          <div className="flex items-center gap-1 text-muted-foreground">
+            <BookOpen size={12} />
+            <span><strong className="text-card-foreground">{activeTrail.modules.length}</strong> Módulos</span>
           </div>
-          <div className="text-center">
-            <p className="text-lg font-bold">{Math.round(activeTrail.completedHours)}h</p>
-            <p className="text-[10px] text-muted-foreground">Estudadas</p>
+          <div className="flex items-center gap-1 text-muted-foreground">
+            <Clock size={12} />
+            <span><strong className="text-card-foreground">{Math.round(activeTrail.completedHours)}h</strong> Estudadas</span>
           </div>
-          <div className="text-center">
-            <p className="text-lg font-bold">{Math.round(activeTrail.totalEstimatedHours - activeTrail.completedHours)}h</p>
-            <p className="text-[10px] text-muted-foreground">Restantes</p>
+          <div className="flex items-center gap-1 text-muted-foreground">
+            <Target size={12} />
+            <span><strong className="text-card-foreground">{Math.round(activeTrail.totalEstimatedHours - activeTrail.completedHours)}h</strong> Restantes</span>
           </div>
         </div>
       </CardContent>
