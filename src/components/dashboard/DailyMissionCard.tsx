@@ -57,53 +57,48 @@ export function DailyMissionCard({ mission, onStartMission, onToggleTask }: Dail
   const status = statusConfig[mission.status];
 
   return (
-    <div className="bg-card border-2 border-accent/20 rounded-2xl overflow-hidden shadow-lg">
+    <div className="bg-card border-2 border-accent/20 rounded-2xl overflow-hidden shadow-lg w-full">
       {/* Header with gradient - More compact on mobile */}
-      <div className="bg-gradient-to-br from-primary via-primary to-accent p-4 sm:p-5 text-primary-foreground relative overflow-hidden">
+      <div className="bg-gradient-to-br from-primary via-primary to-accent p-3 sm:p-5 text-primary-foreground relative overflow-hidden">
         {/* Background decoration */}
         <div className="absolute top-0 right-0 w-24 h-24 bg-white/5 rounded-full blur-2xl -translate-y-1/2 translate-x-1/2" />
         
         <div className="relative z-10">
-          {/* Title row - Stack on very small screens */}
-          <div className="flex items-start justify-between gap-2 mb-2">
-            <div className="flex items-center gap-2 min-w-0 flex-1">
-              <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-xl bg-white/20 backdrop-blur-sm flex items-center justify-center shrink-0">
-                <Sparkles size={16} className="sm:w-5 sm:h-5" />
+          {/* Title row - Wrap status badge on small screens */}
+          <div className="flex flex-wrap items-start justify-between gap-1.5 mb-2">
+            <div className="flex items-center gap-2 min-w-0">
+              <div className="w-7 h-7 sm:w-10 sm:h-10 rounded-lg sm:rounded-xl bg-white/20 backdrop-blur-sm flex items-center justify-center shrink-0">
+                <Sparkles size={14} className="sm:w-5 sm:h-5" />
               </div>
-              <div className="min-w-0 flex-1">
-                <h2 className="text-sm sm:text-lg font-bold leading-tight">{mission.title}</h2>
-                <p className="text-[11px] sm:text-sm opacity-80 truncate">{mission.competency}</p>
+              <div className="min-w-0">
+                <h2 className="text-[13px] sm:text-lg font-bold leading-tight">{mission.title}</h2>
+                <p className="text-[10px] sm:text-sm opacity-80 truncate max-w-[180px] sm:max-w-none">{mission.competency}</p>
               </div>
             </div>
-            <div className={`px-2 py-0.5 sm:px-3 sm:py-1 rounded-full text-[10px] sm:text-xs font-semibold shrink-0 whitespace-nowrap ${status.bg} ${status.text}`}>
+            <div className={`px-1.5 py-0.5 sm:px-3 sm:py-1 rounded-full text-[9px] sm:text-xs font-semibold shrink-0 ${status.bg} ${status.text}`}>
               {status.label}
             </div>
           </div>
 
-          {/* Objective - Hidden on very small screens, show abbreviated */}
-          <p className="text-xs sm:text-sm opacity-90 mb-3 leading-relaxed line-clamp-2 hidden xs:block">
-            {mission.objective}
-          </p>
-
           {/* Stats row - More compact on mobile */}
-          <div className="flex items-center gap-2 text-[11px] sm:text-sm">
-            <div className="flex items-center gap-1 bg-white/15 px-2 py-1 rounded-lg">
-              <Clock size={12} className="sm:w-3.5 sm:h-3.5" />
+          <div className="flex items-center gap-1.5 sm:gap-2 text-[10px] sm:text-sm flex-wrap">
+            <div className="flex items-center gap-1 bg-white/15 px-1.5 sm:px-2 py-0.5 sm:py-1 rounded-md sm:rounded-lg">
+              <Clock size={10} className="sm:w-3.5 sm:h-3.5" />
               <span className="font-medium">{mission.estimatedMinutes}min</span>
             </div>
-            <div className="flex items-center gap-1 bg-white/15 px-2 py-1 rounded-lg">
-              <CheckCircle2 size={12} className="sm:w-3.5 sm:h-3.5" />
+            <div className="flex items-center gap-1 bg-white/15 px-1.5 sm:px-2 py-0.5 sm:py-1 rounded-md sm:rounded-lg">
+              <CheckCircle2 size={10} className="sm:w-3.5 sm:h-3.5" />
               <span className="font-medium">{completedTasks}/{totalTasks}</span>
             </div>
             {/* Progress on mobile inline */}
-            <div className="flex-1 flex items-center gap-2 ml-auto">
-              <div className="flex-1 h-1.5 bg-white/20 rounded-full overflow-hidden">
+            <div className="flex-1 flex items-center gap-1.5 sm:gap-2 min-w-[60px]">
+              <div className="flex-1 h-1 sm:h-1.5 bg-white/20 rounded-full overflow-hidden">
                 <div 
                   className="h-full bg-white/80 rounded-full transition-all duration-500"
                   style={{ width: `${progress}%` }}
                 />
               </div>
-              <span className="text-[10px] font-semibold opacity-90">{progress}%</span>
+              <span className="text-[9px] sm:text-[10px] font-semibold opacity-90">{progress}%</span>
             </div>
           </div>
         </div>
