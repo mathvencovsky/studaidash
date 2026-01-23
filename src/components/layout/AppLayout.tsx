@@ -1,68 +1,85 @@
 import { useState } from "react";
 import { NavLink } from "@/components/NavLink";
 import { 
-  Home, 
+  LayoutDashboard, 
   Map, 
   Sparkles,
-  FileQuestion, 
-  Trophy, 
-  User, 
-  Settings, 
-  Menu, 
-  BarChart3,
   GraduationCap,
+  BookOpen,
+  Clock,
+  Calendar,
   Target,
-  Eye,
-  PlayCircle,
+  RefreshCw,
+  BarChart3,
+  TrendingUp,
   Activity,
-  Compass
+  Bookmark,
+  Settings,
+  Menu,
+  ChevronLeft,
+  User
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
-import { Separator } from "@/components/ui/separator";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Badge } from "@/components/ui/badge";
 
 interface AppLayoutProps {
   children: React.ReactNode;
 }
 
-// Main navigation - DataCamp style organization
-const mainNavItems = [
-  { to: "/", icon: Home, label: "Dashboard" },
-  { to: "/objetivo", icon: Target, label: "Meu Objetivo" },
-  { to: "/trilha/visao-geral", icon: Eye, label: "Visão Geral" },
-  { to: "/estudar", icon: Sparkles, label: "Estudar com IA" },
-  { to: "/explorar", icon: Compass, label: "Explorar Trilhas" },
-  { to: "/trilha", icon: Map, label: "Minhas Trilhas" },
-  { to: "/quizzes", icon: FileQuestion, label: "Simulados" },
+// Navigation sections matching the design
+const aprenderItems = [
+  { to: "/", icon: LayoutDashboard, label: "Dashboard" },
+  { to: "/trilha/visao-geral", icon: Map, label: "Visão da Trilha" },
+  { to: "/programas", icon: GraduationCap, label: "Programas" },
+  { to: "/conteudos", icon: BookOpen, label: "Conteúdos" },
+  { to: "/estudar", icon: Sparkles, label: "Assistente IA" },
 ];
 
-const insightNavItems = [
+const progressoItems = [
+  { to: "/sessoes", icon: Clock, label: "Sessões" },
+  { to: "/calendario", icon: Calendar, label: "Calendário" },
+  { to: "/metas", icon: Target, label: "Metas" },
+  { to: "/revisoes", icon: RefreshCw, label: "Revisões" },
+];
+
+const analyticsItems = [
   { to: "/relatorios", icon: BarChart3, label: "Relatórios" },
+  { to: "/roi-estudo", icon: TrendingUp, label: "ROI de Estudo" },
   { to: "/engajamento", icon: Activity, label: "Engajamento" },
-  { to: "/ranking", icon: Trophy, label: "Ranking" },
 ];
 
-const userNavItems = [
-  { to: "/perfil", icon: User, label: "Perfil" },
+const ferramentasItems = [
+  { to: "/salvos", icon: Bookmark, label: "Salvos" },
   { to: "/configuracoes", icon: Settings, label: "Configurações" },
 ];
 
 // Mobile bottom nav - most important actions
 const mobileNavItems = [
-  { to: "/", icon: Home, label: "Home" },
+  { to: "/", icon: LayoutDashboard, label: "Home" },
   { to: "/estudar", icon: Sparkles, label: "Estudar" },
-  { to: "/trilha", icon: Map, label: "Trilha" },
-  { to: "/quizzes", icon: FileQuestion, label: "Quiz" },
+  { to: "/programas", icon: GraduationCap, label: "Programas" },
+  { to: "/sessoes", icon: Clock, label: "Sessões" },
   { to: "/relatorios", icon: BarChart3, label: "Stats" },
 ];
 
 export function AppLayout({ children }: AppLayoutProps) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
 
-  const NavSection = ({ items, label }: { items: typeof mainNavItems; label?: string }) => (
-    <div className="space-y-1">
-      {label && (
-        <p className="px-3 py-1.5 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
+  const NavSection = ({ 
+    items, 
+    label,
+    collapsed = false 
+  }: { 
+    items: typeof aprenderItems; 
+    label: string;
+    collapsed?: boolean;
+  }) => (
+    <div className="space-y-0.5">
+      {!collapsed && (
+        <p className="px-3 py-2 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
           {label}
         </p>
       )}
@@ -71,48 +88,93 @@ export function AppLayout({ children }: AppLayoutProps) {
           key={item.to}
           to={item.to}
           end={item.to === "/"}
-          className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-muted-foreground hover:bg-muted hover:text-foreground transition-colors"
+          className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-muted-foreground hover:bg-muted hover:text-foreground transition-colors ${collapsed ? "justify-center" : ""}`}
           activeClassName="bg-primary/10 text-primary font-medium"
           onClick={() => setMobileMenuOpen(false)}
         >
           <item.icon size={18} />
-          <span className="text-sm">{item.label}</span>
+          {!collapsed && <span className="text-sm">{item.label}</span>}
         </NavLink>
       ))}
     </div>
   );
 
-  const NavContent = () => (
-    <nav className="flex flex-col gap-4 p-3">
-      <NavSection items={mainNavItems} />
-      <Separator className="mx-2" />
-      <NavSection items={insightNavItems} label="Insights" />
-      <Separator className="mx-2" />
-      <NavSection items={userNavItems} label="Conta" />
+  const NavContent = ({ collapsed = false }: { collapsed?: boolean }) => (
+    <nav className="flex flex-col gap-1 p-2">
+      <NavSection items={aprenderItems} label="Aprender" collapsed={collapsed} />
+      <NavSection items={progressoItems} label="Progresso" collapsed={collapsed} />
+      <NavSection items={analyticsItems} label="Analytics" collapsed={collapsed} />
+      <NavSection items={ferramentasItems} label="Ferramentas" collapsed={collapsed} />
     </nav>
+  );
+
+  const UserFooter = ({ collapsed = false }: { collapsed?: boolean }) => (
+    <div className={`p-3 border-t ${collapsed ? "flex justify-center" : ""}`}>
+      <div className={`flex items-center gap-3 ${collapsed ? "" : "px-2"}`}>
+        <Avatar className="h-9 w-9">
+          <AvatarFallback className="bg-primary text-primary-foreground text-sm font-semibold">
+            J
+          </AvatarFallback>
+        </Avatar>
+        {!collapsed && (
+          <div className="flex-1 min-w-0">
+            <p className="text-sm font-medium truncate">João Silva</p>
+            <Badge variant="secondary" className="text-[10px] px-1.5 py-0">
+              Pro
+            </Badge>
+          </div>
+        )}
+      </div>
+    </div>
   );
 
   return (
     <div className="min-h-screen bg-background flex w-full">
-      {/* Desktop Sidebar - DataCamp style */}
-      <aside className="hidden md:flex flex-col w-64 border-r bg-card shrink-0">
-        <div className="p-4 border-b">
-          <div className="flex items-center gap-2">
-            <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-[#1A237E] to-[#255FF1] flex items-center justify-center">
-              <GraduationCap className="w-5 h-5 text-white" />
+      {/* Desktop Sidebar */}
+      <aside 
+        className={`hidden md:flex flex-col border-r bg-card shrink-0 transition-all duration-300 ${
+          sidebarCollapsed ? "w-16" : "w-60"
+        }`}
+      >
+        {/* Header */}
+        <div className="p-3 border-b">
+          <div className={`flex items-center ${sidebarCollapsed ? "justify-center" : "justify-between"}`}>
+            <div className="flex items-center gap-2">
+              <div className="w-9 h-9 rounded-lg bg-gradient-to-br from-[#1A237E] to-[#255FF1] flex items-center justify-center">
+                <GraduationCap className="w-5 h-5 text-white" />
+              </div>
+              {!sidebarCollapsed && <span className="font-bold text-lg">StudAI</span>}
             </div>
-            <span className="font-bold text-lg">StudAI</span>
+            {!sidebarCollapsed && (
+              <Button 
+                variant="ghost" 
+                size="icon" 
+                className="h-8 w-8"
+                onClick={() => setSidebarCollapsed(true)}
+              >
+                <ChevronLeft size={18} />
+              </Button>
+            )}
           </div>
+          {sidebarCollapsed && (
+            <Button 
+              variant="ghost" 
+              size="icon" 
+              className="h-8 w-8 mt-2 w-full"
+              onClick={() => setSidebarCollapsed(false)}
+            >
+              <Menu size={18} />
+            </Button>
+          )}
         </div>
+
+        {/* Navigation */}
         <div className="flex-1 overflow-y-auto py-2">
-          <NavContent />
+          <NavContent collapsed={sidebarCollapsed} />
         </div>
-        {/* Version Badge */}
-        <div className="p-3 border-t">
-          <p className="text-[10px] text-muted-foreground text-center">
-            v1.0 • PMF Ready
-          </p>
-        </div>
+
+        {/* User Footer */}
+        <UserFooter collapsed={sidebarCollapsed} />
       </aside>
 
       {/* Mobile Header + Content */}
@@ -132,7 +194,7 @@ export function AppLayout({ children }: AppLayoutProps) {
                 <Menu size={24} />
               </Button>
             </SheetTrigger>
-            <SheetContent side="left" className="w-64 p-0">
+            <SheetContent side="left" className="w-64 p-0 flex flex-col">
               <div className="p-4 border-b">
                 <div className="flex items-center gap-2">
                   <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-[#1A237E] to-[#255FF1] flex items-center justify-center">
@@ -141,9 +203,10 @@ export function AppLayout({ children }: AppLayoutProps) {
                   <span className="font-bold text-lg">StudAI</span>
                 </div>
               </div>
-              <div className="py-2">
+              <div className="flex-1 overflow-y-auto py-2">
                 <NavContent />
               </div>
+              <UserFooter />
             </SheetContent>
           </Sheet>
         </header>
@@ -153,7 +216,7 @@ export function AppLayout({ children }: AppLayoutProps) {
           {children}
         </main>
 
-        {/* Mobile Bottom Navigation - Improved touch targets */}
+        {/* Mobile Bottom Navigation */}
         <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-card border-t flex justify-around items-center py-1.5 px-1 z-40 safe-area-bottom">
           {mobileNavItems.map((item) => (
             <NavLink
