@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { NavLink } from "@/components/NavLink";
 import { 
   LayoutDashboard, 
@@ -18,12 +19,23 @@ import {
   Menu,
   ChevronLeft,
   Compass,
-  Library
+  Library,
+  Search,
+  Plus,
+  ChevronDown
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
+import { Input } from "@/components/ui/input";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 interface AppLayoutProps {
   children: React.ReactNode;
@@ -70,6 +82,8 @@ const mobileNavItems = [
 export function AppLayout({ children }: AppLayoutProps) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
+  const navigate = useNavigate();
 
   const NavSection = ({ 
     items, 
@@ -212,6 +226,62 @@ export function AppLayout({ children }: AppLayoutProps) {
               <UserFooter />
             </SheetContent>
           </Sheet>
+        </header>
+
+        {/* Desktop Top Header */}
+        <header className="hidden md:flex items-center justify-between gap-4 px-6 py-3 border-b bg-card sticky top-0 z-40">
+          {/* Search Bar */}
+          <div className="relative flex-1 max-w-xl">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+            <Input
+              type="text"
+              placeholder="Buscar programas, sessões, conteúdos..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="pl-10 h-10 bg-muted/50 border-0 focus-visible:ring-1"
+            />
+          </div>
+
+          {/* Actions */}
+          <div className="flex items-center gap-3">
+            <Button 
+              onClick={() => navigate("/estudar")}
+              className="bg-primary hover:bg-primary/90"
+            >
+              <Plus className="h-4 w-4 mr-2" />
+              Nova sessão
+            </Button>
+
+            {/* User Dropdown */}
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" className="flex items-center gap-2 px-2 hover:bg-muted">
+                  <Avatar className="h-8 w-8">
+                    <AvatarFallback className="bg-primary text-primary-foreground text-sm font-semibold">
+                      J
+                    </AvatarFallback>
+                  </Avatar>
+                  <div className="flex flex-col items-start">
+                    <span className="text-sm font-medium">João Silva</span>
+                    <span className="text-xs text-muted-foreground">Pro</span>
+                  </div>
+                  <ChevronDown className="h-4 w-4 text-muted-foreground" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-48 bg-popover border shadow-lg z-50">
+                <DropdownMenuItem onClick={() => navigate("/perfil")}>
+                  Meu Perfil
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => navigate("/configuracoes")}>
+                  Configurações
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem className="text-destructive">
+                  Sair
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
         </header>
 
         {/* Main Content */}
