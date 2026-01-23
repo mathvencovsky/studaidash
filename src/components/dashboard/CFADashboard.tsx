@@ -1,8 +1,7 @@
 import { useState, useCallback, useMemo, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { Sparkles } from "lucide-react";
 
-// New Enterprise Components
+// Components
 import { HeroSection } from "./HeroSection";
 import { AICopilotCTA } from "./AICopilotCTA";
 import { TodayPlanCard } from "./TodayPlanCard";
@@ -10,8 +9,6 @@ import { TrailExecutiveSummary } from "./TrailExecutiveSummary";
 import { ProgressSection } from "./ProgressSection";
 import { AssessmentsSection } from "./AssessmentsSection";
 import { GamificationSection } from "./GamificationSection";
-
-// Keep existing components for backward compatibility
 import { TrailSelectorCard } from "./TrailSelectorCard";
 import { SmartFeedbackCard } from "./SmartFeedbackCard";
 
@@ -33,6 +30,7 @@ import {
   AVAILABLE_TRAILS,
   calculateTrailMetrics 
 } from "@/data/trail-planning-data";
+import { toast } from "sonner";
 
 // Storage keys
 const STORAGE_KEYS = {
@@ -61,13 +59,6 @@ function saveState<T>(key: string, value: T): void {
   }
 }
 
-// Toast context
-interface Toast {
-  id: string;
-  message: string;
-  type: "success" | "error" | "info";
-}
-
 export function CFADashboard() {
   const navigate = useNavigate();
   
@@ -85,7 +76,6 @@ export function CFADashboard() {
   const [quizzes] = useState<Quiz[]>(CFA_QUIZZES);
   const [simulados] = useState<Simulado[]>(CFA_SIMULADOS);
   const [feedback] = useState<SmartFeedback>(getSmartFeedback);
-  const [toasts, setToasts] = useState<Toast[]>([]);
   const [activeTrail, setActiveTrail] = useState(MOCK_TRAIL_PLAN);
 
   // Calculate overall progress
@@ -96,15 +86,6 @@ export function CFADashboard() {
     calculateTrailMetrics(MOCK_TRAIL_PLAN, MOCK_STUDY_DATA), 
     []
   );
-
-  // Toast helpers
-  const addToast = useCallback((message: string, type: Toast["type"] = "success") => {
-    const id = Date.now().toString();
-    setToasts(prev => [...prev, { id, message, type }]);
-    setTimeout(() => {
-      setToasts(prev => prev.filter(t => t.id !== id));
-    }, 4000);
-  }, []);
 
   // Persist mission changes
   useEffect(() => {
@@ -148,9 +129,9 @@ export function CFADashboard() {
     if (nextTask) {
       handleTaskClick(nextTask);
     } else {
-      addToast("Todas as tarefas concluídas! 🎉", "success");
+      toast.success("Plano concluído");
     }
-  }, [mission.tasks, handleTaskClick, addToast]);
+  }, [mission.tasks, handleTaskClick]);
 
   const handleToggleTask = useCallback((taskId: string) => {
     setMission(prev => {
@@ -171,7 +152,7 @@ export function CFADashboard() {
           xp: p.xp + 25,
           weeklyProgress: p.weeklyProgress + task.estimatedMinutes,
         }));
-        addToast(`+25 XP! Tarefa concluída! 🎉`, "success");
+        toast.success("+25 XP");
       }
 
       return {
@@ -180,15 +161,11 @@ export function CFADashboard() {
         status: newStatus,
       };
     });
-  }, [addToast]);
+  }, []);
 
   const handleModuleClick = useCallback((moduleId: string) => {
-    const module = modules.find(m => m.id === moduleId);
-    if (module) {
-      addToast(`Abrindo: ${module.name}`, "info");
-      navigate("/trilha", { state: { focusModuleId: moduleId } });
-    }
-  }, [addToast, modules, navigate]);
+    navigate("/trilha", { state: { focusModuleId: moduleId } });
+  }, [navigate]);
 
   const handleViewAllBadges = useCallback(() => {
     navigate("/perfil");
@@ -199,9 +176,9 @@ export function CFADashboard() {
     if (questions.length > 0) {
       navigate(`/quiz/${quizId}`);
     } else {
-      addToast("Quiz em desenvolvimento", "info");
+      toast.info("Em desenvolvimento");
     }
-  }, [navigate, addToast]);
+  }, [navigate]);
 
   const handleViewAllQuizzes = useCallback(() => {
     navigate("/quizzes");
@@ -210,10 +187,9 @@ export function CFADashboard() {
   const handleStartSimulado = useCallback((simuladoId: string) => {
     const simulado = simulados.find(s => s.id === simuladoId);
     if (simulado) {
-      addToast(`Iniciando: ${simulado.name}`, "success");
       navigate(`/quiz/${simuladoId}`, { state: { isSimulado: true, simulado } });
     }
-  }, [simulados, navigate, addToast]);
+  }, [simulados, navigate]);
 
   const handleFeedbackAction = useCallback(() => {
     if (feedback.actionModuleId) {
@@ -234,67 +210,41 @@ export function CFADashboard() {
         name: trail.name,
         category: trail.category,
       }));
-      addToast(`Trilha "${trail.shortName}" selecionada! 🎯`, "success");
+      toast.success(`Trilha selecionada: ${trail.shortName}`);
     }
-  }, [addToast]);
+  }, []);
 
   return (
-    <div className="px-4 sm:px-6 lg:px-8 py-6 sm:py-8 pb-24 md:pb-8 max-w-6xl mx-auto">
-      {/* Enterprise Layout: Clean vertical flow with clear hierarchy */}
-      <div className="space-y-6 sm:space-y-8">
+    <div className="px-4 sm:px-6 lg:px-8 py-6 pb-24 md:pb-8 max-w-4xl mx-auto">
+      <div className="space-y-6">
         
-        {/* 1. Hero Section - Copilot positioning */}
+        {/* 1. Hero - Minimal */}
         <HeroSection 
           userName="João"
           progressPercent={trailCalculations.progressPercent}
           daysToGoal={trailCalculations.daysUntilTarget}
         />
 
-        {/* 2. Primary CTA - Most dominant element */}
+        {/* 2. Primary CTA - System command style */}
         <AICopilotCTA 
           recommendation={aiRecommendation}
           onStart={() => navigate("/estudar")}
         />
 
-        {/* 3. Trail Selector (compact) */}
-        <TrailSelectorCard 
-          activeTrail={activeTrail}
-          availableTrails={AVAILABLE_TRAILS}
-          onSelectTrail={handleSelectTrail}
+        {/* 3. Today's Plan */}
+        <TodayPlanCard
+          mission={mission}
+          onStartMission={handleStartMission}
+          onToggleTask={handleToggleTask}
+          onTaskClick={handleTaskClick}
         />
 
-        {/* 4. Two Column Layout for Supporting Content */}
+        {/* 4. Two Column Layout */}
         <div className="grid gap-6 lg:grid-cols-2 lg:items-start">
           
-          {/* Left Column: Execution */}
+          {/* Left Column */}
           <div className="space-y-6">
-            {/* Today's Plan (renamed from Daily Mission) */}
-            <TodayPlanCard
-              mission={mission}
-              onStartMission={handleStartMission}
-              onToggleTask={handleToggleTask}
-              onTaskClick={handleTaskClick}
-            />
-
-            {/* Smart Feedback */}
-            <SmartFeedbackCard
-              feedback={feedback}
-              onActionClick={handleFeedbackAction}
-            />
-
-            {/* Assessments (Quizzes + Simulados combined) */}
-            <AssessmentsSection
-              quizzes={quizzes}
-              simulados={simulados}
-              onStartQuiz={handleStartQuiz}
-              onStartSimulado={handleStartSimulado}
-              onViewAllQuizzes={handleViewAllQuizzes}
-            />
-          </div>
-
-          {/* Right Column: Overview & Progress */}
-          <div className="space-y-6">
-            {/* Executive Summary of Trail */}
+            {/* Trail Status */}
             <TrailExecutiveSummary 
               trailName={activeTrail.name}
               startDate={activeTrail.startDate}
@@ -306,6 +256,16 @@ export function CFADashboard() {
               onViewDetails={() => navigate("/trilha")}
             />
 
+            {/* Trail Selector */}
+            <TrailSelectorCard 
+              activeTrail={activeTrail}
+              availableTrails={AVAILABLE_TRAILS}
+              onSelectTrail={handleSelectTrail}
+            />
+          </div>
+
+          {/* Right Column */}
+          <div className="space-y-6">
             {/* Module Progress */}
             <ProgressSection
               modules={modules}
@@ -313,28 +273,31 @@ export function CFADashboard() {
               onModuleClick={handleModuleClick}
             />
 
-            {/* Gamification (last - not core) */}
-            <GamificationSection
-              progress={userProgress}
-              onViewAllBadges={handleViewAllBadges}
+            {/* Assessments */}
+            <AssessmentsSection
+              quizzes={quizzes}
+              simulados={simulados}
+              onStartQuiz={handleStartQuiz}
+              onStartSimulado={handleStartSimulado}
+              onViewAllQuizzes={handleViewAllQuizzes}
             />
           </div>
         </div>
-      </div>
 
-      {/* Toast Notifications */}
-      <div className="fixed bottom-20 md:bottom-4 left-4 right-4 sm:left-auto sm:right-4 z-[100] space-y-2 max-w-sm mx-auto sm:mx-0">
-        {toasts.map((toast) => (
-          <div
-            key={toast.id}
-            className="p-3 sm:p-4 rounded-xl shadow-lg border bg-card animate-in slide-in-from-bottom-full sm:slide-in-from-right-full"
-          >
-            <div className="flex items-center gap-2">
-              <Sparkles size={14} className="sm:w-4 sm:h-4 text-accent shrink-0" />
-              <p className="text-xs sm:text-sm font-medium text-card-foreground">{toast.message}</p>
-            </div>
-          </div>
-        ))}
+        {/* 5. Secondary Content */}
+        <div className="grid gap-6 lg:grid-cols-2 lg:items-start">
+          {/* Smart Feedback - subtle */}
+          <SmartFeedbackCard
+            feedback={feedback}
+            onActionClick={handleFeedbackAction}
+          />
+
+          {/* Gamification - last */}
+          <GamificationSection
+            progress={userProgress}
+            onViewAllBadges={handleViewAllBadges}
+          />
+        </div>
       </div>
     </div>
   );
