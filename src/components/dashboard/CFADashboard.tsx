@@ -246,6 +246,11 @@ export function CFADashboard() {
           onViewAll={handleViewAllQuizzes}
         />
 
+        <SimuladosCard
+          simulados={simulados}
+          onStartSimulado={handleStartSimulado}
+        />
+
         <TrailProgressCard
           modules={modules}
           overallProgress={overallProgress}
@@ -255,11 +260,6 @@ export function CFADashboard() {
         <GamificationCard
           progress={userProgress}
           onViewAllBadges={handleViewAllBadges}
-        />
-
-        <SimuladosCard
-          simulados={simulados}
-          onStartSimulado={handleStartSimulado}
         />
       </div>
 
@@ -288,6 +288,11 @@ export function CFADashboard() {
             onStartQuiz={handleStartQuiz}
             onViewAll={handleViewAllQuizzes}
           />
+
+          <SimuladosCard
+            simulados={simulados}
+            onStartSimulado={handleStartSimulado}
+          />
         </div>
 
         <div className="space-y-4">
@@ -309,11 +314,6 @@ export function CFADashboard() {
           <GamificationCard
             progress={userProgress}
             onViewAllBadges={handleViewAllBadges}
-          />
-
-          <SimuladosCard
-            simulados={simulados}
-            onStartSimulado={handleStartSimulado}
           />
         </div>
       </div>
