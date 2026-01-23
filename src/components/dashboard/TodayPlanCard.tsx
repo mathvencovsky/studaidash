@@ -3,11 +3,9 @@ import {
   Brain, 
   FileText, 
   HelpCircle, 
-  CheckCircle2, 
+  Check,
   Clock,
-  Play,
-  ChevronRight,
-  Target
+  ChevronRight
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import type { DailyMission, MissionTask } from "@/types/studai";
@@ -49,42 +47,29 @@ export function TodayPlanCard({ mission, onStartMission, onToggleTask, onTaskCli
   };
 
   return (
-    <section className="bg-card border rounded-2xl overflow-hidden">
+    <section className="border rounded-lg bg-card overflow-hidden">
       {/* Header */}
-      <div className="p-4 sm:p-5 border-b bg-muted/30">
-        <div className="flex items-center justify-between gap-3">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
-              <Target className="w-5 h-5 text-primary" />
-            </div>
-            <div>
-              <h3 className="font-semibold text-foreground">Plano de hoje</h3>
-              <p className="text-xs text-muted-foreground">{mission.competency}</p>
-            </div>
+      <div className="p-4 border-b">
+        <div className="flex items-center justify-between">
+          <div>
+            <h3 className="font-medium text-foreground">Plano de hoje</h3>
+            <p className="text-xs text-muted-foreground mt-0.5">
+              {completedTasks}/{totalTasks} tarefas · {mission.estimatedMinutes} min
+            </p>
           </div>
-          
-          <div className="text-right">
-            <div className="flex items-center gap-2 text-sm font-medium">
-              <Clock className="w-4 h-4 text-muted-foreground" />
-              <span>{mission.estimatedMinutes} min</span>
-            </div>
-            <p className="text-xs text-muted-foreground">{completedTasks}/{totalTasks} tarefas</p>
-          </div>
+          <span className="text-sm font-medium text-foreground">{progress}%</span>
         </div>
 
         {/* Progress Bar */}
-        <div className="mt-3 flex items-center gap-3">
-          <div className="flex-1 h-2 bg-muted rounded-full overflow-hidden">
-            <div 
-              className="h-full bg-gradient-to-r from-primary to-accent rounded-full transition-all duration-500"
-              style={{ width: `${progress}%` }}
-            />
-          </div>
-          <span className="text-xs font-semibold text-foreground min-w-[32px]">{progress}%</span>
+        <div className="mt-3 h-1 bg-muted rounded-full overflow-hidden">
+          <div 
+            className="h-full bg-primary rounded-full transition-all duration-300"
+            style={{ width: `${progress}%` }}
+          />
         </div>
       </div>
 
-      {/* Tasks - Compact list */}
+      {/* Tasks */}
       <div className="divide-y">
         {mission.tasks.map((task) => {
           const Icon = taskIcons[task.type];
@@ -92,40 +77,36 @@ export function TodayPlanCard({ mission, onStartMission, onToggleTask, onTaskCli
             <button
               key={task.id}
               onClick={(e) => handleTaskAction(task, e)}
-              className={`w-full flex items-center gap-3 p-3 sm:p-4 transition-all ${
+              className={`w-full flex items-center gap-3 p-3 text-left transition-colors ${
                 task.completed 
-                  ? "bg-status-success/10" 
+                  ? "bg-muted/30" 
                   : "hover:bg-muted/50"
               }`}
             >
-              {/* Status Indicator */}
-              <div className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0 transition-all ${
+              {/* Checkbox */}
+              <div className={`w-5 h-5 rounded border flex items-center justify-center shrink-0 transition-colors ${
                 task.completed 
-                  ? "bg-status-success-text text-white" 
-                  : "border-2 border-muted-foreground/30"
+                  ? "bg-primary border-primary text-primary-foreground" 
+                  : "border-border"
               }`}>
-                {task.completed ? (
-                  <CheckCircle2 className="w-4 h-4" />
-                ) : (
-                  <Icon className="w-4 h-4 text-muted-foreground" />
-                )}
+                {task.completed && <Check className="w-3 h-3" />}
               </div>
 
               {/* Task Info */}
-              <div className="flex-1 text-left min-w-0">
-                <p className={`text-sm font-medium ${
-                  task.completed ? "line-through text-muted-foreground" : "text-foreground"
+              <div className="flex-1 min-w-0">
+                <p className={`text-sm ${
+                  task.completed ? "text-muted-foreground line-through" : "text-foreground"
                 }`}>
                   {task.label}
                 </p>
                 <p className="text-xs text-muted-foreground">
-                  {task.estimatedMinutes}min • {taskLabels[task.type]}
+                  {task.estimatedMinutes} min · {taskLabels[task.type]}
                 </p>
               </div>
 
-              {/* Action */}
+              {/* Arrow for pending tasks */}
               {!task.completed && (
-                <ChevronRight className="w-5 h-5 text-muted-foreground shrink-0" />
+                <ChevronRight className="w-4 h-4 text-muted-foreground shrink-0" />
               )}
             </button>
           );
@@ -134,26 +115,24 @@ export function TodayPlanCard({ mission, onStartMission, onToggleTask, onTaskCli
 
       {/* CTA */}
       {mission.status !== "completed" && nextTask && (
-        <div className="p-4 border-t bg-muted/20">
+        <div className="p-3 border-t">
           <Button
             onClick={onStartMission}
-            className="w-full h-12 font-semibold"
-            size="lg"
+            className="w-full"
+            variant="default"
           >
-            <Play className="w-4 h-4 mr-2" />
             {mission.status === "in_progress" 
               ? `Continuar: ${taskLabels[nextTask.type]}`
-              : `Iniciar plano`
+              : `Iniciar`
             }
           </Button>
         </div>
       )}
 
       {mission.status === "completed" && (
-        <div className="p-4 border-t bg-status-success/10 text-center">
-          <p className="text-sm font-medium text-status-success-text flex items-center justify-center gap-2">
-            <CheckCircle2 className="w-4 h-4" />
-            Plano do dia concluído! 🎉
+        <div className="p-3 border-t bg-muted/30 text-center">
+          <p className="text-sm text-muted-foreground">
+            Plano concluído
           </p>
         </div>
       )}
