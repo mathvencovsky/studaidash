@@ -112,13 +112,44 @@ export function CFADashboard() {
   }, [userProgress]);
 
   // Handlers
-  const handleStartMission = useCallback(() => {
+  // Navigate to study based on task type
+  const handleTaskClick = useCallback((task: { type: string; id: string }) => {
+    // Update mission status to in_progress
     setMission(prev => ({
       ...prev,
       status: prev.status === "not_started" ? "in_progress" : prev.status,
     }));
-    addToast("Missão iniciada! Boa sorte! 🚀", "success");
-  }, [addToast]);
+
+    // Navigate based on task type
+    switch (task.type) {
+      case "reading":
+      case "practice":
+      case "summary":
+        navigate("/estudar");
+        break;
+      case "quiz":
+        navigate("/quizzes");
+        break;
+      default:
+        navigate("/estudar");
+    }
+  }, [navigate]);
+
+  const handleStartMission = useCallback(() => {
+    // Find first incomplete task and navigate to it
+    const nextTask = mission.tasks.find(t => !t.completed);
+    
+    setMission(prev => ({
+      ...prev,
+      status: prev.status === "not_started" ? "in_progress" : prev.status,
+    }));
+
+    if (nextTask) {
+      handleTaskClick(nextTask);
+    } else {
+      addToast("Todas as tarefas concluídas! 🎉", "success");
+    }
+  }, [mission.tasks, handleTaskClick, addToast]);
 
   const handleToggleTask = useCallback((taskId: string) => {
     setMission(prev => {
@@ -249,6 +280,7 @@ export function CFADashboard() {
           mission={mission}
           onStartMission={handleStartMission}
           onToggleTask={handleToggleTask}
+          onTaskClick={handleTaskClick}
         />
 
         <SmartFeedbackCard
@@ -292,6 +324,7 @@ export function CFADashboard() {
             mission={mission}
             onStartMission={handleStartMission}
             onToggleTask={handleToggleTask}
+            onTaskClick={handleTaskClick}
           />
 
           <SmartFeedbackCard
