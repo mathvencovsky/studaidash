@@ -27,6 +27,7 @@ import Metas from "./pages/Metas";
 import Revisoes from "./pages/Revisoes";
 import ROIEstudo from "./pages/ROIEstudo";
 import Salvos from "./pages/Salvos";
+import PesquisarTrilhas from "./pages/PesquisarTrilhas";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -50,6 +51,7 @@ const App = () => (
             <Route element={<AppLayout><TrailOverview /></AppLayout>} path="/trilha/visao-geral" />
             <Route element={<AppLayout><Quizzes /></AppLayout>} path="/quizzes" />
             <Route element={<AppLayout><ExplorarTrilhas /></AppLayout>} path="/explorar" />
+            <Route element={<AppLayout><PesquisarTrilhas /></AppLayout>} path="/pesquisar" />
             <Route element={<AppLayout><TrackDetail /></AppLayout>} path="/explorar/:trackId" />
             <Route element={<AppLayout><Relatorios /></AppLayout>} path="/relatorios" />
             <Route element={<AppLayout><Engajamento /></AppLayout>} path="/engajamento" />

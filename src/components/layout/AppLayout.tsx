@@ -47,6 +47,7 @@ interface AppLayoutProps {
 const aprenderItems = [
   { to: "/", icon: LayoutDashboard, label: "Início" },
   { to: "/trilha", icon: Map, label: "Trilhas" },
+  { to: "/pesquisar", icon: Search, label: "Pesquisar" },
   { to: "/estudar", icon: BookOpen, label: "Estudar" },
   { to: "/quizzes", icon: FileText, label: "Avaliações" },
 ];
