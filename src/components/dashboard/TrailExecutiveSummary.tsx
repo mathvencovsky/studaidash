@@ -39,12 +39,6 @@ export function TrailExecutiveSummary({
     return "Atrasado";
   };
 
-  const getStatusColor = () => {
-    if (paceRatio >= 1) return "text-foreground";
-    if (paceRatio >= 0.7) return "text-muted-foreground";
-    return "text-destructive";
-  };
-
   return (
     <section className="border rounded-lg bg-card overflow-hidden">
       {/* Header */}
@@ -54,58 +48,58 @@ export function TrailExecutiveSummary({
             <h3 className="font-medium text-foreground">Status da trilha</h3>
             <p className="text-xs text-muted-foreground mt-0.5">{trailName}</p>
           </div>
-          <span className={`text-sm font-medium ${getStatusColor()}`}>
+          <span className="text-xs text-muted-foreground">
             {getStatusLabel()}
           </span>
         </div>
       </div>
 
-      {/* Progress */}
+      {/* Timeline */}
       <div className="p-4 border-b">
         <div className="flex items-center justify-between text-xs text-muted-foreground mb-2">
-          <span>{formatDateBR(startDate)}</span>
-          <span>Meta: {formatDateBR(targetDate)}</span>
+          <span>Início: {formatDateBR(startDate)}</span>
+          <span>Término: {formatDateBR(targetDate)}</span>
         </div>
         
         {/* Progress Bar */}
-        <div className="relative h-1.5 bg-muted rounded-full overflow-hidden">
+        <div className="relative h-1 bg-muted rounded-full overflow-hidden">
           <div 
             className="absolute inset-y-0 left-0 bg-primary rounded-full transition-all"
             style={{ width: `${progressPercent}%` }}
           />
         </div>
         
-        <div className="flex justify-between items-center mt-2">
-          <span className="text-xs text-muted-foreground">
+        <div className="flex justify-between items-center mt-2 text-xs">
+          <span className="text-muted-foreground">
             {formatHoursMinutes(completedHours)} estudadas
           </span>
-          <span className="text-sm font-medium text-foreground">
-            {progressPercent}%
+          <span className="font-medium text-foreground">
+            Progresso: {progressPercent}%
           </span>
         </div>
       </div>
 
-      {/* Metrics Grid */}
-      <div className="grid grid-cols-3 divide-x">
-        <div className="p-3 text-center">
-          <p className="text-base font-semibold text-foreground">{formatHoursMinutes(remainingHours)}</p>
+      {/* Metrics */}
+      <div className="grid grid-cols-3 divide-x text-center">
+        <div className="p-3">
+          <p className="text-sm font-medium text-foreground">{formatHoursMinutes(remainingHours)}</p>
           <p className="text-[10px] text-muted-foreground">Restantes</p>
         </div>
-        <div className="p-3 text-center">
-          <p className="text-base font-semibold text-foreground">{daysUntilTarget}</p>
+        <div className="p-3">
+          <p className="text-sm font-medium text-foreground">{daysUntilTarget}</p>
           <p className="text-[10px] text-muted-foreground">Dias</p>
         </div>
-        <div className="p-3 text-center">
-          <p className="text-base font-semibold text-foreground">{formatMinutesToHoursMinutes(requiredMinutesPerDay)}</p>
-          <p className="text-[10px] text-muted-foreground">/dia</p>
+        <div className="p-3">
+          <p className="text-sm font-medium text-foreground">{formatMinutesToHoursMinutes(requiredMinutesPerDay)}</p>
+          <p className="text-[10px] text-muted-foreground">Necessário/dia</p>
         </div>
       </div>
 
       {/* Projection */}
       <div className="p-3 border-t text-xs text-muted-foreground">
         {onTrack 
-          ? `Projeção: ${formatDateBR(estimatedFinishDate)}`
-          : `Ritmo atual: ${Math.round(paceRatio * 100)}% do necessário`
+          ? `No ritmo para concluir no prazo.`
+          : `Ritmo abaixo do necessário para a meta.`
         }
       </div>
 
@@ -113,10 +107,10 @@ export function TrailExecutiveSummary({
       {onViewDetails && (
         <button
           onClick={onViewDetails}
-          className="w-full p-3 text-sm text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-colors border-t flex items-center justify-center gap-1"
+          className="w-full p-3 text-xs text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-colors border-t flex items-center justify-center gap-1"
         >
           Ver detalhes
-          <ChevronRight className="w-4 h-4" />
+          <ChevronRight className="w-3 h-3" />
         </button>
       )}
     </section>

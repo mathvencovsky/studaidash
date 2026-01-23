@@ -18,39 +18,39 @@ export function GamificationSection({ progress, onViewAllBadges }: GamificationS
     <section className="border rounded-lg bg-card overflow-hidden">
       {/* Header */}
       <div className="p-4 border-b">
-        <h3 className="font-medium text-foreground">Conquistas</h3>
+        <h3 className="font-medium text-foreground">Progresso acumulado</h3>
       </div>
 
-      {/* Stats Row */}
-      <div className="grid grid-cols-3 divide-x border-b">
-        <div className="p-3 text-center">
-          <span className="text-base font-semibold text-foreground">{progress.xp.toLocaleString()}</span>
-          <p className="text-[10px] text-muted-foreground">XP</p>
+      {/* Stats */}
+      <div className="grid grid-cols-3 divide-x border-b text-center">
+        <div className="p-3">
+          <span className="text-sm font-medium text-foreground">{progress.streak}</span>
+          <p className="text-[10px] text-muted-foreground">Dias ativos</p>
         </div>
-        <div className="p-3 text-center">
-          <span className="text-base font-semibold text-foreground">Nv {progress.level}</span>
+        <div className="p-3">
+          <span className="text-sm font-medium text-foreground">{progress.level}</span>
           <p className="text-[10px] text-muted-foreground">Nível</p>
         </div>
-        <div className="p-3 text-center">
-          <span className="text-base font-semibold text-foreground">{progress.streak}</span>
-          <p className="text-[10px] text-muted-foreground">Dias</p>
+        <div className="p-3">
+          <span className="text-sm font-medium text-foreground">{progress.xp.toLocaleString()}</span>
+          <p className="text-[10px] text-muted-foreground">XP</p>
         </div>
       </div>
 
       {/* Level Progress */}
       <div className="p-4 border-b">
-        <div className="flex items-center justify-between mb-2 text-xs">
-          <span className="text-muted-foreground">Próximo nível</span>
-          <span className="text-muted-foreground">{progress.xp % 500}/{xpForNext - (progress.level - 1) * 500} XP</span>
+        <div className="flex items-center justify-between mb-2 text-xs text-muted-foreground">
+          <span>Próximo nível</span>
+          <span>{progress.xp % 500}/{xpForNext - (progress.level - 1) * 500}</span>
         </div>
         <Progress value={levelProgress} className="h-1" />
       </div>
 
-      {/* Badges Preview */}
+      {/* Badges */}
       {recentBadges.length > 0 && (
         <div className="p-4">
           <div className="flex items-center justify-between mb-3">
-            <span className="text-xs text-muted-foreground">Últimas conquistas</span>
+            <span className="text-xs text-muted-foreground">Conquistas recentes</span>
             <button 
               onClick={onViewAllBadges}
               className="text-xs text-muted-foreground hover:text-foreground flex items-center gap-0.5 transition-colors"
@@ -60,14 +60,14 @@ export function GamificationSection({ progress, onViewAllBadges }: GamificationS
             </button>
           </div>
           
-          <div className="flex gap-3">
+          <div className="flex gap-2">
             {recentBadges.map((badge) => (
               <div 
                 key={badge.id}
-                className="flex flex-col items-center p-2 bg-muted/30 rounded-lg flex-1"
+                className="flex flex-col items-center p-2 bg-muted/30 rounded-md flex-1"
                 title={badge.description}
               >
-                <span className="text-lg mb-1">{badge.icon}</span>
+                <span className="text-base mb-0.5">{badge.icon}</span>
                 <p className="text-[9px] text-center text-muted-foreground leading-tight line-clamp-1">
                   {badge.name}
                 </p>
