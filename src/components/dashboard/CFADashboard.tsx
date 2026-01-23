@@ -212,16 +212,14 @@ export function CFADashboard() {
         onViewTrail={() => navigate("/trilha")}
       />
 
-      {/* Trail Selector + Overview Grid - Equal columns */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 items-start gap-4">
-        {/* Trail Selector */}
+      {/* Mobile: ordem original (evita mudanças de hierarquia) */}
+      <div className="space-y-4 lg:hidden">
         <TrailSelectorCard 
           activeTrail={activeTrail}
           availableTrails={AVAILABLE_TRAILS}
           onSelectTrail={handleSelectTrail}
         />
-        
-        {/* Visão Geral da Trilha */}
+
         <TrailOverviewCard 
           trailName={activeTrail.name}
           startDate={activeTrail.startDate}
@@ -230,26 +228,61 @@ export function CFADashboard() {
           totalHours={activeTrail.totalEstimatedHours}
           completedHours={activeTrail.completedHours}
         />
+
+        <DailyMissionCard
+          mission={mission}
+          onStartMission={handleStartMission}
+          onToggleTask={handleToggleTask}
+        />
+
+        <SmartFeedbackCard
+          feedback={feedback}
+          onActionClick={handleFeedbackAction}
+        />
+
+        <QuizzesCard
+          quizzes={quizzes}
+          onStartQuiz={handleStartQuiz}
+          onViewAll={handleViewAllQuizzes}
+        />
+
+        <TrailProgressCard
+          modules={modules}
+          overallProgress={overallProgress}
+          onModuleClick={handleModuleClick}
+        />
+
+        <GamificationCard
+          progress={userProgress}
+          onViewAllBadges={handleViewAllBadges}
+        />
+
+        <SimuladosCard
+          simulados={simulados}
+          onStartSimulado={handleStartSimulado}
+        />
       </div>
 
-      {/* Main Grid Layout - Equal 6/6 columns for balance */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-        {/* Left Column - Primary Actions */}
+      {/* Desktop: duas colunas em “pilha” (elimina o espaço vazio abaixo de cards menores) */}
+      <div className="hidden lg:grid grid-cols-2 items-start gap-4">
         <div className="space-y-4">
-          {/* 1. DAILY MISSION - Most Important */}
+          <TrailSelectorCard 
+            activeTrail={activeTrail}
+            availableTrails={AVAILABLE_TRAILS}
+            onSelectTrail={handleSelectTrail}
+          />
+
           <DailyMissionCard
             mission={mission}
             onStartMission={handleStartMission}
             onToggleTask={handleToggleTask}
           />
 
-          {/* Smart Feedback */}
           <SmartFeedbackCard
             feedback={feedback}
             onActionClick={handleFeedbackAction}
           />
 
-          {/* Quizzes */}
           <QuizzesCard
             quizzes={quizzes}
             onStartQuiz={handleStartQuiz}
@@ -257,22 +290,27 @@ export function CFADashboard() {
           />
         </div>
 
-        {/* Right Column - Supporting Info */}
         <div className="space-y-4">
-          {/* 2. Trail Progress */}
+          <TrailOverviewCard 
+            trailName={activeTrail.name}
+            startDate={activeTrail.startDate}
+            targetDate={activeTrail.targetDate}
+            calculations={trailCalculations}
+            totalHours={activeTrail.totalEstimatedHours}
+            completedHours={activeTrail.completedHours}
+          />
+
           <TrailProgressCard
             modules={modules}
             overallProgress={overallProgress}
             onModuleClick={handleModuleClick}
           />
 
-          {/* 3. Gamification */}
           <GamificationCard
             progress={userProgress}
             onViewAllBadges={handleViewAllBadges}
           />
 
-          {/* 4. Simulados */}
           <SimuladosCard
             simulados={simulados}
             onStartSimulado={handleStartSimulado}
