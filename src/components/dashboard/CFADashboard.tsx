@@ -194,9 +194,9 @@ export function CFADashboard() {
   }, [addToast]);
 
   return (
-    <div className="px-4 sm:px-6 lg:px-8 py-4 sm:py-6 pb-24 md:pb-8 max-w-7xl mx-auto">
+    <div className="px-4 sm:px-6 lg:px-8 py-4 sm:py-6 pb-24 md:pb-8 max-w-7xl mx-auto space-y-4">
       {/* Welcome + Tagline */}
-      <div className="mb-5 sm:mb-6">
+      <div>
         <h1 className="text-xl sm:text-2xl md:text-3xl font-bold text-card-foreground">
           Olá, João! 👋
         </h1>
@@ -206,16 +206,14 @@ export function CFADashboard() {
       </div>
 
       {/* CTA Principal - Estudar com IA */}
-      <div className="mb-5 sm:mb-6">
-        <AIStudyCTACard 
-          recommendation={aiRecommendation}
-          onStartWithAI={() => navigate("/estudar")}
-          onViewTrail={() => navigate("/trilha")}
-        />
-      </div>
+      <AIStudyCTACard 
+        recommendation={aiRecommendation}
+        onStartWithAI={() => navigate("/estudar")}
+        onViewTrail={() => navigate("/trilha")}
+      />
 
       {/* Trail Selector + Overview Grid - Equal columns */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 items-start gap-4 sm:gap-5 lg:gap-6 mb-5 sm:mb-6">
+      <div className="grid grid-cols-1 lg:grid-cols-2 items-start gap-4">
         {/* Trail Selector */}
         <TrailSelectorCard 
           activeTrail={activeTrail}
@@ -235,9 +233,9 @@ export function CFADashboard() {
       </div>
 
       {/* Main Grid Layout - Equal 6/6 columns for balance */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-5 lg:gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
         {/* Left Column - Primary Actions */}
-        <div className="space-y-4 sm:space-y-5 lg:space-y-6">
+        <div className="space-y-4">
           {/* 1. DAILY MISSION - Most Important */}
           <DailyMissionCard
             mission={mission}
@@ -260,7 +258,7 @@ export function CFADashboard() {
         </div>
 
         {/* Right Column - Supporting Info */}
-        <div className="space-y-4 sm:space-y-5 lg:space-y-6">
+        <div className="space-y-4">
           {/* 2. Trail Progress */}
           <TrailProgressCard
             modules={modules}
