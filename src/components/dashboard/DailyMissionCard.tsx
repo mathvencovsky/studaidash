@@ -7,7 +7,8 @@ import {
   Clock,
   Play,
   Sparkles,
-  Circle
+  Circle,
+  ChevronRight
 } from "lucide-react";
 import type { DailyMission, MissionTask } from "@/types/studai";
 
@@ -15,6 +16,7 @@ interface DailyMissionCardProps {
   mission: DailyMission;
   onStartMission: () => void;
   onToggleTask: (taskId: string) => void;
+  onTaskClick?: (task: MissionTask) => void;
 }
 
 const taskIcons: Record<MissionTask["type"], typeof BookOpen> = {
@@ -31,10 +33,13 @@ const taskLabels: Record<MissionTask["type"], string> = {
   quiz: "Quiz",
 };
 
-export function DailyMissionCard({ mission, onStartMission, onToggleTask }: DailyMissionCardProps) {
+export function DailyMissionCard({ mission, onStartMission, onToggleTask, onTaskClick }: DailyMissionCardProps) {
   const completedTasks = mission.tasks.filter(t => t.completed).length;
   const totalTasks = mission.tasks.length;
   const progress = Math.round((completedTasks / totalTasks) * 100);
+
+  // Find the first incomplete task
+  const nextTask = mission.tasks.find(t => !t.completed);
 
   const statusConfig = {
     not_started: {
@@ -55,6 +60,22 @@ export function DailyMissionCard({ mission, onStartMission, onToggleTask }: Dail
   };
 
   const status = statusConfig[mission.status];
+
+  const handleTaskAction = (task: MissionTask, e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (task.completed) {
+      // If completed, just toggle (uncheck)
+      onToggleTask(task.id);
+    } else if (onTaskClick) {
+      // If not completed, navigate to study content
+      onTaskClick(task);
+    }
+  };
+
+  const handleMarkComplete = (taskId: string, e: React.MouseEvent) => {
+    e.stopPropagation();
+    onToggleTask(taskId);
+  };
 
   return (
     <div className="bg-card border-2 border-accent/20 rounded-2xl overflow-hidden shadow-lg w-full">
@@ -109,54 +130,71 @@ export function DailyMissionCard({ mission, onStartMission, onToggleTask }: Dail
         {mission.tasks.map((task) => {
           const Icon = taskIcons[task.type];
           return (
-            <button
+            <div
               key={task.id}
-              onClick={() => onToggleTask(task.id)}
-              className={`w-full flex items-center gap-3 p-3 sm:p-3.5 rounded-xl border transition-all duration-200 min-h-[52px] sm:min-h-[56px] touch-manipulation ${
+              className={`w-full flex items-center gap-2 sm:gap-3 p-2.5 sm:p-3.5 rounded-xl border transition-all duration-200 min-h-[52px] sm:min-h-[56px] ${
                 task.completed 
                   ? "bg-status-success/40 border-status-success-text/20" 
-                  : "bg-secondary/30 border-transparent hover:bg-secondary/60 active:bg-secondary active:scale-[0.98]"
+                  : "bg-secondary/30 border-transparent hover:bg-secondary/60"
               }`}
             >
-              {/* Checkbox circle - Larger touch target */}
-              <div className={`w-7 h-7 sm:w-8 sm:h-8 rounded-full flex items-center justify-center shrink-0 border-2 transition-all ${
-                task.completed 
-                  ? "bg-status-success-text border-status-success-text" 
-                  : "border-accent/40 bg-transparent"
-              }`}>
+              {/* Checkbox button */}
+              <button
+                onClick={(e) => handleMarkComplete(task.id, e)}
+                className={`w-7 h-7 sm:w-8 sm:h-8 rounded-full flex items-center justify-center shrink-0 border-2 transition-all touch-manipulation active:scale-95 ${
+                  task.completed 
+                    ? "bg-status-success-text border-status-success-text" 
+                    : "border-accent/40 bg-transparent hover:border-accent hover:bg-accent/10"
+                }`}
+                title={task.completed ? "Desmarcar" : "Marcar como concluído"}
+              >
                 {task.completed ? (
                   <CheckCircle2 size={14} className="sm:w-4 sm:h-4 text-white" />
                 ) : (
-                  <Circle size={14} className="sm:w-4 sm:h-4 text-transparent" />
+                  <Circle size={14} className="sm:w-4 sm:h-4 text-accent/40" />
                 )}
-              </div>
+              </button>
 
-              {/* Task icon */}
-              <div className={`w-8 h-8 sm:w-9 sm:h-9 rounded-lg flex items-center justify-center shrink-0 ${
-                task.completed 
-                  ? "bg-status-success-text/20 text-status-success-text" 
-                  : "bg-accent/10 text-accent"
-              }`}>
-                <Icon size={14} className="sm:w-4 sm:h-4" />
-              </div>
-
-              {/* Task info */}
-              <div className="flex-1 text-left min-w-0">
-                <p className={`font-medium text-xs sm:text-sm leading-tight ${
-                  task.completed ? "line-through text-muted-foreground" : "text-card-foreground"
+              {/* Task content - clickable to start studying */}
+              <button
+                onClick={(e) => handleTaskAction(task, e)}
+                disabled={task.completed}
+                className={`flex-1 flex items-center gap-2 sm:gap-3 text-left min-w-0 touch-manipulation ${
+                  !task.completed ? "hover:opacity-80 active:scale-[0.99]" : ""
+                }`}
+              >
+                {/* Task icon */}
+                <div className={`w-8 h-8 sm:w-9 sm:h-9 rounded-lg flex items-center justify-center shrink-0 ${
+                  task.completed 
+                    ? "bg-status-success-text/20 text-status-success-text" 
+                    : "bg-accent/10 text-accent"
                 }`}>
-                  {task.label}
-                </p>
-                <p className="text-[10px] sm:text-xs text-muted-foreground mt-0.5">
-                  {task.estimatedMinutes}min • {taskLabels[task.type]}
-                </p>
-              </div>
+                  <Icon size={14} className="sm:w-4 sm:h-4" />
+                </div>
+
+                {/* Task info */}
+                <div className="flex-1 min-w-0">
+                  <p className={`font-medium text-xs sm:text-sm leading-tight ${
+                    task.completed ? "line-through text-muted-foreground" : "text-card-foreground"
+                  }`}>
+                    {task.label}
+                  </p>
+                  <p className="text-[10px] sm:text-xs text-muted-foreground mt-0.5">
+                    {task.estimatedMinutes}min • {taskLabels[task.type]}
+                  </p>
+                </div>
+
+                {/* Action indicator */}
+                {!task.completed && (
+                  <ChevronRight size={16} className="sm:w-5 sm:h-5 text-accent shrink-0" />
+                )}
+              </button>
 
               {/* Completed indicator */}
               {task.completed && (
                 <CheckCircle2 size={16} className="sm:w-5 sm:h-5 text-status-success-text shrink-0" />
               )}
-            </button>
+            </div>
           );
         })}
       </div>
@@ -176,12 +214,12 @@ export function DailyMissionCard({ mission, onStartMission, onToggleTask }: Dail
           ) : mission.status === "in_progress" ? (
             <>
               <Play size={18} className="sm:w-5 sm:h-5" />
-              Continuar Missão
+              {nextTask ? `Continuar: ${taskLabels[nextTask.type]}` : "Continuar Missão"}
             </>
           ) : (
             <>
               <Play size={18} className="sm:w-5 sm:h-5" />
-              Iniciar Missão
+              {nextTask ? `Iniciar: ${taskLabels[nextTask.type]}` : "Iniciar Missão"}
             </>
           )}
         </button>
