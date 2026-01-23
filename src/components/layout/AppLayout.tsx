@@ -22,7 +22,10 @@ import {
   Library,
   Search,
   Plus,
-  ChevronDown
+  ChevronDown,
+  User,
+  HelpCircle,
+  LogOut
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
@@ -268,17 +271,44 @@ export function AppLayout({ children }: AppLayoutProps) {
                   <ChevronDown className="h-4 w-4 text-muted-foreground" />
                 </Button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-48 bg-popover border shadow-lg z-50">
-                <DropdownMenuItem onClick={() => navigate("/perfil")}>
-                  Meu Perfil
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => navigate("/configuracoes")}>
-                  Configurações
-                </DropdownMenuItem>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem className="text-destructive">
-                  Sair
-                </DropdownMenuItem>
+              <DropdownMenuContent align="end" className="w-56 bg-popover border shadow-lg z-50 p-0">
+                {/* User Info Header */}
+                <div className="flex items-center gap-3 p-4 border-b">
+                  <Avatar className="h-10 w-10">
+                    <AvatarFallback className="bg-primary text-primary-foreground text-sm font-semibold">
+                      J
+                    </AvatarFallback>
+                  </Avatar>
+                  <div className="flex flex-col">
+                    <span className="text-sm font-semibold">João Silva</span>
+                    <span className="text-xs text-muted-foreground">Nível 12 • Pro</span>
+                  </div>
+                </div>
+                
+                {/* Menu Items */}
+                <div className="p-1">
+                  <DropdownMenuItem onClick={() => navigate("/perfil")} className="flex items-center gap-3 px-3 py-2 cursor-pointer">
+                    <User className="h-4 w-4 text-muted-foreground" />
+                    <span>Perfil</span>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => navigate("/configuracoes")} className="flex items-center gap-3 px-3 py-2 cursor-pointer">
+                    <Settings className="h-4 w-4 text-muted-foreground" />
+                    <span>Configurações</span>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem className="flex items-center gap-3 px-3 py-2 cursor-pointer">
+                    <HelpCircle className="h-4 w-4 text-muted-foreground" />
+                    <span>Ajuda</span>
+                  </DropdownMenuItem>
+                </div>
+                
+                <DropdownMenuSeparator className="my-0" />
+                
+                <div className="p-1">
+                  <DropdownMenuItem className="flex items-center gap-3 px-3 py-2 cursor-pointer text-destructive focus:text-destructive">
+                    <LogOut className="h-4 w-4" />
+                    <span>Sair</span>
+                  </DropdownMenuItem>
+                </div>
               </DropdownMenuContent>
             </DropdownMenu>
           </div>
