@@ -1,36 +1,10 @@
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { TrendingUp, Clock, Target, DollarSign, Brain, Zap } from "lucide-react";
+import { Progress } from "@/components/ui/progress";
 
 const roiMetrics = [
-  {
-    label: "Tempo Investido",
-    value: "185h",
-    subtext: "desde o início",
-    icon: Clock,
-    trend: "+12h esta semana",
-  },
-  {
-    label: "Eficiência de Estudo",
-    value: "87%",
-    subtext: "acima da média",
-    icon: Brain,
-    trend: "+5% vs. mês passado",
-  },
-  {
-    label: "ROI Estimado",
-    value: "R$ 45k",
-    subtext: "potencial salarial",
-    icon: DollarSign,
-    trend: "após certificação",
-  },
-  {
-    label: "Velocidade",
-    value: "1.3x",
-    subtext: "vs. ritmo planejado",
-    icon: Zap,
-    trend: "Adiantado 2 semanas",
-  },
+  { label: "Tempo investido", value: "185h", sublabel: "desde o início" },
+  { label: "Eficiência", value: "87%", sublabel: "acima da média" },
+  { label: "ROI estimado", value: "R$ 45k", sublabel: "potencial salarial" },
+  { label: "Velocidade", value: "1.3x", sublabel: "vs. planejado" },
 ];
 
 const moduleEfficiency = [
@@ -42,65 +16,43 @@ const moduleEfficiency = [
 
 export default function ROIEstudo() {
   return (
-    <div className="px-4 sm:px-6 lg:px-8 py-4 sm:py-6 pb-24 md:pb-8 max-w-7xl mx-auto space-y-6">
+    <div className="px-4 sm:px-6 lg:px-8 py-6 pb-24 md:pb-8 max-w-4xl mx-auto space-y-6">
       <div>
-        <h1 className="text-xl sm:text-2xl md:text-3xl font-bold text-card-foreground">
-          ROI de Estudo
-        </h1>
-        <p className="text-sm sm:text-base text-muted-foreground mt-1">
-          Análise do retorno sobre seu investimento de tempo
+        <h1 className="text-lg font-medium text-foreground">Métricas</h1>
+        <p className="text-sm text-muted-foreground mt-0.5">
+          Retorno sobre tempo investido.
         </p>
       </div>
 
       {/* Main Metrics */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
         {roiMetrics.map((metric) => (
-          <Card key={metric.label}>
-            <CardContent className="p-4">
-              <div className="flex items-center gap-2 mb-2">
-                <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center">
-                  <metric.icon size={16} className="text-primary" />
-                </div>
-              </div>
-              <p className="text-2xl font-bold">{metric.value}</p>
-              <p className="text-xs text-muted-foreground">{metric.subtext}</p>
-              <Badge variant="secondary" className="text-xs mt-2">
-                <TrendingUp size={10} className="mr-1" />
-                {metric.trend}
-              </Badge>
-            </CardContent>
-          </Card>
+          <section key={metric.label} className="border rounded-lg bg-card p-4">
+            <p className="text-xl font-semibold text-foreground">{metric.value}</p>
+            <p className="text-xs text-muted-foreground">{metric.sublabel}</p>
+          </section>
         ))}
       </div>
 
       {/* Module Efficiency */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-base flex items-center gap-2">
-            <Target size={18} className="text-primary" />
-            Eficiência por Módulo
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-4">
+      <section className="border rounded-lg bg-card overflow-hidden">
+        <div className="p-4 border-b">
+          <h2 className="font-medium text-foreground">Eficiência por módulo</h2>
+        </div>
+        <div className="divide-y">
           {moduleEfficiency.map((item) => (
-            <div key={item.module} className="space-y-2">
-              <div className="flex items-center justify-between">
-                <span className="text-sm font-medium">{item.module}</span>
-                <div className="flex items-center gap-2">
-                  <Badge 
-                    variant={item.efficiency >= 80 ? "default" : "secondary"}
-                    className="text-xs"
-                  >
-                    {item.efficiency}%
-                  </Badge>
-                </div>
+            <div key={item.module} className="p-4">
+              <div className="flex items-center justify-between mb-2">
+                <span className="text-sm text-foreground">{item.module}</span>
+                <span className="text-sm font-medium text-foreground">{item.efficiency}%</span>
               </div>
+              <Progress value={item.efficiency} className="h-1 mb-2" />
               <div className="flex items-center gap-2 text-xs text-muted-foreground">
                 <span>{item.hoursSpent}h gastas</span>
-                <span>•</span>
+                <span>·</span>
                 <span>{item.expected}h esperadas</span>
-                <span>•</span>
-                <span className={item.hoursSpent <= item.expected ? "text-green-600" : "text-amber-600"}>
+                <span>·</span>
+                <span className={item.hoursSpent <= item.expected ? "text-foreground" : ""}>
                   {item.hoursSpent <= item.expected 
                     ? `${item.expected - item.hoursSpent}h economizadas` 
                     : `${item.hoursSpent - item.expected}h extras`
@@ -109,27 +61,16 @@ export default function ROIEstudo() {
               </div>
             </div>
           ))}
-        </CardContent>
-      </Card>
+        </div>
+      </section>
 
-      {/* Insight Card */}
-      <Card className="bg-gradient-to-br from-primary/5 to-transparent border-primary/20">
-        <CardContent className="p-4">
-          <div className="flex items-start gap-3">
-            <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
-              <Brain size={20} className="text-primary" />
-            </div>
-            <div>
-              <h3 className="font-semibold text-sm">Insight da IA</h3>
-              <p className="text-sm text-muted-foreground mt-1">
-                Seu ROI está 23% acima da média de usuários com objetivos similares. 
-                Continue focando em Probability Concepts para maximizar sua eficiência 
-                antes do exame.
-              </p>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
+      {/* Insight */}
+      <section className="border rounded-lg bg-card p-4">
+        <p className="text-xs text-muted-foreground mb-1">Observação</p>
+        <p className="text-sm text-foreground">
+          Eficiência 23% acima da média de usuários com objetivos similares.
+        </p>
+      </section>
     </div>
   );
 }

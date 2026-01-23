@@ -1,21 +1,10 @@
 import { useState } from "react";
 import { useTheme } from "next-themes";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Switch } from "@/components/ui/switch";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { 
-  Settings, 
-  Bell, 
-  Moon, 
-  Globe, 
-  Clock, 
-  Shield,
-  HelpCircle,
-  LogOut,
-  ChevronRight
-} from "lucide-react";
+import { ChevronRight, LogOut } from "lucide-react";
 
 export default function Configuracoes() {
   const [notifications, setNotifications] = useState(true);
@@ -31,27 +20,24 @@ export default function Configuracoes() {
   };
 
   return (
-    <div className="p-4 sm:p-6 pb-24 md:pb-6 space-y-6">
-      {/* Header */}
+    <div className="px-4 sm:px-6 lg:px-8 py-6 pb-24 md:pb-8 max-w-2xl mx-auto space-y-6">
       <div>
-        <h1 className="text-2xl sm:text-3xl font-bold">Configurações</h1>
-        <p className="text-muted-foreground mt-1">Personalize sua experiência de estudo</p>
+        <h1 className="text-lg font-medium text-foreground">Configurações</h1>
+        <p className="text-sm text-muted-foreground mt-0.5">
+          Preferências.
+        </p>
       </div>
 
       {/* Notifications */}
-      <Card>
-        <CardHeader className="pb-2">
-          <CardTitle className="text-lg flex items-center gap-2">
-            <Bell className="w-5 h-5" />
-            Notificações
-          </CardTitle>
-          <CardDescription>Gerencie como você recebe alertas</CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="flex items-center justify-between">
+      <section className="border rounded-lg bg-card overflow-hidden">
+        <div className="p-4 border-b">
+          <h2 className="font-medium text-foreground">Notificações</h2>
+        </div>
+        <div className="divide-y">
+          <div className="flex items-center justify-between p-4">
             <div>
-              <Label htmlFor="notifications" className="font-medium">Notificações Push</Label>
-              <p className="text-sm text-muted-foreground">Receba alertas no seu dispositivo</p>
+              <Label htmlFor="notifications" className="text-sm">Push</Label>
+              <p className="text-xs text-muted-foreground">Alertas no dispositivo</p>
             </div>
             <Switch 
               id="notifications" 
@@ -59,10 +45,10 @@ export default function Configuracoes() {
               onCheckedChange={setNotifications} 
             />
           </div>
-          <div className="flex items-center justify-between">
+          <div className="flex items-center justify-between p-4">
             <div>
-              <Label htmlFor="reminder" className="font-medium">Lembrete Diário</Label>
-              <p className="text-sm text-muted-foreground">Lembre-se de estudar todo dia</p>
+              <Label htmlFor="reminder" className="text-sm">Lembrete diário</Label>
+              <p className="text-xs text-muted-foreground">Hora de estudar</p>
             </div>
             <Switch 
               id="reminder" 
@@ -70,22 +56,19 @@ export default function Configuracoes() {
               onCheckedChange={setDailyReminder} 
             />
           </div>
-        </CardContent>
-      </Card>
+        </div>
+      </section>
 
       {/* Appearance */}
-      <Card>
-        <CardHeader className="pb-2">
-          <CardTitle className="text-lg flex items-center gap-2">
-            <Moon className="w-5 h-5" />
-            Aparência
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-4">
+      <section className="border rounded-lg bg-card overflow-hidden">
+        <div className="p-4 border-b">
+          <h2 className="font-medium text-foreground">Aparência</h2>
+        </div>
+        <div className="p-4">
           <div className="flex items-center justify-between">
             <div>
-              <Label htmlFor="darkMode" className="font-medium">Modo Escuro</Label>
-              <p className="text-sm text-muted-foreground">Alterne entre tema claro e escuro</p>
+              <Label htmlFor="darkMode" className="text-sm">Modo escuro</Label>
+              <p className="text-xs text-muted-foreground">Tema claro/escuro</p>
             </div>
             <Switch 
               id="darkMode" 
@@ -93,85 +76,66 @@ export default function Configuracoes() {
               onCheckedChange={handleDarkModeToggle} 
             />
           </div>
-        </CardContent>
-      </Card>
+        </div>
+      </section>
 
       {/* Study Preferences */}
-      <Card>
-        <CardHeader className="pb-2">
-          <CardTitle className="text-lg flex items-center gap-2">
-            <Clock className="w-5 h-5" />
-            Preferências de Estudo
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-4">
+      <section className="border rounded-lg bg-card overflow-hidden">
+        <div className="p-4 border-b">
+          <h2 className="font-medium text-foreground">Estudo</h2>
+        </div>
+        <div className="p-4 space-y-4">
           <div className="space-y-2">
-            <Label className="font-medium">Meta Diária de Estudo</Label>
+            <Label className="text-sm">Meta diária</Label>
             <Select value={studyGoal} onValueChange={setStudyGoal}>
-              <SelectTrigger>
+              <SelectTrigger className="h-9">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="30">30 minutos</SelectItem>
-                <SelectItem value="45">45 minutos</SelectItem>
-                <SelectItem value="60">60 minutos</SelectItem>
-                <SelectItem value="90">90 minutos</SelectItem>
-                <SelectItem value="120">120 minutos</SelectItem>
+                <SelectItem value="30">30 min</SelectItem>
+                <SelectItem value="45">45 min</SelectItem>
+                <SelectItem value="60">60 min</SelectItem>
+                <SelectItem value="90">90 min</SelectItem>
+                <SelectItem value="120">120 min</SelectItem>
               </SelectContent>
             </Select>
           </div>
           <div className="space-y-2">
-            <Label className="font-medium">Idioma</Label>
+            <Label className="text-sm">Idioma</Label>
             <Select value={language} onValueChange={setLanguage}>
-              <SelectTrigger>
+              <SelectTrigger className="h-9">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="pt-BR">Português (Brasil)</SelectItem>
+                <SelectItem value="pt-BR">Português</SelectItem>
                 <SelectItem value="en">English</SelectItem>
               </SelectContent>
             </Select>
           </div>
-        </CardContent>
-      </Card>
+        </div>
+      </section>
 
       {/* Other Options */}
-      <Card>
-        <CardHeader className="pb-2">
-          <CardTitle className="text-lg flex items-center gap-2">
-            <Settings className="w-5 h-5" />
-            Outras Opções
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="p-0">
-          <div className="divide-y">
-            <button className="w-full flex items-center justify-between p-4 hover:bg-muted/50 transition-colors">
-              <div className="flex items-center gap-3">
-                <Shield className="w-5 h-5 text-muted-foreground" />
-                <span className="font-medium">Privacidade e Segurança</span>
-              </div>
-              <ChevronRight className="w-5 h-5 text-muted-foreground" />
-            </button>
-            <button className="w-full flex items-center justify-between p-4 hover:bg-muted/50 transition-colors">
-              <div className="flex items-center gap-3">
-                <HelpCircle className="w-5 h-5 text-muted-foreground" />
-                <span className="font-medium">Ajuda e Suporte</span>
-              </div>
-              <ChevronRight className="w-5 h-5 text-muted-foreground" />
-            </button>
-          </div>
-        </CardContent>
-      </Card>
+      <section className="border rounded-lg bg-card overflow-hidden">
+        <button className="w-full flex items-center justify-between p-4 hover:bg-muted/30 transition-colors text-left">
+          <span className="text-sm text-foreground">Privacidade</span>
+          <ChevronRight className="w-4 h-4 text-muted-foreground" />
+        </button>
+        <div className="border-t" />
+        <button className="w-full flex items-center justify-between p-4 hover:bg-muted/30 transition-colors text-left">
+          <span className="text-sm text-foreground">Ajuda</span>
+          <ChevronRight className="w-4 h-4 text-muted-foreground" />
+        </button>
+      </section>
 
       {/* Logout */}
-      <Button variant="outline" className="w-full gap-2 text-destructive hover:text-destructive">
-        <LogOut className="w-4 h-4" />
-        Sair da Conta
+      <Button variant="outline" className="w-full text-muted-foreground h-9 text-sm">
+        <LogOut className="w-4 h-4 mr-2" />
+        Sair
       </Button>
 
-      {/* Version */}
       <p className="text-center text-xs text-muted-foreground">
-        StudAI v1.0.0
+        v1.0.0
       </p>
     </div>
   );

@@ -1,8 +1,6 @@
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Bookmark, FileText, Video, HelpCircle, Trash2 } from "lucide-react";
+import { FileText, Video, HelpCircle, Bookmark, Trash2 } from "lucide-react";
 
 const savedItems = [
   {
@@ -44,24 +42,13 @@ const getTypeIcon = (type: string) => {
   }
 };
 
-const getTypeLabel = (type: string) => {
-  switch (type) {
-    case "note": return "Nota";
-    case "video": return "Vídeo";
-    case "quiz": return "Quiz";
-    default: return type;
-  }
-};
-
 export default function Salvos() {
   return (
-    <div className="px-4 sm:px-6 lg:px-8 py-4 sm:py-6 pb-24 md:pb-8 max-w-7xl mx-auto space-y-6">
+    <div className="px-4 sm:px-6 lg:px-8 py-6 pb-24 md:pb-8 max-w-4xl mx-auto space-y-6">
       <div>
-        <h1 className="text-xl sm:text-2xl md:text-3xl font-bold text-card-foreground">
-          Salvos
-        </h1>
-        <p className="text-sm sm:text-base text-muted-foreground mt-1">
-          Seus conteúdos favoritos e anotações importantes
+        <h1 className="text-lg font-medium text-foreground">Salvos</h1>
+        <p className="text-sm text-muted-foreground mt-0.5">
+          Conteúdos favoritos.
         </p>
       </div>
 
@@ -73,57 +60,37 @@ export default function Salvos() {
           <TabsTrigger value="quizzes">Quizzes</TabsTrigger>
         </TabsList>
 
-        <TabsContent value="all" className="mt-4 space-y-3">
-          {savedItems.map((item) => {
-            const TypeIcon = getTypeIcon(item.type);
-            return (
-              <Card key={item.id} className="hover:shadow-sm transition-shadow">
-                <CardContent className="p-4 flex items-center gap-4">
-                  <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
-                    <TypeIcon size={20} className="text-primary" />
-                  </div>
+        <TabsContent value="all" className="mt-4">
+          <section className="border rounded-lg bg-card overflow-hidden divide-y">
+            {savedItems.map((item) => {
+              const TypeIcon = getTypeIcon(item.type);
+              return (
+                <div key={item.id} className="flex items-center gap-3 p-4 hover:bg-muted/30 transition-colors">
+                  <TypeIcon className="w-4 h-4 text-muted-foreground shrink-0" />
                   <div className="flex-1 min-w-0">
-                    <h3 className="font-medium text-sm truncate">{item.title}</h3>
-                    <div className="flex items-center gap-2 mt-1 text-xs text-muted-foreground">
-                      <Badge variant="outline" className="text-xs">
-                        {getTypeLabel(item.type)}
-                      </Badge>
-                      <span>•</span>
-                      <span>{item.module}</span>
-                      <span>•</span>
-                      <span>{item.savedAt}</span>
-                    </div>
+                    <p className="text-sm text-foreground truncate">{item.title}</p>
+                    <p className="text-xs text-muted-foreground mt-0.5">
+                      {item.module} · {item.savedAt}
+                    </p>
                   </div>
-                  <Button variant="ghost" size="icon" className="text-muted-foreground hover:text-destructive">
-                    <Trash2 size={16} />
+                  <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-destructive shrink-0">
+                    <Trash2 size={14} />
                   </Button>
-                </CardContent>
-              </Card>
-            );
-          })}
+                </div>
+              );
+            })}
+          </section>
         </TabsContent>
 
         {["notes", "videos", "quizzes"].map((tab) => (
           <TabsContent key={tab} value={tab} className="mt-4">
             <div className="text-center py-8 text-muted-foreground">
-              <Bookmark size={40} className="mx-auto mb-2 opacity-50" />
-              <p>Filtrando por {tab}...</p>
+              <Bookmark size={32} className="mx-auto mb-2 opacity-30" />
+              <p className="text-sm">Filtrando por {tab}...</p>
             </div>
           </TabsContent>
         ))}
       </Tabs>
-
-      {savedItems.length === 0 && (
-        <Card>
-          <CardContent className="p-8 text-center">
-            <Bookmark size={48} className="mx-auto mb-4 text-muted-foreground opacity-50" />
-            <h3 className="font-semibold mb-2">Nenhum item salvo</h3>
-            <p className="text-sm text-muted-foreground">
-              Salve conteúdos importantes durante seus estudos para acessá-los rapidamente aqui.
-            </p>
-          </CardContent>
-        </Card>
-      )}
     </div>
   );
 }

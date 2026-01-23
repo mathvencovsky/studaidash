@@ -1,5 +1,3 @@
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { Button } from "@/components/ui/button";
 import { BookOpen, Clock, ChevronRight } from "lucide-react";
@@ -39,59 +37,53 @@ const programs = [
 
 export default function Programas() {
   return (
-    <div className="px-4 sm:px-6 lg:px-8 py-4 sm:py-6 pb-24 md:pb-8 max-w-7xl mx-auto space-y-6">
+    <div className="px-4 sm:px-6 lg:px-8 py-6 pb-24 md:pb-8 max-w-4xl mx-auto space-y-6">
       <div>
-        <h1 className="text-xl sm:text-2xl md:text-3xl font-bold text-card-foreground">
-          Programas
-        </h1>
-        <p className="text-sm sm:text-base text-muted-foreground mt-1">
-          Gerencie seus programas de estudo ativos
+        <h1 className="text-lg font-medium text-foreground">Programas</h1>
+        <p className="text-sm text-muted-foreground mt-0.5">
+          Trilhas ativas.
         </p>
       </div>
 
-      <div className="grid gap-4">
+      <div className="space-y-4">
         {programs.map((program) => (
-          <Card key={program.id} className="hover:shadow-md transition-shadow">
-            <CardContent className="p-4 sm:p-6">
-              <div className="flex items-start justify-between gap-4">
+          <section key={program.id} className="border rounded-lg bg-card overflow-hidden hover:border-primary/30 transition-colors">
+            <div className="p-4">
+              <div className="flex items-start justify-between gap-3">
                 <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-2 mb-2">
-                    <Badge variant="secondary" className="text-xs">
-                      {program.category}
-                    </Badge>
+                  <div className="flex items-center gap-2 mb-1">
+                    <span className="text-xs text-muted-foreground">{program.category}</span>
                     {program.status === "in_progress" && (
-                      <Badge className="bg-primary/10 text-primary text-xs">
-                        Em andamento
-                      </Badge>
+                      <span className="text-xs text-primary">Em andamento</span>
                     )}
                   </div>
-                  <h3 className="font-semibold text-base sm:text-lg truncate">
+                  <h3 className="font-medium text-foreground truncate">
                     {program.name}
                   </h3>
-                  <div className="flex items-center gap-4 mt-2 text-sm text-muted-foreground">
+                  <div className="flex items-center gap-4 mt-2 text-xs text-muted-foreground">
                     <span className="flex items-center gap-1">
-                      <BookOpen size={14} />
+                      <BookOpen size={12} />
                       {program.modules} módulos
                     </span>
                     <span className="flex items-center gap-1">
-                      <Clock size={14} />
-                      {program.totalHours}h total
+                      <Clock size={12} />
+                      {program.totalHours}h
                     </span>
                   </div>
-                  <div className="mt-3">
-                    <div className="flex items-center justify-between text-xs mb-1">
-                      <span>{program.progress}% concluído</span>
-                      <span>{program.completedHours}h / {program.totalHours}h</span>
-                    </div>
-                    <Progress value={program.progress} className="h-2" />
-                  </div>
                 </div>
-                <Button variant="ghost" size="icon" className="shrink-0">
-                  <ChevronRight size={20} />
+                <Button variant="ghost" size="icon" className="shrink-0 h-8 w-8">
+                  <ChevronRight size={16} />
                 </Button>
               </div>
-            </CardContent>
-          </Card>
+              <div className="mt-3">
+                <div className="flex items-center justify-between text-xs mb-1">
+                  <span className="text-muted-foreground">{program.progress}%</span>
+                  <span className="text-muted-foreground">{program.completedHours}h/{program.totalHours}h</span>
+                </div>
+                <Progress value={program.progress} className="h-1" />
+              </div>
+            </div>
+          </section>
         ))}
       </div>
     </div>
