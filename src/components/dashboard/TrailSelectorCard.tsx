@@ -62,14 +62,13 @@ export function TrailSelectorCard({
     setDialogOpen(false);
   };
 
-  // Find current module in progress
   const currentModule = activeTrail.modules.find(m => m.status === "in_progress");
   const nextModule = activeTrail.modules.find(m => m.status === "not_started");
   const displayModule = currentModule || nextModule;
 
   return (
     <section className="border rounded-lg bg-card overflow-hidden">
-      {/* Header row */}
+      {/* Header */}
       <div className="p-4 border-b">
         <div className="flex items-center justify-between">
           <div>
@@ -82,10 +81,14 @@ export function TrailSelectorCard({
                 Trocar
               </button>
             </DialogTrigger>
-            <DialogContent className="max-w-lg max-h-[80vh] overflow-y-auto">
+            <DialogContent className="max-w-md max-h-[80vh] overflow-y-auto">
               <DialogHeader>
-                <DialogTitle>Trilhas disponíveis</DialogTitle>
+                <DialogTitle className="text-base font-medium">Trilhas disponíveis</DialogTitle>
               </DialogHeader>
+              
+              <p className="text-xs text-muted-foreground -mt-2">
+                Programas estruturados por objetivo.
+              </p>
               
               <div className="space-y-2 mt-4">
                 {availableTrails.map((trail) => {
@@ -96,39 +99,32 @@ export function TrailSelectorCard({
                     <button
                       key={trail.id}
                       onClick={() => handleSelectTrail(trail.id)}
-                      className={`w-full text-left p-3 rounded-lg border transition-colors ${
+                      className={`w-full text-left p-3 rounded-md border transition-colors ${
                         isActive 
                           ? "border-primary bg-primary/5" 
-                          : "border-border hover:border-primary/50 hover:bg-muted/30"
+                          : "border-border hover:bg-muted/30"
                       }`}
                     >
                       <div className="flex items-start gap-3">
-                        <div className="w-10 h-10 rounded-lg bg-muted flex items-center justify-center text-lg shrink-0">
+                        <div className="w-8 h-8 rounded-md bg-muted flex items-center justify-center text-sm shrink-0">
                           {trail.icon}
                         </div>
                         <div className="flex-1 min-w-0">
                           <div className="flex items-center gap-2">
                             <h4 className="font-medium text-sm text-foreground">{trail.name}</h4>
                             {isActive && (
-                              <span className="text-[10px] text-primary bg-primary/10 px-1.5 py-0.5 rounded">
-                                Ativa
-                              </span>
+                              <span className="text-[10px] text-primary">Ativa</span>
                             )}
                           </div>
-                          <p className="text-xs text-muted-foreground mt-0.5 line-clamp-1">
-                            {trail.description}
-                          </p>
-                          <div className="flex items-center gap-3 mt-2 text-xs text-muted-foreground">
-                            <span className="flex items-center gap-1">
-                              <CategoryIcon className="w-3 h-3" />
-                              {categoryLabels[trail.category]}
-                            </span>
+                          <div className="flex items-center gap-2 mt-1 text-xs text-muted-foreground">
                             <span>{trail.totalModules} módulos</span>
+                            <span>·</span>
                             <span>{trail.totalHours}h</span>
+                            <span>·</span>
                             <span>{difficultyLabels[trail.difficulty]}</span>
                           </div>
                         </div>
-                        <ChevronRight className="w-4 h-4 text-muted-foreground shrink-0 mt-1" />
+                        <ChevronRight className="w-4 h-4 text-muted-foreground shrink-0" />
                       </div>
                     </button>
                   );
@@ -146,11 +142,11 @@ export function TrailSelectorCard({
               style={{ width: `${progressPercent}%` }}
             />
           </div>
-          <span className="text-sm font-medium text-foreground">{progressPercent}%</span>
+          <span className="text-xs text-muted-foreground">{progressPercent}%</span>
         </div>
         
-        {/* Quick stats */}
-        <div className="flex items-center gap-4 mt-3 text-xs text-muted-foreground">
+        {/* Stats */}
+        <div className="flex items-center gap-4 mt-2 text-xs text-muted-foreground">
           <span className="flex items-center gap-1">
             <BookOpen className="w-3 h-3" />
             {activeTrail.modules.length} módulos
@@ -162,7 +158,7 @@ export function TrailSelectorCard({
         </div>
       </div>
 
-      {/* Next step section */}
+      {/* Next step */}
       {displayModule ? (
         <div className="p-4">
           <div className="flex items-center justify-between gap-3">
@@ -170,21 +166,21 @@ export function TrailSelectorCard({
               <p className="text-xs text-muted-foreground">
                 {currentModule ? "Continuar" : "Próximo"}
               </p>
-              <p className="text-sm font-medium text-foreground truncate">{displayModule.title}</p>
+              <p className="text-sm text-foreground truncate">{displayModule.title}</p>
             </div>
             <Button
               size="sm"
               variant="default"
-              className="shrink-0"
+              className="shrink-0 h-7 text-xs"
               onClick={() => navigate("/estudar")}
             >
-              Estudar
+              Iniciar sessão
             </Button>
           </div>
         </div>
       ) : (
         <div className="p-4 text-center">
-          <p className="text-sm text-muted-foreground">Trilha concluída</p>
+          <p className="text-xs text-muted-foreground">Trilha concluída</p>
         </div>
       )}
     </section>

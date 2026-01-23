@@ -33,7 +33,7 @@ export function AssessmentsSection({
         <div className="flex items-center justify-between">
           <div>
             <h3 className="font-medium text-foreground">Avaliações</h3>
-            <p className="text-xs text-muted-foreground mt-0.5">Quizzes e simulados</p>
+            <p className="text-xs text-muted-foreground mt-0.5">Medem retenção e preparo.</p>
           </div>
           
           <button 
@@ -48,7 +48,6 @@ export function AssessmentsSection({
 
       {/* Items List */}
       <div className="divide-y">
-        {/* Quizzes */}
         {activeQuizzes.map((quiz) => (
           <div
             key={quiz.id}
@@ -61,7 +60,7 @@ export function AssessmentsSection({
                 {quiz.lastScore !== undefined && (
                   <>
                     <span>·</span>
-                    <span>Última: {quiz.lastScore}%</span>
+                    <span>Última tentativa: {quiz.lastScore}%</span>
                   </>
                 )}
               </div>
@@ -71,14 +70,13 @@ export function AssessmentsSection({
               size="sm" 
               variant={quiz.status === "in_progress" ? "default" : "outline"}
               onClick={() => onStartQuiz(quiz.id)}
-              className="shrink-0 h-8"
+              className="shrink-0 h-7 text-xs"
             >
-              {quiz.status === "in_progress" ? "Continuar" : "Iniciar"}
+              {quiz.status === "in_progress" ? "Continuar" : "Iniciar quiz"}
             </Button>
           </div>
         ))}
 
-        {/* Simulados */}
         {activeSimulados.map((simulado) => (
           <div
             key={simulado.id}
@@ -87,9 +85,6 @@ export function AssessmentsSection({
             <div className="flex-1 min-w-0">
               <div className="flex items-center gap-2">
                 <p className="text-sm text-foreground truncate">{simulado.name}</p>
-                <span className="text-[10px] text-muted-foreground bg-muted px-1.5 py-0.5 rounded shrink-0">
-                  Simulado
-                </span>
               </div>
               <div className="flex items-center gap-2 text-xs text-muted-foreground mt-0.5">
                 <span>{simulado.totalQuestions} questões</span>
@@ -105,9 +100,9 @@ export function AssessmentsSection({
               size="sm"
               variant="outline" 
               onClick={() => onStartSimulado(simulado.id)}
-              className="shrink-0 h-8"
+              className="shrink-0 h-7 text-xs"
             >
-              Fazer
+              Iniciar simulado
             </Button>
           </div>
         ))}

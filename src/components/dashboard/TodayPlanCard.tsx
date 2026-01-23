@@ -4,7 +4,6 @@ import {
   FileText, 
   HelpCircle, 
   Check,
-  Clock,
   ChevronRight
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -46,6 +45,12 @@ export function TodayPlanCard({ mission, onStartMission, onToggleTask, onTaskCli
     }
   };
 
+  const getStatusLabel = () => {
+    if (mission.status === "completed") return "Concluído";
+    if (mission.status === "in_progress") return "Em andamento";
+    return "Não iniciado";
+  };
+
   return (
     <section className="border rounded-lg bg-card overflow-hidden">
       {/* Header */}
@@ -54,42 +59,44 @@ export function TodayPlanCard({ mission, onStartMission, onToggleTask, onTaskCli
           <div>
             <h3 className="font-medium text-foreground">Plano de hoje</h3>
             <p className="text-xs text-muted-foreground mt-0.5">
-              {completedTasks}/{totalTasks} tarefas · {mission.estimatedMinutes} min
+              Tarefas para manter o ritmo.
             </p>
           </div>
-          <span className="text-sm font-medium text-foreground">{progress}%</span>
+          <span className="text-xs text-muted-foreground">{getStatusLabel()}</span>
         </div>
 
         {/* Progress Bar */}
-        <div className="mt-3 h-1 bg-muted rounded-full overflow-hidden">
-          <div 
-            className="h-full bg-primary rounded-full transition-all duration-300"
-            style={{ width: `${progress}%` }}
-          />
+        <div className="mt-3 flex items-center gap-3">
+          <div className="flex-1 h-1 bg-muted rounded-full overflow-hidden">
+            <div 
+              className="h-full bg-primary rounded-full transition-all duration-300"
+              style={{ width: `${progress}%` }}
+            />
+          </div>
+          <span className="text-xs text-muted-foreground">{completedTasks}/{totalTasks}</span>
         </div>
       </div>
 
       {/* Tasks */}
       <div className="divide-y">
         {mission.tasks.map((task) => {
-          const Icon = taskIcons[task.type];
           return (
             <button
               key={task.id}
               onClick={(e) => handleTaskAction(task, e)}
               className={`w-full flex items-center gap-3 p-3 text-left transition-colors ${
                 task.completed 
-                  ? "bg-muted/30" 
+                  ? "bg-muted/20" 
                   : "hover:bg-muted/50"
               }`}
             >
               {/* Checkbox */}
-              <div className={`w-5 h-5 rounded border flex items-center justify-center shrink-0 transition-colors ${
+              <div className={`w-4 h-4 rounded border flex items-center justify-center shrink-0 transition-colors ${
                 task.completed 
                   ? "bg-primary border-primary text-primary-foreground" 
                   : "border-border"
               }`}>
-                {task.completed && <Check className="w-3 h-3" />}
+                {task.completed && <Check className="w-2.5 h-2.5" />}
               </div>
 
               {/* Task Info */}
@@ -121,18 +128,15 @@ export function TodayPlanCard({ mission, onStartMission, onToggleTask, onTaskCli
             className="w-full"
             variant="default"
           >
-            {mission.status === "in_progress" 
-              ? `Continuar: ${taskLabels[nextTask.type]}`
-              : `Iniciar`
-            }
+            {mission.status === "in_progress" ? "Continuar" : "Iniciar plano"}
           </Button>
         </div>
       )}
 
       {mission.status === "completed" && (
-        <div className="p-3 border-t bg-muted/30 text-center">
-          <p className="text-sm text-muted-foreground">
-            Plano concluído
+        <div className="p-3 border-t text-center">
+          <p className="text-xs text-muted-foreground">
+            Concluído
           </p>
         </div>
       )}
