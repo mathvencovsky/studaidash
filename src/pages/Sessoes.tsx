@@ -1,5 +1,3 @@
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
 import { Clock, Calendar, TrendingUp, BookOpen } from "lucide-react";
 
 const recentSessions = [
@@ -8,7 +6,6 @@ const recentSessions = [
     date: "Hoje",
     duration: "45min",
     topic: "Probability Concepts",
-    xpEarned: 85,
     tasksCompleted: 3,
   },
   {
@@ -16,7 +13,6 @@ const recentSessions = [
     date: "Ontem",
     duration: "1h 20min",
     topic: "Time Value of Money",
-    xpEarned: 120,
     tasksCompleted: 5,
   },
   {
@@ -24,7 +20,6 @@ const recentSessions = [
     date: "20/01/2026",
     duration: "30min",
     topic: "Distribuição Normal",
-    xpEarned: 50,
     tasksCompleted: 2,
   },
   {
@@ -32,83 +27,61 @@ const recentSessions = [
     date: "19/01/2026",
     duration: "55min",
     topic: "Organizing Data",
-    xpEarned: 95,
     tasksCompleted: 4,
   },
 ];
 
 const stats = [
-  { label: "Total de Sessões", value: "24", icon: BookOpen },
-  { label: "Tempo Total", value: "18h 30min", icon: Clock },
-  { label: "Média por Sessão", value: "46min", icon: TrendingUp },
-  { label: "Sessões esta Semana", value: "5", icon: Calendar },
+  { label: "Total", value: "24", sublabel: "sessões" },
+  { label: "Tempo", value: "18h 30min", sublabel: "acumulado" },
+  { label: "Média", value: "46min", sublabel: "por sessão" },
+  { label: "Semana", value: "5", sublabel: "sessões" },
 ];
 
 export default function Sessoes() {
   return (
-    <div className="px-4 sm:px-6 lg:px-8 py-4 sm:py-6 pb-24 md:pb-8 max-w-7xl mx-auto space-y-6">
+    <div className="px-4 sm:px-6 lg:px-8 py-6 pb-24 md:pb-8 max-w-4xl mx-auto space-y-6">
       <div>
-        <h1 className="text-xl sm:text-2xl md:text-3xl font-bold text-card-foreground">
-          Sessões de Estudo
-        </h1>
-        <p className="text-sm sm:text-base text-muted-foreground mt-1">
-          Histórico e estatísticas das suas sessões
+        <h1 className="text-lg font-medium text-foreground">Sessões</h1>
+        <p className="text-sm text-muted-foreground mt-0.5">
+          Histórico de estudo.
         </p>
       </div>
 
-      {/* Stats Grid */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+      {/* Stats */}
+      <div className="grid grid-cols-4 gap-3 border rounded-lg p-4 bg-card">
         {stats.map((stat) => (
-          <Card key={stat.label}>
-            <CardContent className="p-4">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
-                  <stat.icon size={20} className="text-primary" />
-                </div>
-                <div>
-                  <p className="text-lg font-bold">{stat.value}</p>
-                  <p className="text-xs text-muted-foreground">{stat.label}</p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
+          <div key={stat.label} className="text-center">
+            <p className="text-base font-semibold text-foreground">{stat.value}</p>
+            <p className="text-[10px] text-muted-foreground">{stat.sublabel}</p>
+          </div>
         ))}
       </div>
 
       {/* Recent Sessions */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-base">Sessões Recentes</CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-3">
+      <section className="border rounded-lg bg-card overflow-hidden">
+        <div className="p-4 border-b">
+          <h2 className="font-medium text-foreground">Sessões recentes</h2>
+        </div>
+        <div className="divide-y">
           {recentSessions.map((session) => (
             <div
               key={session.id}
-              className="flex items-center justify-between p-3 rounded-lg bg-muted/30 hover:bg-muted/50 transition-colors"
+              className="flex items-center justify-between p-4 hover:bg-muted/30 transition-colors"
             >
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
-                  <BookOpen size={18} className="text-primary" />
-                </div>
-                <div>
-                  <p className="font-medium text-sm">{session.topic}</p>
-                  <p className="text-xs text-muted-foreground">
-                    {session.date} • {session.duration}
-                  </p>
-                </div>
-              </div>
-              <div className="text-right">
-                <Badge variant="secondary" className="text-xs">
-                  +{session.xpEarned} XP
-                </Badge>
-                <p className="text-xs text-muted-foreground mt-1">
-                  {session.tasksCompleted} tarefas
+              <div className="flex-1 min-w-0">
+                <p className="text-sm font-medium text-foreground">{session.topic}</p>
+                <p className="text-xs text-muted-foreground mt-0.5">
+                  {session.date} · {session.duration}
                 </p>
               </div>
+              <span className="text-xs text-muted-foreground">
+                {session.tasksCompleted} tarefas
+              </span>
             </div>
           ))}
-        </CardContent>
-      </Card>
+        </div>
+      </section>
     </div>
   );
 }

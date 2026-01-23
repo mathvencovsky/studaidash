@@ -1,78 +1,15 @@
 import { useNavigate } from "react-router-dom";
-import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { FileQuestion, CheckCircle2, RotateCcw, Play } from "lucide-react";
 import { CFA_QUIZZES } from "@/data/cfa-mock-data";
 import { getQuizQuestions } from "@/data/quiz-questions-data";
 
 export default function Quizzes() {
   const navigate = useNavigate();
 
-  const getStatusBadge = (status: string) => {
-    switch (status) {
-      case "completed":
-        return <Badge className="bg-green-100 text-green-700 hover:bg-green-100">Concluído</Badge>;
-      case "in_progress":
-        return <Badge className="bg-amber-100 text-amber-700 hover:bg-amber-100">Em Progresso</Badge>;
-      case "not_started":
-        return <Badge variant="secondary">Não Iniciado</Badge>;
-      default:
-        return null;
-    }
-  };
-
   const handleStartQuiz = (quizId: string) => {
     const questions = getQuizQuestions(quizId);
     if (questions.length > 0) {
       navigate(`/quiz/${quizId}`);
-    }
-  };
-
-  const getActionButton = (quizId: string, status: string) => {
-    const questions = getQuizQuestions(quizId);
-    const hasQuestions = questions.length > 0;
-
-    switch (status) {
-      case "completed":
-        return (
-          <Button 
-            variant="outline" 
-            size="sm" 
-            className="gap-1"
-            onClick={() => handleStartQuiz(quizId)}
-            disabled={!hasQuestions}
-          >
-            <RotateCcw size={14} />
-            Refazer
-          </Button>
-        );
-      case "in_progress":
-        return (
-          <Button 
-            size="sm" 
-            className="gap-1"
-            onClick={() => handleStartQuiz(quizId)}
-            disabled={!hasQuestions}
-          >
-            <Play size={14} />
-            Continuar
-          </Button>
-        );
-      case "not_started":
-        return (
-          <Button 
-            size="sm" 
-            className="gap-1"
-            onClick={() => handleStartQuiz(quizId)}
-            disabled={!hasQuestions}
-          >
-            <Play size={14} />
-            {hasQuestions ? "Iniciar" : "Em breve"}
-          </Button>
-        );
-      default:
-        return null;
     }
   };
 
@@ -83,84 +20,85 @@ export default function Quizzes() {
     CFA_QUIZZES.filter(q => q.lastScore !== undefined).length || 0;
 
   return (
-    <div className="p-4 sm:p-6 pb-24 md:pb-6 space-y-6">
-      {/* Header */}
+    <div className="px-4 sm:px-6 lg:px-8 py-6 pb-24 md:pb-8 max-w-4xl mx-auto space-y-6">
       <div>
-        <h1 className="text-2xl sm:text-3xl font-bold">Quizzes</h1>
-        <p className="text-muted-foreground mt-1">Avaliações CFA-style por módulo</p>
+        <h1 className="text-lg font-medium text-foreground">Avaliações</h1>
+        <p className="text-sm text-muted-foreground mt-0.5">
+          Quizzes por módulo.
+        </p>
       </div>
 
       {/* Stats */}
-      <div className="grid grid-cols-2 gap-3">
-        <Card>
-          <CardContent className="p-4 text-center">
-            <p className="text-2xl font-bold text-primary">{completedQuizzes}/{CFA_QUIZZES.length}</p>
-            <p className="text-xs text-muted-foreground">Quizzes Concluídos</p>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardContent className="p-4 text-center">
-            <p className="text-2xl font-bold text-primary">{avgScore.toFixed(0)}%</p>
-            <p className="text-xs text-muted-foreground">Média de Acertos</p>
-          </CardContent>
-        </Card>
+      <div className="grid grid-cols-2 gap-3 border rounded-lg p-4 bg-card">
+        <div className="text-center">
+          <p className="text-base font-semibold text-foreground">{completedQuizzes}/{CFA_QUIZZES.length}</p>
+          <p className="text-[10px] text-muted-foreground">Concluídos</p>
+        </div>
+        <div className="text-center">
+          <p className="text-base font-semibold text-foreground">{avgScore.toFixed(0)}%</p>
+          <p className="text-[10px] text-muted-foreground">Média</p>
+        </div>
       </div>
 
       {/* Quiz List */}
-      <div className="space-y-3">
-        <h2 className="text-lg font-semibold">Quizzes por Módulo</h2>
-        {CFA_QUIZZES.map((quiz) => {
-          const questions = getQuizQuestions(quiz.id);
-          const hasQuestions = questions.length > 0;
-          
-          return (
-            <Card key={quiz.id} className={`transition-shadow ${hasQuestions ? "hover:shadow-md cursor-pointer" : "opacity-70"}`}>
-              <CardContent className="p-4">
-                <div className="flex items-start gap-3">
-                  <div className={`flex items-center justify-center w-10 h-10 rounded-full shrink-0 ${
-                    hasQuestions ? "bg-primary/10" : "bg-muted"
-                  }`}>
-                    <FileQuestion className={`w-5 h-5 ${hasQuestions ? "text-primary" : "text-muted-foreground"}`} />
-                  </div>
-                  <div className="flex-1 min-w-0 space-y-2">
-                    <div className="flex items-start justify-between gap-2">
-                      <div className="min-w-0">
-                        <h3 className="font-medium text-sm sm:text-base truncate">{quiz.moduleName}</h3>
-                        <div className="flex items-center gap-2 mt-1 text-xs text-muted-foreground">
-                          <span>{hasQuestions ? `${questions.length} questões` : "Em breve"}</span>
-                          {quiz.attempts > 0 && (
-                            <>
-                              <span>•</span>
-                              <span>{quiz.attempts} tentativa{quiz.attempts > 1 ? "s" : ""}</span>
-                            </>
-                          )}
-                        </div>
-                      </div>
-                      {getStatusBadge(quiz.status)}
-                    </div>
-                    
-                    {quiz.lastScore !== undefined && (
-                      <div className="flex items-center gap-2 text-sm">
-                        <CheckCircle2 className="w-4 h-4 text-green-500" />
-                        <span>Última nota: <strong>{quiz.lastScore}%</strong></span>
-                        {quiz.lastAttemptDate && (
-                          <span className="text-muted-foreground text-xs">
-                            ({new Date(quiz.lastAttemptDate).toLocaleDateString("pt-BR")})
-                          </span>
-                        )}
-                      </div>
-                    )}
+      <section className="border rounded-lg bg-card overflow-hidden">
+        <div className="p-4 border-b">
+          <h2 className="font-medium text-foreground">Quizzes</h2>
+        </div>
+        <div className="divide-y">
+          {CFA_QUIZZES.map((quiz) => {
+            const questions = getQuizQuestions(quiz.id);
+            const hasQuestions = questions.length > 0;
+            
+            const getStatusLabel = () => {
+              if (quiz.status === "completed") return "Concluído";
+              if (quiz.status === "in_progress") return "Em andamento";
+              return "Não iniciado";
+            };
 
-                    <div className="flex justify-end">
-                      {getActionButton(quiz.id, quiz.status)}
-                    </div>
+            const getButtonLabel = () => {
+              if (!hasQuestions) return "Em breve";
+              if (quiz.status === "completed") return "Refazer";
+              if (quiz.status === "in_progress") return "Continuar";
+              return "Iniciar quiz";
+            };
+            
+            return (
+              <div
+                key={quiz.id}
+                className={`flex items-center gap-3 p-4 ${!hasQuestions ? "opacity-50" : ""}`}
+              >
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-medium text-foreground truncate">{quiz.moduleName}</p>
+                  <div className="flex items-center gap-2 text-xs text-muted-foreground mt-0.5">
+                    <span>{hasQuestions ? `${questions.length} questões` : "Em desenvolvimento"}</span>
+                    {quiz.lastScore !== undefined && (
+                      <>
+                        <span>·</span>
+                        <span>Última: {quiz.lastScore}%</span>
+                      </>
+                    )}
                   </div>
                 </div>
-              </CardContent>
-            </Card>
-          );
-        })}
-      </div>
+
+                <span className="text-xs text-muted-foreground shrink-0">
+                  {getStatusLabel()}
+                </span>
+
+                <Button 
+                  size="sm" 
+                  variant={quiz.status === "in_progress" ? "default" : "outline"}
+                  onClick={() => handleStartQuiz(quiz.id)}
+                  disabled={!hasQuestions}
+                  className="shrink-0 h-7 text-xs"
+                >
+                  {getButtonLabel()}
+                </Button>
+              </div>
+            );
+          })}
+        </div>
+      </section>
     </div>
   );
 }
