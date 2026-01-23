@@ -1,15 +1,20 @@
 import { useState, useCallback, useMemo, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Sparkles } from "lucide-react";
-import { DailyMissionCard } from "./DailyMissionCard";
-import { TrailProgressCard } from "./TrailProgressCard";
-import { GamificationCard } from "./GamificationCard";
-import { QuizzesCard } from "./QuizzesCard";
-import { SimuladosCard } from "./SimuladosCard";
-import { SmartFeedbackCard } from "./SmartFeedbackCard";
-import { AIStudyCTACard } from "./AIStudyCTACard";
-import { TrailOverviewCard } from "./TrailOverviewCard";
+
+// New Enterprise Components
+import { HeroSection } from "./HeroSection";
+import { AICopilotCTA } from "./AICopilotCTA";
+import { TodayPlanCard } from "./TodayPlanCard";
+import { TrailExecutiveSummary } from "./TrailExecutiveSummary";
+import { ProgressSection } from "./ProgressSection";
+import { AssessmentsSection } from "./AssessmentsSection";
+import { GamificationSection } from "./GamificationSection";
+
+// Keep existing components for backward compatibility
 import { TrailSelectorCard } from "./TrailSelectorCard";
+import { SmartFeedbackCard } from "./SmartFeedbackCard";
+
 import type { DailyMission, CFAModule, UserProgress, Quiz, Simulado, SmartFeedback } from "@/types/studai";
 import { getQuizQuestions } from "@/data/quiz-questions-data";
 import { getNextAIStudyAction } from "@/data/ai-study-data";
@@ -112,15 +117,12 @@ export function CFADashboard() {
   }, [userProgress]);
 
   // Handlers
-  // Navigate to study based on task type
   const handleTaskClick = useCallback((task: { type: string; id: string }) => {
-    // Update mission status to in_progress
     setMission(prev => ({
       ...prev,
       status: prev.status === "not_started" ? "in_progress" : prev.status,
     }));
 
-    // Navigate based on task type
     switch (task.type) {
       case "reading":
       case "practice":
@@ -136,7 +138,6 @@ export function CFADashboard() {
   }, [navigate]);
 
   const handleStartMission = useCallback(() => {
-    // Find first incomplete task and navigate to it
     const nextTask = mission.tasks.find(t => !t.completed);
     
     setMission(prev => ({
@@ -163,7 +164,6 @@ export function CFADashboard() {
           ? "in_progress" 
           : "not_started";
 
-      // Award XP if task completed
       const task = prev.tasks.find(t => t.id === taskId);
       if (task && !task.completed) {
         setUserProgress(p => ({
@@ -210,14 +210,12 @@ export function CFADashboard() {
   const handleStartSimulado = useCallback((simuladoId: string) => {
     const simulado = simulados.find(s => s.id === simuladoId);
     if (simulado) {
-      // Simulados use the same quiz engine but with simulado-specific data
       addToast(`Iniciando: ${simulado.name}`, "success");
       navigate(`/quiz/${simuladoId}`, { state: { isSimulado: true, simulado } });
     }
   }, [simulados, navigate, addToast]);
 
   const handleFeedbackAction = useCallback(() => {
-    // Navigate based on feedback type
     if (feedback.actionModuleId) {
       navigate("/trilha", { state: { focusModuleId: feedback.actionModuleId } });
     } else if (feedback.type === "weakness" || feedback.type === "focus") {
@@ -241,129 +239,86 @@ export function CFADashboard() {
   }, [addToast]);
 
   return (
-    <div className="px-4 sm:px-6 lg:px-8 py-4 sm:py-6 pb-24 md:pb-8 max-w-7xl mx-auto space-y-4">
-      {/* Welcome + Tagline */}
-      <div>
-        <h1 className="text-xl sm:text-2xl md:text-3xl font-bold text-card-foreground">
-          Olá, João! 👋
-        </h1>
-        <p className="text-sm sm:text-base text-muted-foreground mt-0.5 sm:mt-1">
-          O StudAI usa IA para adaptar seus estudos ao seu objetivo e ritmo.
-        </p>
-      </div>
+    <div className="px-4 sm:px-6 lg:px-8 py-6 sm:py-8 pb-24 md:pb-8 max-w-6xl mx-auto">
+      {/* Enterprise Layout: Clean vertical flow with clear hierarchy */}
+      <div className="space-y-6 sm:space-y-8">
+        
+        {/* 1. Hero Section - Copilot positioning */}
+        <HeroSection 
+          userName="João"
+          progressPercent={trailCalculations.progressPercent}
+          daysToGoal={trailCalculations.daysUntilTarget}
+        />
 
-      {/* CTA Principal - Estudar com IA */}
-      <AIStudyCTACard 
-        recommendation={aiRecommendation}
-        onStartWithAI={() => navigate("/estudar")}
-        onViewTrail={() => navigate("/trilha")}
-      />
+        {/* 2. Primary CTA - Most dominant element */}
+        <AICopilotCTA 
+          recommendation={aiRecommendation}
+          onStart={() => navigate("/estudar")}
+        />
 
-      {/* Mobile: ordem original (evita mudanças de hierarquia) */}
-      <div className="space-y-4 lg:hidden">
+        {/* 3. Trail Selector (compact) */}
         <TrailSelectorCard 
           activeTrail={activeTrail}
           availableTrails={AVAILABLE_TRAILS}
           onSelectTrail={handleSelectTrail}
         />
 
-        <TrailOverviewCard 
-          trailName={activeTrail.name}
-          startDate={activeTrail.startDate}
-          targetDate={activeTrail.targetDate}
-          calculations={trailCalculations}
-          totalHours={activeTrail.totalEstimatedHours}
-          completedHours={activeTrail.completedHours}
-        />
+        {/* 4. Two Column Layout for Supporting Content */}
+        <div className="grid gap-6 lg:grid-cols-2 lg:items-start">
+          
+          {/* Left Column: Execution */}
+          <div className="space-y-6">
+            {/* Today's Plan (renamed from Daily Mission) */}
+            <TodayPlanCard
+              mission={mission}
+              onStartMission={handleStartMission}
+              onToggleTask={handleToggleTask}
+              onTaskClick={handleTaskClick}
+            />
 
-        <DailyMissionCard
-          mission={mission}
-          onStartMission={handleStartMission}
-          onToggleTask={handleToggleTask}
-          onTaskClick={handleTaskClick}
-        />
+            {/* Smart Feedback */}
+            <SmartFeedbackCard
+              feedback={feedback}
+              onActionClick={handleFeedbackAction}
+            />
 
-        <SmartFeedbackCard
-          feedback={feedback}
-          onActionClick={handleFeedbackAction}
-        />
+            {/* Assessments (Quizzes + Simulados combined) */}
+            <AssessmentsSection
+              quizzes={quizzes}
+              simulados={simulados}
+              onStartQuiz={handleStartQuiz}
+              onStartSimulado={handleStartSimulado}
+              onViewAllQuizzes={handleViewAllQuizzes}
+            />
+          </div>
 
-        <QuizzesCard
-          quizzes={quizzes}
-          onStartQuiz={handleStartQuiz}
-          onViewAll={handleViewAllQuizzes}
-        />
+          {/* Right Column: Overview & Progress */}
+          <div className="space-y-6">
+            {/* Executive Summary of Trail */}
+            <TrailExecutiveSummary 
+              trailName={activeTrail.name}
+              startDate={activeTrail.startDate}
+              targetDate={activeTrail.targetDate}
+              calculations={trailCalculations}
+              totalHours={activeTrail.totalEstimatedHours}
+              completedHours={activeTrail.completedHours}
+              streak={MOCK_STUDY_DATA.streak}
+              onViewDetails={() => navigate("/trilha")}
+            />
 
-        <SimuladosCard
-          simulados={simulados}
-          onStartSimulado={handleStartSimulado}
-        />
+            {/* Module Progress */}
+            <ProgressSection
+              modules={modules}
+              overallProgress={overallProgress}
+              onModuleClick={handleModuleClick}
+            />
 
-        <TrailProgressCard
-          modules={modules}
-          overallProgress={overallProgress}
-          onModuleClick={handleModuleClick}
-        />
-
-        <GamificationCard
-          progress={userProgress}
-          onViewAllBadges={handleViewAllBadges}
-        />
-      </div>
-
-      {/* Desktop: duas colunas em “pilha” (elimina o espaço vazio abaixo de cards menores) */}
-      <div className="hidden lg:grid grid-cols-2 items-start gap-4">
-        <div className="space-y-4">
-          <TrailSelectorCard 
-            activeTrail={activeTrail}
-            availableTrails={AVAILABLE_TRAILS}
-            onSelectTrail={handleSelectTrail}
-          />
-
-          <DailyMissionCard
-            mission={mission}
-            onStartMission={handleStartMission}
-            onToggleTask={handleToggleTask}
-            onTaskClick={handleTaskClick}
-          />
-
-          <SmartFeedbackCard
-            feedback={feedback}
-            onActionClick={handleFeedbackAction}
-          />
-
-          <QuizzesCard
-            quizzes={quizzes}
-            onStartQuiz={handleStartQuiz}
-            onViewAll={handleViewAllQuizzes}
-          />
-
-          <SimuladosCard
-            simulados={simulados}
-            onStartSimulado={handleStartSimulado}
-          />
-        </div>
-
-        <div className="space-y-4">
-          <TrailOverviewCard 
-            trailName={activeTrail.name}
-            startDate={activeTrail.startDate}
-            targetDate={activeTrail.targetDate}
-            calculations={trailCalculations}
-            totalHours={activeTrail.totalEstimatedHours}
-            completedHours={activeTrail.completedHours}
-          />
-
-          <TrailProgressCard
-            modules={modules}
-            overallProgress={overallProgress}
-            onModuleClick={handleModuleClick}
-          />
-
-          <GamificationCard
-            progress={userProgress}
-            onViewAllBadges={handleViewAllBadges}
-          />
+            {/* Gamification (last - not core) */}
+            <GamificationSection
+              progress={userProgress}
+              onViewAllBadges={handleViewAllBadges}
+            />
+          </div>
         </div>
       </div>
 
