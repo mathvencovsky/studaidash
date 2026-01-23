@@ -377,9 +377,29 @@ export const QUIZ_QUESTIONS: Record<string, QuizQuestion[]> = {
   ]
 };
 
-// Get questions for a specific quiz
+// Simulado questions - combines questions from multiple modules
+export const SIMULADO_QUESTIONS: Record<string, QuizQuestion[]> = {
+  "sim-partial": [
+    // Mix of TVM and Probability questions for partial simulado
+    ...QUIZ_QUESTIONS["quiz-qm1"].map(q => ({ ...q, quizId: "sim-partial" })),
+    ...QUIZ_QUESTIONS["quiz-qm2"].map(q => ({ ...q, quizId: "sim-partial" })),
+    ...QUIZ_QUESTIONS["quiz-qm3"].map(q => ({ ...q, quizId: "sim-partial" })),
+    ...QUIZ_QUESTIONS["quiz-qm4"].map(q => ({ ...q, quizId: "sim-partial" })),
+    ...QUIZ_QUESTIONS["quiz-qm5"].map(q => ({ ...q, quizId: "sim-partial" })),
+  ],
+  "sim-full": [
+    // Full exam uses all available questions
+    ...QUIZ_QUESTIONS["quiz-qm1"].map(q => ({ ...q, quizId: "sim-full" })),
+    ...QUIZ_QUESTIONS["quiz-qm2"].map(q => ({ ...q, quizId: "sim-full" })),
+    ...QUIZ_QUESTIONS["quiz-qm3"].map(q => ({ ...q, quizId: "sim-full" })),
+    ...QUIZ_QUESTIONS["quiz-qm4"].map(q => ({ ...q, quizId: "sim-full" })),
+    ...QUIZ_QUESTIONS["quiz-qm5"].map(q => ({ ...q, quizId: "sim-full" })),
+  ]
+};
+
+// Get questions for a specific quiz or simulado
 export function getQuizQuestions(quizId: string): QuizQuestion[] {
-  return QUIZ_QUESTIONS[quizId] || [];
+  return QUIZ_QUESTIONS[quizId] || SIMULADO_QUESTIONS[quizId] || [];
 }
 
 // Create a new quiz session
@@ -388,6 +408,19 @@ export function createQuizSession(quiz: Quiz): QuizSession {
   return {
     quizId: quiz.id,
     moduleName: quiz.moduleName,
+    questions,
+    currentIndex: 0,
+    answers: new Array(questions.length).fill(null),
+    startedAt: Date.now()
+  };
+}
+
+// Create a simulado session
+export function createSimuladoSession(simulado: { id: string; name: string; durationMinutes: number }): QuizSession {
+  const questions = getQuizQuestions(simulado.id);
+  return {
+    quizId: simulado.id,
+    moduleName: simulado.name,
     questions,
     currentIndex: 0,
     answers: new Array(questions.length).fill(null),

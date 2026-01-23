@@ -152,14 +152,16 @@ export function CFADashboard() {
   }, [addToast]);
 
   const handleModuleClick = useCallback((moduleId: string) => {
-    addToast("Abrindo módulo...", "info");
-    // TODO API: Navigate to module detail view
-  }, [addToast]);
+    const module = modules.find(m => m.id === moduleId);
+    if (module) {
+      addToast(`Abrindo: ${module.name}`, "info");
+      navigate("/trilha", { state: { focusModuleId: moduleId } });
+    }
+  }, [addToast, modules, navigate]);
 
   const handleViewAllBadges = useCallback(() => {
-    addToast("Ver todas as conquistas", "info");
-    // TODO API: Open badges modal
-  }, [addToast]);
+    navigate("/perfil");
+  }, [navigate]);
 
   const handleStartQuiz = useCallback((quizId: string) => {
     const questions = getQuizQuestions(quizId);
@@ -176,20 +178,34 @@ export function CFADashboard() {
 
   const handleStartSimulado = useCallback((simuladoId: string) => {
     const simulado = simulados.find(s => s.id === simuladoId);
-    addToast(`Iniciando: ${simulado?.name || "Simulado"}`, "info");
-    // TODO API: Start simulado session
-  }, [addToast, simulados]);
+    if (simulado) {
+      // Simulados use the same quiz engine but with simulado-specific data
+      addToast(`Iniciando: ${simulado.name}`, "success");
+      navigate(`/quiz/${simuladoId}`, { state: { isSimulado: true, simulado } });
+    }
+  }, [simulados, navigate, addToast]);
 
   const handleFeedbackAction = useCallback(() => {
-    addToast("Redirecionando para prática...", "info");
-    // TODO API: Navigate to practice module
-  }, [addToast]);
+    // Navigate based on feedback type
+    if (feedback.actionModuleId) {
+      navigate("/trilha", { state: { focusModuleId: feedback.actionModuleId } });
+    } else if (feedback.type === "weakness" || feedback.type === "focus") {
+      navigate("/estudar");
+    } else {
+      navigate("/trilha");
+    }
+  }, [feedback, navigate]);
 
   const handleSelectTrail = useCallback((trailId: string) => {
     const trail = AVAILABLE_TRAILS.find(t => t.id === trailId);
     if (trail) {
+      setActiveTrail(prev => ({
+        ...prev,
+        id: trail.id,
+        name: trail.name,
+        category: trail.category,
+      }));
       addToast(`Trilha "${trail.shortName}" selecionada! 🎯`, "success");
-      // TODO API: Load trail data from backend
     }
   }, [addToast]);
 
