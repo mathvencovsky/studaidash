@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useTheme } from "next-themes";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Switch } from "@/components/ui/switch";
 import { Button } from "@/components/ui/button";
@@ -19,9 +20,15 @@ import {
 export default function Configuracoes() {
   const [notifications, setNotifications] = useState(true);
   const [dailyReminder, setDailyReminder] = useState(true);
-  const [darkMode, setDarkMode] = useState(false);
   const [language, setLanguage] = useState("pt-BR");
   const [studyGoal, setStudyGoal] = useState("60");
+  
+  const { theme, setTheme } = useTheme();
+  const isDarkMode = theme === "dark";
+
+  const handleDarkModeToggle = (checked: boolean) => {
+    setTheme(checked ? "dark" : "light");
+  };
 
   return (
     <div className="p-4 sm:p-6 pb-24 md:pb-6 space-y-6">
@@ -82,8 +89,8 @@ export default function Configuracoes() {
             </div>
             <Switch 
               id="darkMode" 
-              checked={darkMode} 
-              onCheckedChange={setDarkMode} 
+              checked={isDarkMode} 
+              onCheckedChange={handleDarkModeToggle} 
             />
           </div>
         </CardContent>
