@@ -17,7 +17,8 @@ import {
   Settings,
   Menu,
   ChevronLeft,
-  User
+  Compass,
+  Library
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
@@ -35,6 +36,8 @@ const aprenderItems = [
   { to: "/programas", icon: GraduationCap, label: "Programas" },
   { to: "/conteudos", icon: BookOpen, label: "Conteúdos" },
   { to: "/estudar", icon: Sparkles, label: "Assistente IA" },
+  { to: "/explorar", icon: Compass, label: "Explorar Trilhas" },
+  { to: "/trilha", icon: Library, label: "Minhas Trilhas" },
 ];
 
 const progressoItems = [
