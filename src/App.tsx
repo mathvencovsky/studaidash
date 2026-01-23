@@ -18,6 +18,14 @@ import Engajamento from "./pages/Engajamento";
 import Ranking from "./pages/Ranking";
 import Perfil from "./pages/Perfil";
 import Configuracoes from "./pages/Configuracoes";
+import Programas from "./pages/Programas";
+import Conteudos from "./pages/Conteudos";
+import Sessoes from "./pages/Sessoes";
+import Calendario from "./pages/Calendario";
+import Metas from "./pages/Metas";
+import Revisoes from "./pages/Revisoes";
+import ROIEstudo from "./pages/ROIEstudo";
+import Salvos from "./pages/Salvos";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -46,6 +54,17 @@ const App = () => (
           <Route element={<AppLayout><Ranking /></AppLayout>} path="/ranking" />
           <Route element={<AppLayout><Perfil /></AppLayout>} path="/perfil" />
           <Route element={<AppLayout><Configuracoes /></AppLayout>} path="/configuracoes" />
+          
+          {/* New pages */}
+          <Route element={<AppLayout><Programas /></AppLayout>} path="/programas" />
+          <Route element={<AppLayout><Conteudos /></AppLayout>} path="/conteudos" />
+          <Route element={<AppLayout><Sessoes /></AppLayout>} path="/sessoes" />
+          <Route element={<AppLayout><Calendario /></AppLayout>} path="/calendario" />
+          <Route element={<AppLayout><Metas /></AppLayout>} path="/metas" />
+          <Route element={<AppLayout><Revisoes /></AppLayout>} path="/revisoes" />
+          <Route element={<AppLayout><ROIEstudo /></AppLayout>} path="/roi-estudo" />
+          <Route element={<AppLayout><Salvos /></AppLayout>} path="/salvos" />
+          
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>
