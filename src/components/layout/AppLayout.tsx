@@ -133,9 +133,9 @@ export function AppLayout({ children }: AppLayoutProps) {
 
   return (
     <div className="min-h-screen bg-background flex w-full">
-      {/* Desktop Sidebar */}
+      {/* Desktop Sidebar - Fixed */}
       <aside 
-        className={`hidden md:flex flex-col border-r bg-card shrink-0 transition-all duration-300 ${
+        className={`hidden md:flex flex-col border-r bg-card shrink-0 transition-all duration-300 sticky top-0 h-screen ${
           sidebarCollapsed ? "w-16" : "w-60"
         }`}
       >
