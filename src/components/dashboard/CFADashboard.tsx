@@ -262,6 +262,12 @@ export function CFADashboard() {
               availableTrails={AVAILABLE_TRAILS}
               onSelectTrail={handleSelectTrail}
             />
+
+            {/* Gamification - below trail selector */}
+            <GamificationSection
+              progress={userProgress}
+              onViewAllBadges={handleViewAllBadges}
+            />
           </div>
 
           {/* Right Column */}
@@ -284,20 +290,11 @@ export function CFADashboard() {
           </div>
         </div>
 
-        {/* 5. Secondary Content */}
-        <div className="grid gap-6 lg:grid-cols-2 lg:items-start">
-          {/* Smart Feedback - subtle */}
-          <SmartFeedbackCard
-            feedback={feedback}
-            onActionClick={handleFeedbackAction}
-          />
-
-          {/* Gamification - last */}
-          <GamificationSection
-            progress={userProgress}
-            onViewAllBadges={handleViewAllBadges}
-          />
-        </div>
+        {/* 5. Smart Feedback */}
+        <SmartFeedbackCard
+          feedback={feedback}
+          onActionClick={handleFeedbackAction}
+        />
       </div>
     </div>
   );
