@@ -12,13 +12,13 @@ import { GamificationSection } from "./GamificationSection";
 import { TrailSelectorCard } from "./TrailSelectorCard";
 import { SmartFeedbackCard } from "./SmartFeedbackCard";
 
-import type { DailyMission, CFAModule, UserProgress, Quiz, Simulado, SmartFeedback } from "@/types/studai";
+import type { CFAModule, UserProgress, Quiz, Simulado, SmartFeedback } from "@/types/studai";
 import { getQuizQuestions } from "@/data/quiz-questions-data";
 import { getNextAIStudyAction } from "@/data/ai-study-data";
+import { useDailyPlan } from "@/hooks/use-daily-plan";
 import { 
   CFA_MODULES, 
   DEFAULT_USER_PROGRESS, 
-  getTodayMission, 
   CFA_QUIZZES, 
   CFA_SIMULADOS, 
   getSmartFeedback,
@@ -34,7 +34,6 @@ import { toast } from "sonner";
 
 // Storage keys
 const STORAGE_KEYS = {
-  mission: "studai_daily_mission",
   progress: "studai_user_progress",
   modules: "studai_cfa_modules",
 };
@@ -65,10 +64,10 @@ export function CFADashboard() {
   // AI Recommendation
   const aiRecommendation = useMemo(() => getNextAIStudyAction(), []);
   
+  // Daily Plan hook (centralized state)
+  const { mission, toggleTask, startMission } = useDailyPlan();
+  
   // State
-  const [mission, setMission] = useState<DailyMission>(() => 
-    loadState(STORAGE_KEYS.mission, getTodayMission())
-  );
   const [userProgress, setUserProgress] = useState<UserProgress>(() => 
     loadState(STORAGE_KEYS.progress, DEFAULT_USER_PROGRESS)
   );
@@ -87,11 +86,6 @@ export function CFADashboard() {
     []
   );
 
-  // Persist mission changes
-  useEffect(() => {
-    saveState(STORAGE_KEYS.mission, mission);
-  }, [mission]);
-
   // Persist user progress changes
   useEffect(() => {
     saveState(STORAGE_KEYS.progress, userProgress);
@@ -99,10 +93,7 @@ export function CFADashboard() {
 
   // Handlers
   const handleTaskClick = useCallback((task: { type: string; id: string }) => {
-    setMission(prev => ({
-      ...prev,
-      status: prev.status === "not_started" ? "in_progress" : prev.status,
-    }));
+    startMission();
 
     switch (task.type) {
       case "reading":
@@ -116,52 +107,34 @@ export function CFADashboard() {
       default:
         navigate("/estudar");
     }
-  }, [navigate]);
+  }, [navigate, startMission]);
 
   const handleStartMission = useCallback(() => {
     const nextTask = mission.tasks.find(t => !t.completed);
-    
-    setMission(prev => ({
-      ...prev,
-      status: prev.status === "not_started" ? "in_progress" : prev.status,
-    }));
+    startMission();
 
     if (nextTask) {
       handleTaskClick(nextTask);
     } else {
       toast.success("Plano concluído");
     }
-  }, [mission.tasks, handleTaskClick]);
+  }, [mission.tasks, handleTaskClick, startMission]);
 
   const handleToggleTask = useCallback((taskId: string) => {
-    setMission(prev => {
-      const updatedTasks = prev.tasks.map(t => 
-        t.id === taskId ? { ...t, completed: !t.completed } : t
-      );
-      const completedCount = updatedTasks.filter(t => t.completed).length;
-      const newStatus = completedCount === updatedTasks.length 
-        ? "completed" 
-        : completedCount > 0 
-          ? "in_progress" 
-          : "not_started";
-
-      const task = prev.tasks.find(t => t.id === taskId);
-      if (task && !task.completed) {
-        setUserProgress(p => ({
-          ...p,
-          xp: p.xp + 25,
-          weeklyProgress: p.weeklyProgress + task.estimatedMinutes,
-        }));
-        toast.success("+25 XP");
-      }
-
-      return {
-        ...prev,
-        tasks: updatedTasks,
-        status: newStatus,
-      };
-    });
-  }, []);
+    const task = mission.tasks.find(t => t.id === taskId);
+    
+    // Only grant XP when marking as complete (not when unchecking)
+    if (task && !task.completed) {
+      setUserProgress(p => ({
+        ...p,
+        xp: p.xp + 25,
+        weeklyProgress: p.weeklyProgress + task.estimatedMinutes,
+      }));
+      toast.success("+25 XP");
+    }
+    
+    toggleTask(taskId);
+  }, [mission.tasks, toggleTask]);
 
   const handleModuleClick = useCallback((moduleId: string) => {
     navigate("/trilha", { state: { focusModuleId: moduleId } });

@@ -11,6 +11,7 @@ import {
   type AIStudySession,
   type StudySessionHistory
 } from "@/data/ai-study-data";
+import { markTaskCompleted } from "@/hooks/use-daily-plan";
 import { Loader2 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -62,6 +63,11 @@ export default function EstudarComIA() {
     
     // Clear current session
     saveCurrentSession(null);
+    
+    // Mark daily plan tasks as completed based on session content
+    // Study sessions complete reading and practice tasks
+    markTaskCompleted("reading");
+    markTaskCompleted("practice");
     
     // Show completion toast
     toast.success(`Sessão concluída! +${totalXP} XP`, {
