@@ -12,6 +12,7 @@ import {
   type StudySessionHistory
 } from "@/data/ai-study-data";
 import { markTaskCompleted } from "@/hooks/use-daily-plan";
+import { awardSessionCompleteXP, awardStepXP } from "@/hooks/use-xp";
 import { Loader2 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -38,14 +39,18 @@ export default function EstudarComIA() {
   }, []);
 
   const handleUpdateSession = useCallback((updatedSession: AIStudySession) => {
+    // Award XP for completing a step (if advancing to next step)
+    if (updatedSession.currentStepIndex > (session?.currentStepIndex ?? 0)) {
+      awardStepXP();
+    }
     setSession(updatedSession);
-  }, []);
+  }, [session?.currentStepIndex]);
 
   const handleComplete = useCallback((confidenceRating: number) => {
     if (!session) return;
 
-    // Calculate XP earned
-    const totalXP = session.xpEarned + (confidenceRating * 10);
+    // Award XP through centralized system
+    const { totalXP, leveledUp } = awardSessionCompleteXP(confidenceRating);
     
     // Save to session history
     const historyEntry: StudySessionHistory = {
@@ -69,10 +74,19 @@ export default function EstudarComIA() {
     markTaskCompleted("reading");
     markTaskCompleted("practice");
     
-    // Show completion toast
-    toast.success(`Sessão concluída! +${totalXP} XP`, {
-      description: `Você estudou "${session.moduleName}" com a IA`,
-    });
+    // Show completion toast with level up notification
+    const xpFromSteps = session.xpEarned;
+    const finalXP = xpFromSteps + totalXP;
+    
+    if (leveledUp) {
+      toast.success(`🎉 Level Up! +${finalXP} XP`, {
+        description: `Você subiu de nível estudando "${session.moduleName}"!`,
+      });
+    } else {
+      toast.success(`Sessão concluída! +${finalXP} XP`, {
+        description: `Você estudou "${session.moduleName}" com a IA`,
+      });
+    }
     
     // Navigate back to dashboard
     navigate("/");

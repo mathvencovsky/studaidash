@@ -34,7 +34,7 @@ import {
   X,
   Check
 } from "lucide-react";
-import { DEFAULT_USER_PROGRESS, getXPForNextLevel, getLevelProgress } from "@/data/cfa-mock-data";
+import { useXP } from "@/hooks/use-xp";
 import { toast } from "sonner";
 
 interface UserProfile {
@@ -82,9 +82,8 @@ export default function Perfil() {
   const [showGoalModal, setShowGoalModal] = useState(false);
   const [showProgramModal, setShowProgramModal] = useState(false);
   
-  const userProgress = DEFAULT_USER_PROGRESS;
-  const levelProgress = getLevelProgress(userProgress.xp, userProgress.level);
-  const xpForNext = getXPForNextLevel(userProgress.level);
+  // Use centralized XP hook for reactive updates
+  const { progress: userProgress, levelProgress, xpForNextLevel: xpForNext } = useXP();
   const unlockedBadges = userProgress.badges.filter(b => b.unlocked);
 
   useEffect(() => {

@@ -1,4 +1,4 @@
-import { useState, useCallback, useMemo, useEffect } from "react";
+import { useState, useCallback, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 
 // Components
@@ -12,13 +12,13 @@ import { GamificationSection } from "./GamificationSection";
 import { TrailSelectorCard } from "./TrailSelectorCard";
 import { SmartFeedbackCard } from "./SmartFeedbackCard";
 
-import type { CFAModule, UserProgress, Quiz, Simulado, SmartFeedback } from "@/types/studai";
+import type { CFAModule, Quiz, Simulado, SmartFeedback } from "@/types/studai";
 import { getQuizQuestions } from "@/data/quiz-questions-data";
 import { getNextAIStudyAction } from "@/data/ai-study-data";
 import { useDailyPlan } from "@/hooks/use-daily-plan";
+import { useXP, awardTaskXP } from "@/hooks/use-xp";
 import { 
   CFA_MODULES, 
-  DEFAULT_USER_PROGRESS, 
   CFA_QUIZZES, 
   CFA_SIMULADOS, 
   getSmartFeedback,
@@ -32,32 +32,6 @@ import {
 } from "@/data/trail-planning-data";
 import { toast } from "sonner";
 
-// Storage keys
-const STORAGE_KEYS = {
-  progress: "studai_user_progress",
-  modules: "studai_cfa_modules",
-};
-
-// Helper to load from localStorage
-function loadState<T>(key: string, defaultValue: T): T {
-  try {
-    const stored = localStorage.getItem(key);
-    if (!stored) return defaultValue;
-    return JSON.parse(stored) as T;
-  } catch {
-    return defaultValue;
-  }
-}
-
-// Helper to save to localStorage
-function saveState<T>(key: string, value: T): void {
-  try {
-    localStorage.setItem(key, JSON.stringify(value));
-  } catch (e) {
-    console.error("Failed to save state:", e);
-  }
-}
-
 export function CFADashboard() {
   const navigate = useNavigate();
   
@@ -67,10 +41,10 @@ export function CFADashboard() {
   // Daily Plan hook (centralized state)
   const { mission, toggleTask, startMission } = useDailyPlan();
   
+  // Centralized XP hook
+  const { progress: userProgress } = useXP();
+  
   // State
-  const [userProgress, setUserProgress] = useState<UserProgress>(() => 
-    loadState(STORAGE_KEYS.progress, DEFAULT_USER_PROGRESS)
-  );
   const [modules] = useState<CFAModule[]>(CFA_MODULES);
   const [quizzes] = useState<Quiz[]>(CFA_QUIZZES);
   const [simulados] = useState<Simulado[]>(CFA_SIMULADOS);
@@ -85,11 +59,6 @@ export function CFADashboard() {
     calculateTrailMetrics(MOCK_TRAIL_PLAN, MOCK_STUDY_DATA), 
     []
   );
-
-  // Persist user progress changes
-  useEffect(() => {
-    saveState(STORAGE_KEYS.progress, userProgress);
-  }, [userProgress]);
 
   // Handlers
   const handleTaskClick = useCallback((task: { type: string; id: string }) => {
@@ -125,12 +94,12 @@ export function CFADashboard() {
     
     // Only grant XP when marking as complete (not when unchecking)
     if (task && !task.completed) {
-      setUserProgress(p => ({
-        ...p,
-        xp: p.xp + 25,
-        weeklyProgress: p.weeklyProgress + task.estimatedMinutes,
-      }));
-      toast.success("+25 XP");
+      const { leveledUp } = awardTaskXP();
+      if (leveledUp) {
+        toast.success("🎉 Level Up! +25 XP");
+      } else {
+        toast.success("+25 XP");
+      }
     }
     
     toggleTask(taskId);
