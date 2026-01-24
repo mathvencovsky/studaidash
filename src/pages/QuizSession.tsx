@@ -10,6 +10,7 @@ import {
   type QuizSession as QuizSessionType, 
   type QuizResult as QuizResultType 
 } from "@/data/quiz-questions-data";
+import { markTaskCompleted } from "@/hooks/use-daily-plan";
 import { Loader2 } from "lucide-react";
 import type { Simulado } from "@/types/studai";
 
@@ -105,6 +106,9 @@ export default function QuizSession() {
   const handleComplete = useCallback((quizResult: QuizResultType) => {
     setResult(quizResult);
     setViewState("result");
+    
+    // Mark quiz task as completed in daily plan
+    markTaskCompleted("quiz");
   }, []);
 
   const handleRetry = useCallback(() => {
