@@ -11,7 +11,9 @@ import {
   type QuizResult as QuizResultType 
 } from "@/data/quiz-questions-data";
 import { markTaskCompleted } from "@/hooks/use-daily-plan";
+import { awardQuizXP } from "@/hooks/use-xp";
 import { Loader2 } from "lucide-react";
+import { toast } from "sonner";
 import type { Simulado } from "@/types/studai";
 
 type ViewState = "loading" | "playing" | "result";
@@ -109,6 +111,19 @@ export default function QuizSession() {
     
     // Mark quiz task as completed in daily plan
     markTaskCompleted("quiz");
+    
+    // Award XP based on quiz score
+    const { totalXP, leveledUp } = awardQuizXP(quizResult.score);
+    
+    if (leveledUp) {
+      toast.success(`🎉 Level Up! +${totalXP} XP`, {
+        description: `Score: ${quizResult.score}% - Você subiu de nível!`,
+      });
+    } else {
+      toast.success(`Quiz concluído! +${totalXP} XP`, {
+        description: `Score: ${quizResult.score}%`,
+      });
+    }
   }, []);
 
   const handleRetry = useCallback(() => {
