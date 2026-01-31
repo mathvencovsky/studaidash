@@ -9,11 +9,16 @@ const benefits = [
 ];
 
 export function LandingHero() {
-  const scrollToSection = (href: string) => {
-    const element = document.querySelector(href);
-    if (element) {
-      element.scrollIntoView({ behavior: "smooth" });
-    }
+  const scrollToId = (id: string) => {
+    const el = document.getElementById(id);
+    if (!el) return;
+
+    el.scrollIntoView({ behavior: "smooth", block: "start" });
+
+    // Focus after scroll for keyboard/screen reader accessibility
+    window.requestAnimationFrame(() => {
+      setTimeout(() => el.focus?.(), 150);
+    });
   };
 
   return (
@@ -41,7 +46,7 @@ export function LandingHero() {
             <div className="flex flex-col sm:flex-row gap-3 justify-center lg:justify-start mt-8">
               <Button 
                 size="lg" 
-                onClick={() => scrollToSection("#auth-card")}
+                onClick={() => scrollToId("auth-card")}
                 className="text-base"
               >
                 Começar grátis
@@ -49,7 +54,7 @@ export function LandingHero() {
               <Button 
                 variant="outline" 
                 size="lg"
-                onClick={() => scrollToSection("#como-funciona")}
+                onClick={() => scrollToId("como-funciona")}
                 className="text-base"
               >
                 Ver como funciona
@@ -58,11 +63,11 @@ export function LandingHero() {
 
             <div className="flex flex-wrap items-center justify-center lg:justify-start gap-4 mt-6 text-sm text-muted-foreground">
               <span className="flex items-center gap-1.5">
-                <CheckCircle2 className="h-4 w-4 text-success" />
+                <CheckCircle2 className="h-4 w-4 text-primary" />
                 Sem cartão de crédito
               </span>
               <span className="flex items-center gap-1.5">
-                <CheckCircle2 className="h-4 w-4 text-success" />
+                <CheckCircle2 className="h-4 w-4 text-primary" />
                 Configuração em 2 minutos
               </span>
             </div>
@@ -79,7 +84,9 @@ export function LandingHero() {
 
           {/* Right Column - Auth Card */}
           <div className="flex justify-center lg:justify-end">
-            <AuthCard />
+            <div id="auth-card" tabIndex={-1} className="outline-none">
+              <AuthCard />
+            </div>
           </div>
         </div>
       </div>
