@@ -1,4 +1,4 @@
-import { Check } from "lucide-react";
+import { Check, AlertCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 
@@ -6,31 +6,34 @@ const plans = [
   {
     name: "Grátis",
     price: "R$ 0",
+    period: "para sempre",
     description: "Para começar a organizar seus estudos",
     features: [
       "1 trilha ativa",
-      "Plano diário básico",
-      "Quizzes limitados",
-      "Estatísticas essenciais",
+      "Plano diário personalizado",
+      "Quizzes e revisões",
+      "Métricas de progresso",
+      "Suporte por e-mail",
     ],
     cta: "Começar grátis",
     highlighted: false,
+    available: true,
   },
   {
     name: "Pro",
-    price: "R$ 29",
-    period: "/mês",
-    description: "Para quem leva os estudos a sério",
+    price: "Em breve",
+    period: "",
+    description: "Para quem quer ir além",
     features: [
       "Trilhas ilimitadas",
-      "Planos adaptativos completos",
-      "Quizzes e simulados ilimitados",
-      "Métricas avançadas",
-      "Revisões inteligentes",
-      "Suporte prioritário",
+      "Relatórios avançados",
+      "Sessões de estudo com IA",
+      "Prioridade no suporte",
+      "Exportação de dados",
     ],
-    cta: "Começar teste grátis",
+    cta: "Avise-me quando disponível",
     highlighted: true,
+    available: false,
   },
 ];
 
@@ -39,43 +42,51 @@ export function PricingSection() {
     const authCard = document.querySelector("#auth-card");
     if (authCard) {
       authCard.scrollIntoView({ behavior: "smooth" });
+      setTimeout(() => {
+        const emailInput = authCard.querySelector('input[type="email"]') as HTMLInputElement;
+        emailInput?.focus();
+      }, 500);
     }
   };
 
   return (
-    <section id="planos" className="py-20 bg-muted/30">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="text-center mb-16">
+    <section id="planos" className="py-20 bg-background">
+      <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="text-center mb-12">
           <h2 className="text-2xl sm:text-3xl font-bold text-foreground">
             Planos simples e transparentes
           </h2>
           <p className="mt-4 text-muted-foreground max-w-2xl mx-auto">
-            Escolha o plano que faz sentido para você. Sem surpresas.
+            Comece grátis. Faça upgrade quando precisar.
           </p>
         </div>
 
-        <div className="grid md:grid-cols-2 gap-8 max-w-4xl mx-auto">
+        <div className="grid md:grid-cols-2 gap-8 max-w-3xl mx-auto">
           {plans.map((plan) => (
-            <Card 
+            <Card
               key={plan.name}
-              className={`relative ${plan.highlighted ? 'border-primary shadow-lg' : ''}`}
+              className={`relative ${
+                plan.highlighted
+                  ? "border-primary shadow-lg"
+                  : "border-border"
+              }`}
             >
               {plan.highlighted && (
                 <div className="absolute -top-3 left-1/2 -translate-x-1/2">
                   <span className="bg-primary text-primary-foreground text-xs font-medium px-3 py-1 rounded-full">
-                    Mais popular
+                    Em breve
                   </span>
                 </div>
               )}
-              <CardHeader className="text-center pb-2">
+              <CardHeader>
                 <CardTitle className="text-xl">{plan.name}</CardTitle>
-                <CardDescription>{plan.description}</CardDescription>
-                <div className="mt-4">
-                  <span className="text-4xl font-bold text-foreground">{plan.price}</span>
+                <div className="flex items-baseline gap-1">
+                  <span className="text-3xl font-bold">{plan.price}</span>
                   {plan.period && (
-                    <span className="text-muted-foreground">{plan.period}</span>
+                    <span className="text-muted-foreground text-sm">/{plan.period}</span>
                   )}
                 </div>
+                <CardDescription>{plan.description}</CardDescription>
               </CardHeader>
               <CardContent>
                 <ul className="space-y-3 mb-6">
@@ -86,16 +97,25 @@ export function PricingSection() {
                     </li>
                   ))}
                 </ul>
-                <Button 
-                  className="w-full" 
+                <Button
+                  className="w-full"
                   variant={plan.highlighted ? "default" : "outline"}
-                  onClick={scrollToAuth}
+                  onClick={plan.available ? scrollToAuth : undefined}
+                  disabled={!plan.available}
                 >
                   {plan.cta}
                 </Button>
               </CardContent>
             </Card>
           ))}
+        </div>
+
+        {/* No tricks notice */}
+        <div className="mt-10 text-center">
+          <div className="inline-flex items-center gap-2 text-sm text-muted-foreground bg-muted/50 px-4 py-2 rounded-full">
+            <AlertCircle className="h-4 w-4" />
+            <span>Sem pegadinhas: você pode cancelar ou excluir sua conta a qualquer momento.</span>
+          </div>
         </div>
       </div>
     </section>

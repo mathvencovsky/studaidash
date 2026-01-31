@@ -4,6 +4,7 @@ import {
   LogoStrip,
   ProductSection,
   HowItWorks,
+  TrustSection,
   Testimonials,
   PricingSection,
   FAQSection,
@@ -19,6 +20,7 @@ export default function Landing() {
         <LogoStrip />
         <ProductSection />
         <HowItWorks />
+        <TrustSection />
         <Testimonials />
         <PricingSection />
         <FAQSection />

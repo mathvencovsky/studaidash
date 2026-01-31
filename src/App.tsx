@@ -35,6 +35,13 @@ import Salvos from "./pages/Salvos";
 import PesquisarTrilhas from "./pages/PesquisarTrilhas";
 import NotFound from "./pages/NotFound";
 
+// Legal & Public Pages
+import Privacidade from "./pages/Privacidade";
+import Termos from "./pages/Termos";
+import Seguranca from "./pages/Seguranca";
+import Contato from "./pages/Contato";
+import Sobre from "./pages/Sobre";
+
 const queryClient = new QueryClient();
 
 const App = () => (
@@ -243,6 +250,13 @@ const App = () => (
                   </ProtectedRoute>
                 } 
               />
+              
+              {/* Public Legal Pages */}
+              <Route path="/privacidade" element={<Privacidade />} />
+              <Route path="/termos" element={<Termos />} />
+              <Route path="/seguranca" element={<Seguranca />} />
+              <Route path="/contato" element={<Contato />} />
+              <Route path="/sobre" element={<Sobre />} />
               
               <Route path="*" element={<NotFound />} />
             </Routes>

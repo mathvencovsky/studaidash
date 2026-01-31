@@ -4,20 +4,20 @@ import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 
 const testimonials = [
   {
-    quote: "Consegui manter a consistência que nunca tive antes. O plano diário me ajuda a não procrastinar.",
-    name: "Marina Costa",
-    role: "Concurso Público - TRF",
+    quote: "Consegui manter a constância que nunca tive antes. O plano diário me ajuda a não procrastinar — sei exatamente o que fazer quando sento para estudar.",
+    name: "Marina C.",
+    role: "Concurso Público",
     initials: "MC",
   },
   {
-    quote: "Passei no CFA Level I na primeira tentativa. O sistema de revisões fez toda a diferença.",
-    name: "Ricardo Mendes",
-    role: "Analista Financeiro",
+    quote: "O sistema de revisões me ajudou a reter muito mais conteúdo. Antes eu esquecia tudo em semanas, agora consigo revisar no momento certo.",
+    name: "Ricardo M.",
+    role: "Certificação Financeira",
     initials: "RM",
   },
   {
-    quote: "Finalmente consigo ver meu progresso real. Não é sobre estudar muito, é sobre estudar certo.",
-    name: "Juliana Alves",
+    quote: "Finalmente consigo ver meu progresso real. Não é sobre estudar muito, é sobre estudar certo — e a plataforma me mostrou isso.",
+    name: "Juliana A.",
     role: "Residência Médica",
     initials: "JA",
   },
@@ -29,10 +29,10 @@ export function Testimonials() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-16">
           <h2 className="text-2xl sm:text-3xl font-bold text-foreground">
-            O que nossos usuários dizem
+            Quem usa, recomenda
           </h2>
           <p className="mt-4 text-muted-foreground max-w-2xl mx-auto">
-            Estudantes reais, resultados reais
+            Depoimentos de estudantes que organizam seus estudos com o StudAI.
           </p>
         </div>
 
@@ -41,7 +41,7 @@ export function Testimonials() {
             <Card key={testimonial.name} className="relative">
               <CardContent className="pt-8 pb-6">
                 <Quote className="absolute top-4 left-4 h-8 w-8 text-primary/20" />
-                <p className="text-muted-foreground mb-6 relative z-10">
+                <p className="text-muted-foreground mb-6 relative z-10 text-sm leading-relaxed">
                   "{testimonial.quote}"
                 </p>
                 <div className="flex items-center gap-3">

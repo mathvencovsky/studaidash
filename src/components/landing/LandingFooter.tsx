@@ -1,32 +1,36 @@
+import { Link } from "react-router-dom";
 import { GraduationCap } from "lucide-react";
 
 const footerLinks = {
   produto: [
-    { label: "Funcionalidades", href: "#produto" },
+    { label: "Recursos", href: "#produto" },
+    { label: "Como funciona", href: "#como-funciona" },
     { label: "Planos", href: "#planos" },
-    { label: "Novidades", href: "#" },
+    { label: "FAQ", href: "#faq" },
   ],
-  recursos: [
-    { label: "Central de ajuda", href: "#" },
-    { label: "Blog", href: "#" },
-    { label: "Comunidade", href: "#" },
-  ],
-  suporte: [
-    { label: "Contato", href: "#" },
-    { label: "Status", href: "#" },
+  empresa: [
+    { label: "Sobre", href: "/sobre", isRoute: true },
+    { label: "Contato", href: "/contato", isRoute: true },
   ],
   legal: [
-    { label: "Termos de uso", href: "#" },
-    { label: "Privacidade", href: "#" },
-    { label: "Cookies", href: "#" },
+    { label: "Privacidade", href: "/privacidade", isRoute: true },
+    { label: "Termos de Uso", href: "/termos", isRoute: true },
+    { label: "Segurança", href: "/seguranca", isRoute: true },
   ],
 };
 
 export function LandingFooter() {
+  const scrollToSection = (href: string) => {
+    const element = document.querySelector(href);
+    if (element) {
+      element.scrollIntoView({ behavior: "smooth" });
+    }
+  };
+
   return (
     <footer className="bg-card border-t py-12">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="grid grid-cols-2 md:grid-cols-5 gap-8">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
           {/* Brand */}
           <div className="col-span-2 md:col-span-1">
             <div className="flex items-center gap-2 mb-4">
@@ -36,70 +40,74 @@ export function LandingFooter() {
               <span className="font-semibold text-foreground">StudAI</span>
             </div>
             <p className="text-sm text-muted-foreground">
-              Estude com consistência. Alcance seus objetivos.
+              Organize seus estudos. Veja seu progresso real.
             </p>
           </div>
 
-          {/* Links */}
+          {/* Produto */}
           <div>
             <h4 className="font-medium text-foreground mb-3 text-sm">Produto</h4>
             <ul className="space-y-2">
               {footerLinks.produto.map((link) => (
                 <li key={link.label}>
-                  <a 
-                    href={link.href} 
+                  <button 
+                    onClick={() => scrollToSection(link.href)}
                     className="text-sm text-muted-foreground hover:text-foreground transition-colors"
                   >
                     {link.label}
-                  </a>
+                  </button>
                 </li>
               ))}
             </ul>
           </div>
 
+          {/* Empresa */}
           <div>
-            <h4 className="font-medium text-foreground mb-3 text-sm">Recursos</h4>
+            <h4 className="font-medium text-foreground mb-3 text-sm">Empresa</h4>
             <ul className="space-y-2">
-              {footerLinks.recursos.map((link) => (
+              {footerLinks.empresa.map((link) => (
                 <li key={link.label}>
-                  <a 
-                    href={link.href} 
-                    className="text-sm text-muted-foreground hover:text-foreground transition-colors"
-                  >
-                    {link.label}
-                  </a>
+                  {link.isRoute ? (
+                    <Link 
+                      to={link.href}
+                      className="text-sm text-muted-foreground hover:text-foreground transition-colors"
+                    >
+                      {link.label}
+                    </Link>
+                  ) : (
+                    <a 
+                      href={link.href} 
+                      className="text-sm text-muted-foreground hover:text-foreground transition-colors"
+                    >
+                      {link.label}
+                    </a>
+                  )}
                 </li>
               ))}
             </ul>
           </div>
 
-          <div>
-            <h4 className="font-medium text-foreground mb-3 text-sm">Suporte</h4>
-            <ul className="space-y-2">
-              {footerLinks.suporte.map((link) => (
-                <li key={link.label}>
-                  <a 
-                    href={link.href} 
-                    className="text-sm text-muted-foreground hover:text-foreground transition-colors"
-                  >
-                    {link.label}
-                  </a>
-                </li>
-              ))}
-            </ul>
-          </div>
-
+          {/* Legal */}
           <div>
             <h4 className="font-medium text-foreground mb-3 text-sm">Legal</h4>
             <ul className="space-y-2">
               {footerLinks.legal.map((link) => (
                 <li key={link.label}>
-                  <a 
-                    href={link.href} 
-                    className="text-sm text-muted-foreground hover:text-foreground transition-colors"
-                  >
-                    {link.label}
-                  </a>
+                  {link.isRoute ? (
+                    <Link 
+                      to={link.href}
+                      className="text-sm text-muted-foreground hover:text-foreground transition-colors"
+                    >
+                      {link.label}
+                    </Link>
+                  ) : (
+                    <a 
+                      href={link.href} 
+                      className="text-sm text-muted-foreground hover:text-foreground transition-colors"
+                    >
+                      {link.label}
+                    </a>
+                  )}
                 </li>
               ))}
             </ul>
@@ -111,6 +119,7 @@ export function LandingFooter() {
             © {new Date().getFullYear()} StudAI. Todos os direitos reservados.
           </p>
           <p className="text-sm text-muted-foreground">
+            {/* TODO: Substituir por e-mail real */}
             contato@studai.com.br
           </p>
         </div>
