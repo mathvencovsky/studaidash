@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { NavLink } from "@/components/NavLink";
+import { useAuth } from "@/hooks/use-auth";
 import { 
   LayoutDashboard, 
   Map, 
@@ -45,7 +46,7 @@ interface AppLayoutProps {
 
 // YC-style navigation - functional, no fluff
 const aprenderItems = [
-  { to: "/", icon: LayoutDashboard, label: "Início" },
+  { to: "/dashboard", icon: LayoutDashboard, label: "Início" },
   { to: "/trilha", icon: Map, label: "Trilhas" },
   { to: "/pesquisar", icon: Search, label: "Pesquisar" },
   { to: "/estudar", icon: BookOpen, label: "Estudar" },
@@ -72,7 +73,7 @@ const ferramentasItems = [
 
 // Mobile bottom nav - core actions only
 const mobileNavItems = [
-  { to: "/", icon: LayoutDashboard, label: "Início" },
+  { to: "/dashboard", icon: LayoutDashboard, label: "Início" },
   { to: "/estudar", icon: BookOpen, label: "Estudar" },
   { to: "/trilha", icon: Map, label: "Trilhas" },
   { to: "/quizzes", icon: FileText, label: "Avaliações" },
@@ -84,6 +85,17 @@ export function AppLayout({ children }: AppLayoutProps) {
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const navigate = useNavigate();
+  const { user, signOut } = useAuth();
+
+  const handleSignOut = async () => {
+    await signOut();
+    navigate("/");
+  };
+
+  // Get user initials and email from auth
+  const userEmail = user?.email || "usuario@email.com";
+  const userName = user?.user_metadata?.full_name || userEmail.split("@")[0];
+  const userInitials = userName.charAt(0).toUpperCase();
 
   const NavSection = ({ 
     items, 
@@ -104,7 +116,7 @@ export function AppLayout({ children }: AppLayoutProps) {
         <NavLink
           key={item.to}
           to={item.to}
-          end={item.to === "/"}
+          end={item.to === "/dashboard"}
           className={`flex items-center gap-3 px-3 py-2 rounded-md text-muted-foreground hover:bg-muted hover:text-foreground transition-colors ${collapsed ? "justify-center" : ""}`}
           activeClassName="bg-primary/10 text-primary font-medium"
           onClick={() => setMobileMenuOpen(false)}
@@ -130,12 +142,12 @@ export function AppLayout({ children }: AppLayoutProps) {
       <div className={`flex items-center gap-3 ${collapsed ? "" : "px-2"}`}>
         <Avatar className="h-8 w-8">
           <AvatarFallback className="bg-muted text-muted-foreground text-sm font-medium">
-            J
+            {userInitials}
           </AvatarFallback>
         </Avatar>
         {!collapsed && (
           <div className="flex-1 min-w-0">
-            <p className="text-sm font-medium truncate">João Silva</p>
+            <p className="text-sm font-medium truncate">{userName}</p>
           </div>
         )}
       </div>
@@ -256,10 +268,10 @@ export function AppLayout({ children }: AppLayoutProps) {
                 <Button variant="ghost" size="sm" className="flex items-center gap-2 px-2 hover:bg-muted h-8">
                   <Avatar className="h-6 w-6">
                     <AvatarFallback className="bg-muted text-muted-foreground text-xs font-medium">
-                      J
+                      {userInitials}
                     </AvatarFallback>
                   </Avatar>
-                  <span className="text-sm">João</span>
+                  <span className="text-sm">{userName.split(" ")[0]}</span>
                   <ChevronDown className="h-3 w-3 text-muted-foreground" />
                 </Button>
               </DropdownMenuTrigger>
@@ -268,12 +280,12 @@ export function AppLayout({ children }: AppLayoutProps) {
                 <div className="flex items-center gap-2 p-3 border-b">
                   <Avatar className="h-8 w-8">
                     <AvatarFallback className="bg-muted text-muted-foreground text-sm font-medium">
-                      J
+                      {userInitials}
                     </AvatarFallback>
                   </Avatar>
                   <div className="flex flex-col">
-                    <span className="text-sm font-medium">João Silva</span>
-                    <span className="text-xs text-muted-foreground">joao@email.com</span>
+                    <span className="text-sm font-medium">{userName}</span>
+                    <span className="text-xs text-muted-foreground truncate max-w-[120px]">{userEmail}</span>
                   </div>
                 </div>
                 
@@ -296,7 +308,7 @@ export function AppLayout({ children }: AppLayoutProps) {
                 <DropdownMenuSeparator className="my-0" />
                 
                 <div className="p-1">
-                  <DropdownMenuItem className="flex items-center gap-2 px-2 py-1.5 cursor-pointer text-sm text-muted-foreground">
+                  <DropdownMenuItem onClick={handleSignOut} className="flex items-center gap-2 px-2 py-1.5 cursor-pointer text-sm text-muted-foreground">
                     <LogOut className="h-4 w-4" />
                     <span>Sair</span>
                   </DropdownMenuItem>

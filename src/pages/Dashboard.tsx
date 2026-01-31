@@ -1,7 +1,7 @@
 import { CFADashboard } from "@/components/dashboard";
 
-const Index = () => {
+const Dashboard = () => {
   return <CFADashboard />;
 };
 
-export default Index;
+export default Dashboard;
