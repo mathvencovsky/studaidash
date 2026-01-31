@@ -14,31 +14,37 @@ const features = [
     icon: Map,
     title: "Trilhas personalizadas",
     description: "Monte seu roteiro de estudos com base no seu objetivo e prazo.",
+    why: "Você nunca fica perdido sobre o que estudar.",
   },
   {
     icon: Brain,
     title: "Sessões de estudo guiadas",
     description: "Estude com foco usando sessões estruturadas e temporizadas.",
+    why: "Menos procrastinação, mais execução.",
   },
   {
     icon: RefreshCw,
-    title: "Revisões inteligentes",
+    title: "Revisões no tempo certo",
     description: "Sistema de repetição espaçada para fixar o conteúdo.",
+    why: "Você retém mais, estudando menos.",
   },
   {
     icon: BarChart3,
     title: "Métricas de progresso",
     description: "Acompanhe sua evolução com dados claros e acionáveis.",
+    why: "Você vê exatamente onde está e para onde vai.",
   },
   {
     icon: Target,
     title: "Metas diárias",
     description: "Planos diários que se adaptam ao seu ritmo e disponibilidade.",
+    why: "Você sempre sabe o que fazer hoje.",
   },
   {
     icon: Calendar,
     title: "Calendário integrado",
     description: "Visualize sua rotina e mantenha a consistência.",
+    why: "Você não perde prazos nem sessões.",
   },
 ];
 
@@ -48,10 +54,10 @@ export function ProductSection() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-16">
           <h2 className="text-2xl sm:text-3xl font-bold text-foreground">
-            Tudo que você precisa para estudar com consistência
+            O que o StudAI faz por você
           </h2>
           <p className="mt-4 text-muted-foreground max-w-2xl mx-auto">
-            Uma plataforma completa para organizar, executar e acompanhar seus estudos.
+            Uma plataforma para organizar, executar e acompanhar seus estudos — tudo em um só lugar.
           </p>
         </div>
 
@@ -125,6 +131,7 @@ export function ProductSection() {
                 <feature.icon className="h-8 w-8 text-primary mb-3" />
                 <h3 className="font-medium text-foreground mb-1">{feature.title}</h3>
                 <p className="text-sm text-muted-foreground">{feature.description}</p>
+                <p className="text-xs text-primary/80 mt-2 font-medium">{feature.why}</p>
               </div>
             ))}
           </div>

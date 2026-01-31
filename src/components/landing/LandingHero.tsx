@@ -1,11 +1,33 @@
-import { CheckCircle2 } from "lucide-react";
+import { CheckCircle2, ArrowRight, Shield, Eye, Headphones } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { AuthCard } from "./AuthCard";
 
-const benefits = [
-  "Planos de estudo adaptativos baseados no seu ritmo",
-  "Quizzes e simulados para fixar conteúdo",
-  "Acompanhamento de progresso em tempo real",
+const beforeAfter = {
+  before: [
+    "Estudo sem constância",
+    "Sem clareza do que revisar",
+    "Progresso invisível",
+  ],
+  after: [
+    "Rotina guiada por dia",
+    "Revisão no tempo certo",
+    "Evolução visível por semana",
+  ],
+};
+
+const trustItems = [
+  {
+    icon: Shield,
+    text: "Seus dados sob seu controle",
+  },
+  {
+    icon: Eye,
+    text: "Transparência de planos",
+  },
+  {
+    icon: Headphones,
+    text: "Suporte por e-mail",
+  },
 ];
 
 export function LandingHero() {
@@ -15,7 +37,6 @@ export function LandingHero() {
 
     el.scrollIntoView({ behavior: "smooth", block: "start" });
 
-    // Focus after scroll for keyboard/screen reader accessibility
     window.requestAnimationFrame(() => {
       setTimeout(() => el.focus?.(), 150);
     });
@@ -33,15 +54,35 @@ export function LandingHero() {
           {/* Left Column - Content */}
           <div className="text-center lg:text-left">
             <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-foreground leading-tight">
-              Estude com consistência.
+              Estude com constância.
               <br />
-              <span className="text-primary">Alcance seus objetivos.</span>
+              <span className="text-primary">Veja seu progresso real.</span>
             </h1>
             
             <p className="mt-6 text-lg text-muted-foreground max-w-xl mx-auto lg:mx-0">
-              Organize seus estudos para concursos e certificações com trilhas personalizadas, 
-              revisões inteligentes e métricas que mostram sua evolução real.
+              Plataforma de estudos para quem precisa de rotina organizada, revisões no tempo certo e métricas claras de evolução — seja para concursos, certificações ou transições de carreira.
             </p>
+
+            {/* Before → After Block */}
+            <div className="mt-8 grid grid-cols-2 gap-4 max-w-lg mx-auto lg:mx-0">
+              <div className="space-y-2">
+                <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">Antes</p>
+                {beforeAfter.before.map((item, index) => (
+                  <p key={index} className="text-sm text-muted-foreground/70 line-through">
+                    {item}
+                  </p>
+                ))}
+              </div>
+              <div className="space-y-2">
+                <p className="text-xs font-medium text-primary uppercase tracking-wide">Depois</p>
+                {beforeAfter.after.map((item, index) => (
+                  <p key={index} className="text-sm text-foreground flex items-center gap-2">
+                    <CheckCircle2 className="h-3.5 w-3.5 text-primary shrink-0" />
+                    {item}
+                  </p>
+                ))}
+              </div>
+            </div>
 
             <div className="flex flex-col sm:flex-row gap-3 justify-center lg:justify-start mt-8">
               <Button 
@@ -50,6 +91,7 @@ export function LandingHero() {
                 className="text-base"
               >
                 Começar grátis
+                <ArrowRight className="ml-2 h-4 w-4" />
               </Button>
               <Button 
                 variant="outline" 
@@ -61,25 +103,15 @@ export function LandingHero() {
               </Button>
             </div>
 
-            <div className="flex flex-wrap items-center justify-center lg:justify-start gap-4 mt-6 text-sm text-muted-foreground">
-              <span className="flex items-center gap-1.5">
-                <CheckCircle2 className="h-4 w-4 text-primary" />
-                Sem cartão de crédito
-              </span>
-              <span className="flex items-center gap-1.5">
-                <CheckCircle2 className="h-4 w-4 text-primary" />
-                Configuração em 2 minutos
-              </span>
-            </div>
-
-            <ul className="mt-8 space-y-3">
-              {benefits.map((benefit, index) => (
-                <li key={index} className="flex items-start gap-3 text-left">
-                  <CheckCircle2 className="h-5 w-5 text-primary shrink-0 mt-0.5" />
-                  <span className="text-muted-foreground">{benefit}</span>
-                </li>
+            {/* Trust Bar */}
+            <div className="flex flex-wrap items-center justify-center lg:justify-start gap-x-6 gap-y-2 mt-6">
+              {trustItems.map((item, index) => (
+                <span key={index} className="flex items-center gap-1.5 text-sm text-muted-foreground">
+                  <item.icon className="h-4 w-4 text-primary/70" />
+                  {item.text}
+                </span>
               ))}
-            </ul>
+            </div>
           </div>
 
           {/* Right Column - Auth Card */}

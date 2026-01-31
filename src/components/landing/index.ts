@@ -4,6 +4,7 @@ export { AuthCard } from "./AuthCard";
 export { LogoStrip } from "./LogoStrip";
 export { ProductSection } from "./ProductSection";
 export { HowItWorks } from "./HowItWorks";
+export { TrustSection } from "./TrustSection";
 export { Testimonials } from "./Testimonials";
 export { PricingSection } from "./PricingSection";
 export { FAQSection } from "./FAQSection";

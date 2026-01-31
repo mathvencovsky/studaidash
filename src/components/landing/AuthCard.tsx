@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import { Eye, EyeOff, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -216,9 +216,9 @@ export function AuthCard() {
 
           <p className="text-xs text-muted-foreground text-center mt-4">
             Ao continuar, você concorda com os{" "}
-            <a href="#" className="underline hover:text-foreground">Termos de Uso</a>
+            <Link to="/termos" className="underline hover:text-foreground">Termos de Uso</Link>
             {" "}e{" "}
-            <a href="#" className="underline hover:text-foreground">Política de Privacidade</a>.
+            <Link to="/privacidade" className="underline hover:text-foreground">Política de Privacidade</Link>.
           </p>
         </CardContent>
       </Tabs>

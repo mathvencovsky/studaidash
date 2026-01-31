@@ -5,19 +5,22 @@ const steps = [
     icon: UserPlus,
     number: "01",
     title: "Crie sua conta",
-    description: "Cadastre-se gratuitamente em menos de um minuto. Sem cartão de crédito.",
+    description: "Cadastro gratuito em menos de um minuto. Sem cartão de crédito.",
+    promise: "Você começa a usar hoje.",
   },
   {
     icon: Settings2,
     number: "02",
-    title: "Configure seu objetivo",
-    description: "Escolha sua certificação ou concurso, defina a data da prova e sua disponibilidade.",
+    title: "Defina sua meta e disponibilidade",
+    description: "Escolha seu objetivo, a data da prova e quanto tempo tem por dia.",
+    promise: "O sistema calcula seu plano.",
   },
   {
     icon: TrendingUp,
     number: "03",
-    title: "Estude e evolua",
-    description: "Siga seu plano diário, faça revisões e acompanhe sua evolução com métricas claras.",
+    title: "Siga a trilha e acompanhe sua evolução",
+    description: "Estude conforme o plano diário, faça revisões e veja métricas claras.",
+    promise: "Você sempre sabe o próximo passo.",
   },
 ];
 
@@ -30,7 +33,7 @@ export function HowItWorks() {
             Como funciona
           </h2>
           <p className="mt-4 text-muted-foreground max-w-2xl mx-auto">
-            Três passos simples para transformar seus estudos
+            Três passos para sair da desorganização e entrar em uma rotina de estudos que funciona.
           </p>
         </div>
 
@@ -54,6 +57,9 @@ export function HowItWorks() {
                 <h3 className="mt-6 text-lg font-semibold text-foreground">{step.title}</h3>
                 <p className="mt-2 text-muted-foreground text-sm max-w-xs mx-auto">
                   {step.description}
+                </p>
+                <p className="mt-2 text-xs text-primary font-medium">
+                  {step.promise}
                 </p>
               </div>
             </div>
