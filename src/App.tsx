@@ -4,8 +4,13 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { ThemeProvider } from "next-themes";
+import { AuthProvider } from "@/hooks/use-auth";
+import { ProtectedRoute, PublicOnlyRoute } from "@/components/auth";
 import { AppLayout } from "@/components/layout/AppLayout";
-import Index from "./pages/Index";
+
+// Pages
+import Landing from "./pages/Landing";
+import Dashboard from "./pages/Dashboard";
 import Trilha from "./pages/Trilha";
 import TrailOverview from "./pages/TrailOverview";
 import MeuObjetivo from "./pages/MeuObjetivo";
@@ -35,44 +40,215 @@ const queryClient = new QueryClient();
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <ThemeProvider attribute="class" defaultTheme="light" enableSystem>
-      <TooltipProvider>
-        <Toaster />
-        <Sonner />
-        <BrowserRouter>
-          <Routes>
-            {/* Fullscreen routes */}
-            <Route path="/quiz/:quizId" element={<QuizSession />} />
-            <Route path="/estudar" element={<EstudarComIA />} />
-            
-            {/* Main app routes with layout */}
-            <Route element={<AppLayout><Index /></AppLayout>} path="/" />
-            <Route element={<AppLayout><MeuObjetivo /></AppLayout>} path="/objetivo" />
-            <Route element={<AppLayout><Trilha /></AppLayout>} path="/trilha" />
-            <Route element={<AppLayout><TrailOverview /></AppLayout>} path="/trilha/visao-geral" />
-            <Route element={<AppLayout><Quizzes /></AppLayout>} path="/quizzes" />
-            <Route element={<AppLayout><ExplorarTrilhas /></AppLayout>} path="/explorar" />
-            <Route element={<AppLayout><PesquisarTrilhas /></AppLayout>} path="/pesquisar" />
-            <Route element={<AppLayout><TrackDetail /></AppLayout>} path="/explorar/:trackId" />
-            <Route element={<AppLayout><Relatorios /></AppLayout>} path="/relatorios" />
-            <Route element={<AppLayout><Engajamento /></AppLayout>} path="/engajamento" />
-            <Route element={<AppLayout><Ranking /></AppLayout>} path="/ranking" />
-            <Route element={<AppLayout><Perfil /></AppLayout>} path="/perfil" />
-            <Route element={<AppLayout><Configuracoes /></AppLayout>} path="/configuracoes" />
-            
-            {/* New pages */}
-            <Route element={<AppLayout><Programas /></AppLayout>} path="/programas" />
-            <Route element={<AppLayout><Conteudos /></AppLayout>} path="/conteudos" />
-            <Route element={<AppLayout><Sessoes /></AppLayout>} path="/sessoes" />
-            <Route element={<AppLayout><Calendario /></AppLayout>} path="/calendario" />
-            <Route element={<AppLayout><Metas /></AppLayout>} path="/metas" />
-            <Route element={<AppLayout><Revisoes /></AppLayout>} path="/revisoes" />
-            <Route element={<AppLayout><ROIEstudo /></AppLayout>} path="/roi-estudo" />
-            <Route element={<AppLayout><Salvos /></AppLayout>} path="/salvos" />
-            
-            <Route path="*" element={<NotFound />} />
-          </Routes>
-        </BrowserRouter>
-      </TooltipProvider>
+      <AuthProvider>
+        <TooltipProvider>
+          <Toaster />
+          <Sonner />
+          <BrowserRouter>
+            <Routes>
+              {/* Public landing page - redirects to dashboard if authenticated */}
+              <Route 
+                path="/" 
+                element={
+                  <PublicOnlyRoute>
+                    <Landing />
+                  </PublicOnlyRoute>
+                } 
+              />
+
+              {/* Fullscreen routes (protected) */}
+              <Route 
+                path="/quiz/:quizId" 
+                element={
+                  <ProtectedRoute>
+                    <QuizSession />
+                  </ProtectedRoute>
+                } 
+              />
+              <Route 
+                path="/estudar" 
+                element={
+                  <ProtectedRoute>
+                    <EstudarComIA />
+                  </ProtectedRoute>
+                } 
+              />
+              
+              {/* Main app routes with layout (protected) */}
+              <Route 
+                path="/dashboard" 
+                element={
+                  <ProtectedRoute>
+                    <AppLayout><Dashboard /></AppLayout>
+                  </ProtectedRoute>
+                } 
+              />
+              <Route 
+                path="/objetivo" 
+                element={
+                  <ProtectedRoute>
+                    <AppLayout><MeuObjetivo /></AppLayout>
+                  </ProtectedRoute>
+                } 
+              />
+              <Route 
+                path="/trilha" 
+                element={
+                  <ProtectedRoute>
+                    <AppLayout><Trilha /></AppLayout>
+                  </ProtectedRoute>
+                } 
+              />
+              <Route 
+                path="/trilha/visao-geral" 
+                element={
+                  <ProtectedRoute>
+                    <AppLayout><TrailOverview /></AppLayout>
+                  </ProtectedRoute>
+                } 
+              />
+              <Route 
+                path="/quizzes" 
+                element={
+                  <ProtectedRoute>
+                    <AppLayout><Quizzes /></AppLayout>
+                  </ProtectedRoute>
+                } 
+              />
+              <Route 
+                path="/explorar" 
+                element={
+                  <ProtectedRoute>
+                    <AppLayout><ExplorarTrilhas /></AppLayout>
+                  </ProtectedRoute>
+                } 
+              />
+              <Route 
+                path="/pesquisar" 
+                element={
+                  <ProtectedRoute>
+                    <AppLayout><PesquisarTrilhas /></AppLayout>
+                  </ProtectedRoute>
+                } 
+              />
+              <Route 
+                path="/explorar/:trackId" 
+                element={
+                  <ProtectedRoute>
+                    <AppLayout><TrackDetail /></AppLayout>
+                  </ProtectedRoute>
+                } 
+              />
+              <Route 
+                path="/relatorios" 
+                element={
+                  <ProtectedRoute>
+                    <AppLayout><Relatorios /></AppLayout>
+                  </ProtectedRoute>
+                } 
+              />
+              <Route 
+                path="/engajamento" 
+                element={
+                  <ProtectedRoute>
+                    <AppLayout><Engajamento /></AppLayout>
+                  </ProtectedRoute>
+                } 
+              />
+              <Route 
+                path="/ranking" 
+                element={
+                  <ProtectedRoute>
+                    <AppLayout><Ranking /></AppLayout>
+                  </ProtectedRoute>
+                } 
+              />
+              <Route 
+                path="/perfil" 
+                element={
+                  <ProtectedRoute>
+                    <AppLayout><Perfil /></AppLayout>
+                  </ProtectedRoute>
+                } 
+              />
+              <Route 
+                path="/configuracoes" 
+                element={
+                  <ProtectedRoute>
+                    <AppLayout><Configuracoes /></AppLayout>
+                  </ProtectedRoute>
+                } 
+              />
+              <Route 
+                path="/programas" 
+                element={
+                  <ProtectedRoute>
+                    <AppLayout><Programas /></AppLayout>
+                  </ProtectedRoute>
+                } 
+              />
+              <Route 
+                path="/conteudos" 
+                element={
+                  <ProtectedRoute>
+                    <AppLayout><Conteudos /></AppLayout>
+                  </ProtectedRoute>
+                } 
+              />
+              <Route 
+                path="/sessoes" 
+                element={
+                  <ProtectedRoute>
+                    <AppLayout><Sessoes /></AppLayout>
+                  </ProtectedRoute>
+                } 
+              />
+              <Route 
+                path="/calendario" 
+                element={
+                  <ProtectedRoute>
+                    <AppLayout><Calendario /></AppLayout>
+                  </ProtectedRoute>
+                } 
+              />
+              <Route 
+                path="/metas" 
+                element={
+                  <ProtectedRoute>
+                    <AppLayout><Metas /></AppLayout>
+                  </ProtectedRoute>
+                } 
+              />
+              <Route 
+                path="/revisoes" 
+                element={
+                  <ProtectedRoute>
+                    <AppLayout><Revisoes /></AppLayout>
+                  </ProtectedRoute>
+                } 
+              />
+              <Route 
+                path="/roi-estudo" 
+                element={
+                  <ProtectedRoute>
+                    <AppLayout><ROIEstudo /></AppLayout>
+                  </ProtectedRoute>
+                } 
+              />
+              <Route 
+                path="/salvos" 
+                element={
+                  <ProtectedRoute>
+                    <AppLayout><Salvos /></AppLayout>
+                  </ProtectedRoute>
+                } 
+              />
+              
+              <Route path="*" element={<NotFound />} />
+            </Routes>
+          </BrowserRouter>
+        </TooltipProvider>
+      </AuthProvider>
     </ThemeProvider>
   </QueryClientProvider>
 );
