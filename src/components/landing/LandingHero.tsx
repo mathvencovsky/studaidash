@@ -88,7 +88,7 @@ function MiniProductPreview() {
       </p>
       
       {/* Mobile: carousel with edge-to-edge scroll; Desktop: grid */}
-      <div className="flex gap-3 overflow-x-auto snap-x snap-mandatory overscroll-x-contain scrollbar-hide -mx-4 px-4 pb-2 [scroll-padding-left:1rem] [scroll-padding-right:1rem] md:mx-0 md:px-0 md:grid md:grid-cols-3 md:gap-4 md:overflow-visible md:pb-0">
+      <div className="flex gap-3 overflow-x-auto snap-x snap-mandatory overscroll-x-contain scrollbar-hide -mx-4 px-4 pb-4 pr-8 [scroll-padding-left:1rem] [scroll-padding-right:1rem] md:mx-0 md:px-0 md:pr-0 md:grid md:grid-cols-3 md:gap-4 md:overflow-visible md:pb-0">
         {/* Card 1: Hoje */}
         <Card className="w-[88vw] max-w-[340px] shrink-0 snap-start bg-card border-2 border-border hover:border-primary/40 transition-all duration-300 shadow-lg md:w-auto md:max-w-none md:shrink md:snap-none">
           <CardContent className="p-3 sm:p-4">
@@ -350,7 +350,7 @@ export function LandingHero() {
             </div>
 
             {/* Product Preview - Mobile */}
-            <div className="mt-8 lg:hidden max-w-full overflow-hidden">
+            <div className="mt-8 lg:hidden max-w-full">
               <MiniProductPreview />
             </div>
           </div>
