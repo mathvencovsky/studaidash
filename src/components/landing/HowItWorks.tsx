@@ -92,13 +92,13 @@ export function HowItWorks() {
   }, [currentProfile]);
 
   return (
-    <SectionWrapper id="como-funciona" variant="tint" tabIndex={-1}>
+    <SectionWrapper id="como-funciona" variant="tint" tabIndex={-1} withNoise>
       <div className="text-center mb-10">
-        <KickerBadge variant="warm" className="mb-3">
-          <Rocket className="h-3 w-3" />
+        <KickerBadge variant="warm" className="mb-4">
+          <Rocket className="h-3.5 w-3.5" />
           Comece em minutos
         </KickerBadge>
-        <h2 className="text-2xl sm:text-3xl font-bold text-foreground">
+        <h2 className="display-h2 text-foreground">
           Como <HeadlineHighlight>funciona</HeadlineHighlight>
         </h2>
         <p className="mt-3 text-muted-foreground max-w-2xl mx-auto">
@@ -111,26 +111,26 @@ export function HowItWorks() {
           <div key={step.number} className="relative">
             {/* Connector line */}
             {index < steps.length - 1 && (
-              <div className="hidden md:block absolute top-14 left-[60%] w-[80%] h-0.5 bg-gradient-to-r from-primary/30 to-transparent" />
+              <div className="hidden md:block absolute top-14 left-[60%] w-[80%] h-0.5 bg-gradient-to-r from-primary/40 to-transparent" />
             )}
             
             <div className="text-center">
               <div className="relative inline-flex">
-                <div className="w-28 h-28 rounded-2xl bg-gradient-to-br from-primary/15 to-accent/10 flex items-center justify-center mx-auto border-2 border-primary/20 shadow-lg">
+                <div className="w-28 h-28 rounded-2xl bg-gradient-to-br from-primary/15 to-accent/10 flex items-center justify-center mx-auto border-2 border-primary/20 shadow-xl">
                   <step.icon className="h-12 w-12 text-primary" />
                 </div>
-                <span className="absolute -top-2 -right-2 w-10 h-10 rounded-full bg-accent-warm text-accent-warm-foreground text-sm font-bold flex items-center justify-center shadow-lg">
+                <span className="absolute -top-2 -right-2 w-10 h-10 rounded-full bg-gradient-to-br from-accent-warm to-accent-warm/80 text-accent-warm-foreground text-sm font-bold flex items-center justify-center shadow-lg">
                   {step.number}
                 </span>
               </div>
               <h3 className="mt-6 text-lg font-bold text-foreground">{step.title}</h3>
-              <p className="mt-2 text-muted-foreground text-sm max-w-xs mx-auto">
+              <p className="mt-2 text-muted-foreground text-sm max-w-xs mx-auto leading-relaxed">
                 {step.description}
               </p>
-              <p className="mt-3 text-xs bg-muted/60 text-muted-foreground px-3 py-1.5 rounded-full inline-block">
+              <p className="mt-3 text-xs bg-card text-muted-foreground px-4 py-2 rounded-full inline-block border-2 font-medium">
                 {step.example}
               </p>
-              <p className="mt-2 text-xs text-success font-semibold">
+              <p className="mt-2 text-xs text-success font-bold">
                 {step.promise}
               </p>
             </div>

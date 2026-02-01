@@ -1,7 +1,7 @@
 import { cn } from "@/lib/utils";
 import type { ReactNode } from "react";
 
-type SectionVariant = "plain" | "tint" | "gradient" | "split";
+type SectionVariant = "plain" | "tint" | "gradient" | "split" | "dark";
 
 interface SectionWrapperProps {
   children: ReactNode;
@@ -10,13 +10,15 @@ interface SectionWrapperProps {
   id?: string;
   className?: string;
   tabIndex?: number;
+  withNoise?: boolean;
 }
 
 const variantStyles: Record<SectionVariant, string> = {
   plain: "bg-background",
-  tint: "bg-muted/40",
-  gradient: "bg-gradient-to-br from-primary/5 via-background to-accent/5",
-  split: "bg-card border-y border-border",
+  tint: "bg-muted/50",
+  gradient: "bg-gradient-to-br from-primary/5 via-background to-accent-warm/5",
+  split: "bg-card border-y-2 border-border",
+  dark: "bg-foreground text-background",
 };
 
 export function SectionWrapper({
@@ -26,6 +28,7 @@ export function SectionWrapper({
   id,
   className,
   tabIndex,
+  withNoise = false,
 }: SectionWrapperProps) {
   return (
     <section
@@ -34,11 +37,12 @@ export function SectionWrapper({
       className={cn(
         variantStyles[variant],
         compact ? "py-10 md:py-12" : "py-12 md:py-16",
-        "outline-none",
+        "outline-none relative overflow-hidden",
+        withNoise && "noise-bg",
         className
       )}
     >
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
         {children}
       </div>
     </section>

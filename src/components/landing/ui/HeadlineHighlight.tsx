@@ -20,11 +20,12 @@ export function HeadlineHighlight({
       )}
     >
       <span className="relative z-10">{children}</span>
+      {/* Organic marker/highlighter effect */}
       <span
         className={cn(
-          "absolute bottom-1 left-0 right-0 h-3 -z-0 rounded-sm",
+          "absolute -bottom-0.5 left-0 right-0 h-[0.35em] -z-0 rounded-sm transform -rotate-[0.5deg]",
           variant === "warm" 
-            ? "bg-accent-warm/20" 
+            ? "bg-accent-warm/25" 
             : "bg-primary/20"
         )}
         aria-hidden="true"

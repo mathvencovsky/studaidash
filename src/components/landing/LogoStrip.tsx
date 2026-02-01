@@ -39,13 +39,13 @@ export function LogoStrip() {
       {/* Header */}
       <div className="text-center mb-6">
         <KickerBadge variant="primary" className="mb-3">
-          <Zap className="h-3 w-3" />
+          <Zap className="h-3.5 w-3.5" />
           Prova de valor
         </KickerBadge>
-        <h2 className="text-lg sm:text-xl font-bold text-foreground">
+        <h2 className="display-h3 text-foreground">
           Clareza para estudar todos os dias
         </h2>
-        <p className="mt-2 text-sm text-muted-foreground">
+        <p className="mt-2 text-sm text-muted-foreground max-w-lg mx-auto">
           Plano do dia, revisões e progresso semanal no mesmo lugar.
         </p>
       </div>
@@ -60,9 +60,9 @@ export function LogoStrip() {
             onMouseLeave={() => setActiveAudience(null)}
             onFocus={() => setActiveAudience(item.key)}
             onBlur={() => setActiveAudience(null)}
-            className={`px-4 py-2 text-xs font-semibold rounded-full border-2 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 ${
+            className={`px-4 py-2.5 text-xs font-bold rounded-xl border-2 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 ${
               activeAudience === item.key
-                ? "border-accent-warm bg-accent-warm/10 text-accent-warm shadow-sm"
+                ? "border-accent-warm bg-accent-warm/10 text-accent-warm shadow-md transform -translate-y-0.5"
                 : "border-border bg-card text-foreground hover:border-accent-warm/50 hover:bg-accent-warm/5"
             }`}
           >
@@ -72,9 +72,9 @@ export function LogoStrip() {
       </div>
 
       {/* Dynamic microcopy */}
-      <div className="h-6 mb-5 text-center">
+      <div className="h-7 mb-5 text-center">
         {activeAudience && (
-          <p className="text-sm font-medium text-accent-warm animate-in fade-in duration-200">
+          <p className="text-sm font-semibold text-accent-warm animate-in fade-in duration-200">
             {audienceMicrocopy[activeAudience]}
           </p>
         )}
@@ -84,7 +84,7 @@ export function LogoStrip() {
       <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
         <div className="flex flex-wrap justify-center lg:justify-start items-center gap-x-6 gap-y-2">
           {credibilityBullets.map((bullet) => (
-            <span key={bullet} className="flex items-center gap-2 text-sm text-foreground">
+            <span key={bullet} className="flex items-center gap-2.5 text-sm text-foreground font-medium">
               <CheckCircle2 className="h-4 w-4 text-success shrink-0" />
               {bullet}
             </span>
@@ -94,21 +94,21 @@ export function LogoStrip() {
         <div className="flex flex-wrap justify-center lg:justify-end items-center gap-4 text-xs text-muted-foreground">
           <Link 
             to="/privacidade" 
-            className="inline-flex items-center gap-1.5 hover:text-foreground transition-colors focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 rounded font-medium"
+            className="inline-flex items-center gap-1.5 hover:text-foreground transition-colors focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 rounded font-semibold"
           >
             <Shield className="h-3.5 w-3.5" />
             Privacidade
           </Link>
           <Link 
             to="/seguranca" 
-            className="inline-flex items-center gap-1.5 hover:text-foreground transition-colors focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 rounded font-medium"
+            className="inline-flex items-center gap-1.5 hover:text-foreground transition-colors focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 rounded font-semibold"
           >
             <Lock className="h-3.5 w-3.5" />
             Segurança
           </Link>
           <a
             href={`mailto:${SUPPORT_EMAIL}`}
-            className="inline-flex items-center gap-1.5 hover:text-foreground transition-colors focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 rounded font-medium"
+            className="inline-flex items-center gap-1.5 hover:text-foreground transition-colors focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 rounded font-semibold"
           >
             <Mail className="h-3.5 w-3.5" />
             Suporte
