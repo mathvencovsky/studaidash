@@ -1,36 +1,150 @@
-import { CheckCircle2, ArrowRight, Shield, Eye, Headphones } from "lucide-react";
+import { useState } from "react";
+import { ArrowRight, CheckCircle2, Calendar, RotateCcw, TrendingUp, Mail, Shield, FileText } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { AuthCard } from "./AuthCard";
+import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
+import { Card, CardContent } from "@/components/ui/card";
+import { Progress } from "@/components/ui/progress";
+import { Link } from "react-router-dom";
 
-const beforeAfter = {
-  before: [
-    "Estudo sem constância",
-    "Sem clareza do que revisar",
-    "Progresso invisível",
-  ],
-  after: [
-    "Rotina guiada por dia",
-    "Revisão no tempo certo",
-    "Evolução visível por semana",
-  ],
+type ProfileKey = "concurso" | "certificacao" | "faculdade";
+
+const profiles: Record<ProfileKey, {
+  label: string;
+  benefits: string[];
+  microcopy: string;
+}> = {
+  concurso: {
+    label: "Concurso",
+    benefits: [
+      "Cronograma adaptado ao edital e data da prova",
+      "Revisões espaçadas para matérias de alto peso",
+      "Simulados com estatísticas por banca",
+    ],
+    microcopy: "Funciona para concursos federais, estaduais e municipais",
+  },
+  certificacao: {
+    label: "Certificação",
+    benefits: [
+      "Trilhas alinhadas ao syllabus oficial (CFA, CPA, CEA)",
+      "Revisões programadas por módulo e nível",
+      "Métricas de prontidão para o exame",
+    ],
+    microcopy: "CFA, CPA-10/20, CEA, CFP e outras certificações",
+  },
+  faculdade: {
+    label: "Faculdade",
+    benefits: [
+      "Organização por disciplina e período",
+      "Revisões antes das provas",
+      "Acompanhamento de carga horária semanal",
+    ],
+    microcopy: "Para graduação, pós ou cursos livres",
+  },
 };
 
-const trustItems = [
-  {
-    icon: Shield,
-    text: "Seus dados sob seu controle",
-  },
-  {
-    icon: Eye,
-    text: "Transparência de planos",
-  },
-  {
-    icon: Headphones,
-    text: "Suporte por e-mail",
-  },
-];
+// Mini Product Preview - simula interface real do app
+function MiniProductPreview() {
+  const todayTasks = [
+    { label: "Leitura: Direito Constitucional", done: true },
+    { label: "Quiz: Princípios Fundamentais", done: true },
+    { label: "Revisão: Art. 5º CF", done: false },
+  ];
+
+  const reviewQueue = [
+    { subject: "Direito Administrativo", dueIn: "Hoje" },
+    { subject: "Português", dueIn: "Amanhã" },
+    { subject: "Raciocínio Lógico", dueIn: "3 dias" },
+  ];
+
+  return (
+    <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+      {/* Card 1: Hoje */}
+      <Card className="bg-card/80 backdrop-blur border-border/50">
+        <CardContent className="p-4">
+          <div className="flex items-center gap-2 mb-3">
+            <Calendar className="h-4 w-4 text-primary" />
+            <span className="text-sm font-medium text-foreground">Hoje</span>
+          </div>
+          <ul className="space-y-2">
+            {todayTasks.map((task, i) => (
+              <li key={i} className="flex items-center gap-2 text-xs">
+                <div className={`h-3.5 w-3.5 rounded-full border flex items-center justify-center ${
+                  task.done 
+                    ? "bg-primary border-primary" 
+                    : "border-muted-foreground/40"
+                }`}>
+                  {task.done && <CheckCircle2 className="h-2.5 w-2.5 text-primary-foreground" />}
+                </div>
+                <span className={task.done ? "text-muted-foreground line-through" : "text-foreground"}>
+                  {task.label}
+                </span>
+              </li>
+            ))}
+          </ul>
+          <p className="text-xs text-muted-foreground mt-3">2 de 3 concluídas</p>
+        </CardContent>
+      </Card>
+
+      {/* Card 2: Próxima revisão */}
+      <Card className="bg-card/80 backdrop-blur border-border/50">
+        <CardContent className="p-4">
+          <div className="flex items-center gap-2 mb-3">
+            <RotateCcw className="h-4 w-4 text-primary" />
+            <span className="text-sm font-medium text-foreground">Revisões</span>
+          </div>
+          <ul className="space-y-2">
+            {reviewQueue.map((item, i) => (
+              <li key={i} className="flex items-center justify-between text-xs">
+                <span className="text-foreground truncate max-w-[100px]">{item.subject}</span>
+                <span className={`text-xs px-1.5 py-0.5 rounded ${
+                  item.dueIn === "Hoje" 
+                    ? "bg-primary/10 text-primary" 
+                    : "bg-muted text-muted-foreground"
+                }`}>
+                  {item.dueIn}
+                </span>
+              </li>
+            ))}
+          </ul>
+          <p className="text-xs text-muted-foreground mt-3">3 revisões pendentes</p>
+        </CardContent>
+      </Card>
+
+      {/* Card 3: Semana */}
+      <Card className="bg-card/80 backdrop-blur border-border/50">
+        <CardContent className="p-4">
+          <div className="flex items-center gap-2 mb-3">
+            <TrendingUp className="h-4 w-4 text-primary" />
+            <span className="text-sm font-medium text-foreground">Semana</span>
+          </div>
+          <div className="space-y-3">
+            <div>
+              <div className="flex justify-between text-xs mb-1">
+                <span className="text-muted-foreground">Progresso</span>
+                <span className="text-foreground font-medium">68%</span>
+              </div>
+              <Progress value={68} className="h-1.5" />
+            </div>
+            <div className="flex justify-between text-xs">
+              <span className="text-muted-foreground">Horas estudadas</span>
+              <span className="text-foreground font-medium">8h 30min</span>
+            </div>
+            <div className="flex justify-between text-xs">
+              <span className="text-muted-foreground">Meta semanal</span>
+              <span className="text-foreground font-medium">12h</span>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+    </div>
+  );
+}
 
 export function LandingHero() {
+  const [profile, setProfile] = useState<ProfileKey>("concurso");
+  const currentProfile = profiles[profile];
+
   const scrollToId = (id: string) => {
     const el = document.getElementById(id);
     if (!el) return;
@@ -38,7 +152,10 @@ export function LandingHero() {
     el.scrollIntoView({ behavior: "smooth", block: "start" });
 
     window.requestAnimationFrame(() => {
-      setTimeout(() => el.focus?.(), 150);
+      setTimeout(() => {
+        const emailInput = el.querySelector('input[type="email"]') as HTMLInputElement;
+        emailInput?.focus();
+      }, 150);
     });
   };
 
@@ -50,47 +167,59 @@ export function LandingHero() {
       <div className="absolute bottom-0 left-0 w-64 h-64 bg-primary/10 rounded-full blur-3xl pointer-events-none" />
       
       <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="grid lg:grid-cols-2 gap-12 lg:gap-16 items-center">
+        <div className="grid lg:grid-cols-2 gap-12 lg:gap-16 items-start">
           {/* Left Column - Content */}
           <div className="text-center lg:text-left">
+            {/* Headline */}
             <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-foreground leading-tight">
-              Estude com constância.
-              <br />
-              <span className="text-primary">Veja seu progresso real.</span>
+              Seu plano de estudo diário com revisões automáticas e progresso visível
             </h1>
             
+            {/* Subheadline */}
             <p className="mt-6 text-lg text-muted-foreground max-w-xl mx-auto lg:mx-0">
-              Plataforma de estudos para quem precisa de rotina organizada, revisões no tempo certo e métricas claras de evolução. Seja para concursos, certificações ou transições de carreira.
+              Você define a meta e a data. O sistema monta o cronograma, agenda as revisões no tempo certo e mostra exatamente onde você está.
             </p>
 
-            {/* Before → After Block */}
-            <div className="mt-8 grid grid-cols-2 gap-4 max-w-lg mx-auto lg:mx-0">
-              <div className="space-y-2">
-                <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">Antes</p>
-                {beforeAfter.before.map((item, index) => (
-                  <p key={index} className="text-sm text-muted-foreground/70 line-through">
-                    {item}
-                  </p>
+            {/* Profile Selector */}
+            <div className="mt-8">
+              <p className="text-sm text-muted-foreground mb-3">Estou estudando para:</p>
+              <ToggleGroup 
+                type="single" 
+                value={profile} 
+                onValueChange={(v) => v && setProfile(v as ProfileKey)}
+                className="justify-center lg:justify-start"
+              >
+                {(Object.keys(profiles) as ProfileKey[]).map((key) => (
+                  <ToggleGroupItem 
+                    key={key} 
+                    value={key}
+                    variant="outline"
+                    className="px-4 py-2 text-sm data-[state=on]:bg-primary data-[state=on]:text-primary-foreground"
+                  >
+                    {profiles[key].label}
+                  </ToggleGroupItem>
                 ))}
-              </div>
-              <div className="space-y-2">
-                <p className="text-xs font-medium text-primary uppercase tracking-wide">Depois</p>
-                {beforeAfter.after.map((item, index) => (
-                  <p key={index} className="text-sm text-foreground flex items-center gap-2">
-                    <CheckCircle2 className="h-3.5 w-3.5 text-primary shrink-0" />
-                    {item}
-                  </p>
-                ))}
-              </div>
+              </ToggleGroup>
             </div>
 
+            {/* Dynamic Benefits */}
+            <ul className="mt-6 space-y-2 max-w-lg mx-auto lg:mx-0">
+              {currentProfile.benefits.map((benefit, index) => (
+                <li key={index} className="flex items-start gap-2 text-sm text-foreground">
+                  <CheckCircle2 className="h-4 w-4 text-primary shrink-0 mt-0.5" />
+                  <span>{benefit}</span>
+                </li>
+              ))}
+            </ul>
+
+            {/* CTAs */}
             <div className="flex flex-col sm:flex-row gap-3 justify-center lg:justify-start mt-8">
               <Button 
                 size="lg" 
                 onClick={() => scrollToId("auth-card")}
                 className="text-base"
               >
-                Começar grátis
+                Criar meu plano grátis
                 <ArrowRight className="ml-2 h-4 w-4" />
               </Button>
               <Button 
@@ -103,21 +232,51 @@ export function LandingHero() {
               </Button>
             </div>
 
+            {/* Microcopy below CTA */}
+            <p className="mt-3 text-sm text-muted-foreground text-center lg:text-left">
+              {currentProfile.microcopy}
+            </p>
+
             {/* Trust Bar */}
-            <div className="flex flex-wrap items-center justify-center lg:justify-start gap-x-6 gap-y-2 mt-6">
-              {trustItems.map((item, index) => (
-                <span key={index} className="flex items-center gap-1.5 text-sm text-muted-foreground">
-                  <item.icon className="h-4 w-4 text-primary/70" />
-                  {item.text}
-                </span>
-              ))}
+            <div className="flex flex-wrap items-center justify-center lg:justify-start gap-x-5 gap-y-2 mt-6 text-sm text-muted-foreground">
+              <a 
+                href="mailto:support@studai.app" 
+                className="flex items-center gap-1.5 hover:text-foreground transition-colors"
+              >
+                <Mail className="h-4 w-4 text-primary/70" />
+                support@studai.app
+              </a>
+              <Link 
+                to="/seguranca" 
+                className="flex items-center gap-1.5 hover:text-foreground transition-colors"
+              >
+                <Shield className="h-4 w-4 text-primary/70" />
+                Segurança
+              </Link>
+              <Link 
+                to="/privacidade" 
+                className="flex items-center gap-1.5 hover:text-foreground transition-colors"
+              >
+                <FileText className="h-4 w-4 text-primary/70" />
+                Privacidade
+              </Link>
+            </div>
+
+            {/* Product Preview - Mobile */}
+            <div className="mt-10 lg:hidden">
+              <MiniProductPreview />
             </div>
           </div>
 
-          {/* Right Column - Auth Card */}
-          <div className="flex justify-center lg:justify-end">
-            <div id="auth-card" tabIndex={-1} className="outline-none">
+          {/* Right Column - Auth Card + Preview Desktop */}
+          <div className="flex flex-col gap-8">
+            <div id="auth-card" tabIndex={-1} className="outline-none flex justify-center lg:justify-end">
               <AuthCard />
+            </div>
+            
+            {/* Product Preview - Desktop */}
+            <div className="hidden lg:block">
+              <MiniProductPreview />
             </div>
           </div>
         </div>
