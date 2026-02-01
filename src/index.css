@@ -4,11 +4,20 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Mobile-first: prevent horizontal scroll */
-html, body {
-  overflow-x: hidden;
+/* Mobile-first: prevent horizontal scroll + block horizontal pan */
+html,
+body {
+  width: 100%;
+  overflow-x: hidden; /* fallback */
+  overflow-x: clip;
+  overscroll-behavior-x: none;
   -webkit-overflow-scrolling: touch;
   max-width: 100vw;
+}
+
+body {
+  /* Prevent iOS/Android sideways page panning while preserving vertical scroll */
+  touch-action: pan-y;
 }
 
 #root {
@@ -18,6 +27,7 @@ html, body {
   margin: 0;
   padding: 0;
   text-align: initial;
+  overflow-x: hidden; /* fallback */
   overflow-x: clip;
   max-width: 100vw;
 }
