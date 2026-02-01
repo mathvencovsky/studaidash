@@ -81,30 +81,30 @@ function MiniProductPreview() {
   ];
 
   return (
-    <div className="relative">
+    <div className="relative w-full overflow-hidden">
       {/* Subtle label */}
       <p className="text-xs text-muted-foreground text-center mb-2 font-medium">
         Exemplo ilustrativo
       </p>
       
-      {/* Mobile: horizontal scroll, Desktop: grid */}
-      <div className="flex gap-3 overflow-x-auto pb-2 snap-x snap-mandatory scrollbar-hide sm:grid sm:grid-cols-3 sm:overflow-visible sm:pb-0">
+      {/* Mobile: horizontal scroll with proper constraints, Desktop: grid */}
+      <div className="flex gap-3 overflow-x-auto pb-2 snap-x snap-mandatory scrollbar-hide -mx-4 px-4 sm:mx-0 sm:px-0 sm:grid sm:grid-cols-3 sm:overflow-visible sm:pb-0">
         {/* Card 1: Hoje */}
-        <Card className="flex-shrink-0 w-[280px] sm:w-auto snap-center bg-card border-2 border-border hover:border-primary/40 transition-all duration-300 shadow-lg">
-          <CardContent className="p-4">
-            <div className="flex items-center gap-2 mb-3">
+        <Card className="flex-shrink-0 w-[240px] min-w-[240px] sm:w-auto sm:min-w-0 snap-start bg-card border-2 border-border hover:border-primary/40 transition-all duration-300 shadow-lg">
+          <CardContent className="p-3 sm:p-4">
+            <div className="flex items-center gap-2 mb-2 sm:mb-3">
               <div className="p-1.5 rounded-lg bg-primary/10">
-                <Calendar className="h-3.5 w-3.5 text-primary" />
+                <Calendar className="h-3 w-3 sm:h-3.5 sm:w-3.5 text-primary" />
               </div>
-              <span className="text-sm font-bold text-foreground">Hoje</span>
-              <span className="ml-auto text-[10px] font-semibold bg-accent-warm/15 text-accent-warm px-2 py-0.5 rounded-full">
+              <span className="text-xs sm:text-sm font-bold text-foreground">Hoje</span>
+              <span className="ml-auto text-[9px] sm:text-[10px] font-semibold bg-accent-warm/15 text-accent-warm px-1.5 sm:px-2 py-0.5 rounded-full">
                 3 tarefas
               </span>
             </div>
-            <ul className="space-y-2">
+            <ul className="space-y-1.5 sm:space-y-2">
               {todayTasks.map((task, i) => (
-                <li key={i} className="flex items-center gap-2 text-xs">
-                  <div className={`h-3.5 w-3.5 rounded-full border-2 flex items-center justify-center ${
+                <li key={i} className="flex items-center gap-1.5 sm:gap-2 text-[11px] sm:text-xs">
+                  <div className={`h-3 w-3 sm:h-3.5 sm:w-3.5 rounded-full border-2 flex items-center justify-center ${
                     task.done 
                       ? "bg-success border-success" 
                       : "border-muted-foreground/30"
@@ -117,24 +117,24 @@ function MiniProductPreview() {
                 </li>
               ))}
             </ul>
-            <p className="text-xs text-muted-foreground mt-3 font-semibold">2 de 3 concluídas</p>
+            <p className="text-[10px] sm:text-xs text-muted-foreground mt-2 sm:mt-3 font-semibold">2 de 3 concluídas</p>
           </CardContent>
         </Card>
 
         {/* Card 2: Revisões */}
-        <Card className="flex-shrink-0 w-[280px] sm:w-auto snap-center bg-card border-2 border-border hover:border-accent-warm/40 transition-all duration-300 shadow-lg">
-          <CardContent className="p-4">
-            <div className="flex items-center gap-2 mb-3">
+        <Card className="flex-shrink-0 w-[240px] min-w-[240px] sm:w-auto sm:min-w-0 snap-start bg-card border-2 border-border hover:border-accent-warm/40 transition-all duration-300 shadow-lg">
+          <CardContent className="p-3 sm:p-4">
+            <div className="flex items-center gap-2 mb-2 sm:mb-3">
               <div className="p-1.5 rounded-lg bg-accent-warm/10">
-                <RotateCcw className="h-3.5 w-3.5 text-accent-warm" />
+                <RotateCcw className="h-3 w-3 sm:h-3.5 sm:w-3.5 text-accent-warm" />
               </div>
-              <span className="text-sm font-bold text-foreground">Revisões</span>
+              <span className="text-xs sm:text-sm font-bold text-foreground">Revisões</span>
             </div>
-            <ul className="space-y-2">
+            <ul className="space-y-1.5 sm:space-y-2">
               {reviewQueue.map((item, i) => (
-                <li key={i} className="flex items-center justify-between text-xs">
-                  <span className="text-foreground font-medium truncate max-w-[120px]">{item.subject}</span>
-                  <span className={`text-[10px] px-2 py-0.5 rounded-full font-bold ${
+                <li key={i} className="flex items-center justify-between text-[11px] sm:text-xs">
+                  <span className="text-foreground font-medium truncate max-w-[100px] sm:max-w-[120px]">{item.subject}</span>
+                  <span className={`text-[9px] sm:text-[10px] px-1.5 sm:px-2 py-0.5 rounded-full font-bold ${
                     item.dueIn === "Hoje" 
                       ? "bg-accent-warm/15 text-accent-warm" 
                       : "bg-muted text-muted-foreground"
@@ -144,32 +144,32 @@ function MiniProductPreview() {
                 </li>
               ))}
             </ul>
-            <p className="text-xs text-muted-foreground mt-3 font-semibold">3 pendentes</p>
+            <p className="text-[10px] sm:text-xs text-muted-foreground mt-2 sm:mt-3 font-semibold">3 pendentes</p>
           </CardContent>
         </Card>
 
         {/* Card 3: Semana */}
-        <Card className="flex-shrink-0 w-[280px] sm:w-auto snap-center bg-card border-2 border-border hover:border-success/40 transition-all duration-300 shadow-lg">
-          <CardContent className="p-4">
-            <div className="flex items-center gap-2 mb-3">
+        <Card className="flex-shrink-0 w-[240px] min-w-[240px] sm:w-auto sm:min-w-0 snap-start bg-card border-2 border-border hover:border-success/40 transition-all duration-300 shadow-lg">
+          <CardContent className="p-3 sm:p-4">
+            <div className="flex items-center gap-2 mb-2 sm:mb-3">
               <div className="p-1.5 rounded-lg bg-success/10">
-                <TrendingUp className="h-3.5 w-3.5 text-success" />
+                <TrendingUp className="h-3 w-3 sm:h-3.5 sm:w-3.5 text-success" />
               </div>
-              <span className="text-sm font-bold text-foreground">Semana</span>
+              <span className="text-xs sm:text-sm font-bold text-foreground">Semana</span>
             </div>
-            <div className="space-y-2.5">
+            <div className="space-y-2 sm:space-y-2.5">
               <div>
-                <div className="flex justify-between text-xs mb-1">
+                <div className="flex justify-between text-[11px] sm:text-xs mb-1">
                   <span className="text-muted-foreground">Progresso</span>
                   <span className="text-foreground font-bold">68%</span>
                 </div>
-                <Progress value={68} className="h-2" />
+                <Progress value={68} className="h-1.5 sm:h-2" />
               </div>
-              <div className="flex justify-between text-xs">
+              <div className="flex justify-between text-[11px] sm:text-xs">
                 <span className="text-muted-foreground">Horas</span>
                 <span className="text-foreground font-bold">8h 30min</span>
               </div>
-              <div className="flex justify-between text-xs">
+              <div className="flex justify-between text-[11px] sm:text-xs">
                 <span className="text-muted-foreground">Meta</span>
                 <span className="text-foreground font-bold">12h</span>
               </div>
@@ -226,7 +226,7 @@ export function LandingHero() {
   };
 
   return (
-    <section className="relative pt-16 pb-10 md:pt-24 md:pb-14 overflow-hidden noise-bg">
+    <section className="relative pt-16 pb-10 md:pt-24 md:pb-14 overflow-x-hidden noise-bg">
       {/* Premium gradient background - reduced blur on mobile */}
       <div className="absolute inset-0 bg-gradient-to-br from-primary/8 via-background to-accent-warm/8 pointer-events-none" />
       
@@ -238,11 +238,13 @@ export function LandingHero() {
         <div className="grid lg:grid-cols-2 gap-8 lg:gap-12 items-start">
           {/* Left Column - Content */}
           <div className="text-center lg:text-left">
-            {/* Kicker Badge */}
-            <KickerBadge variant="warm" className="mb-4">
-              <Sparkles className="h-3.5 w-3.5" />
-              Para concursos, certificações e faculdade
-            </KickerBadge>
+            {/* Kicker Badge - constrained width on mobile */}
+            <div className="flex justify-center lg:justify-start mb-4">
+              <KickerBadge variant="warm" className="max-w-full">
+                <Sparkles className="h-3.5 w-3.5 shrink-0" />
+                <span className="truncate">Para concursos, certificações e faculdade</span>
+              </KickerBadge>
+            </div>
 
             {/* Headline with display font and highlight */}
             <h1 className="display-h1 text-foreground">
@@ -255,21 +257,21 @@ export function LandingHero() {
               Defina a meta e a data. O sistema monta o cronograma e mostra onde você está.
             </p>
 
-            {/* Profile Selector - Premium feel */}
+            {/* Profile Selector - full width on mobile, centered */}
             <div className="mt-6">
               <p className="text-sm text-foreground font-semibold mb-2">Estou estudando para:</p>
               <ToggleGroup 
                 type="single" 
                 value={profile} 
                 onValueChange={handleProfileChange}
-                className="justify-center lg:justify-start gap-1.5 flex-wrap"
+                className="w-full max-w-sm mx-auto lg:mx-0 lg:max-w-none grid grid-cols-3 gap-1"
               >
                 {(Object.keys(profiles) as ProfileKey[]).map((key) => (
                   <ToggleGroupItem 
                     key={key} 
                     value={key}
                     variant="outline"
-                    className="px-4 py-2.5 min-h-[44px] text-sm font-semibold border-2 rounded-xl data-[state=on]:bg-primary data-[state=on]:text-primary-foreground data-[state=on]:border-primary data-[state=on]:shadow-lg hover:border-primary/50 hover:bg-primary/5 transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
+                    className="px-2 sm:px-4 py-2 min-h-[44px] text-xs sm:text-sm font-semibold border-2 rounded-xl data-[state=on]:bg-primary data-[state=on]:text-primary-foreground data-[state=on]:border-primary data-[state=on]:shadow-lg hover:border-primary/50 hover:bg-primary/5 transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
                   >
                     {profiles[key].label}
                   </ToggleGroupItem>
@@ -277,8 +279,8 @@ export function LandingHero() {
               </ToggleGroup>
             </div>
 
-            {/* Dynamic Benefits */}
-            <ul className="mt-5 space-y-2 max-w-lg mx-auto lg:mx-0">
+            {/* Dynamic Benefits - constrained width */}
+            <ul className="mt-5 space-y-2 max-w-sm mx-auto lg:mx-0 lg:max-w-lg text-left">
               {currentProfile.benefits.map((benefit, index) => (
                 <li key={index} className="flex items-start gap-2.5 text-sm text-foreground">
                   <CheckCircle2 className="h-4 w-4 text-success shrink-0 mt-0.5" />
@@ -287,12 +289,12 @@ export function LandingHero() {
               ))}
             </ul>
 
-            {/* CTAs - full width on mobile */}
-            <div className="flex flex-col gap-3 mt-6">
+            {/* CTAs - full width stacked on mobile */}
+            <div className="flex flex-col gap-3 mt-6 max-w-sm mx-auto lg:mx-0 lg:max-w-none lg:flex-row">
               <Button 
                 size="lg" 
                 onClick={() => scrollToId("auth-card")}
-                className="w-full sm:w-auto text-base font-semibold min-h-[48px] bg-gradient-to-r from-primary to-accent hover:from-primary/90 hover:to-accent/90 shadow-xl shadow-primary/30 hover:shadow-2xl transition-all duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
+                className="w-full lg:w-auto text-base font-semibold min-h-[48px] bg-gradient-to-r from-primary to-accent hover:from-primary/90 hover:to-accent/90 shadow-xl shadow-primary/30 hover:shadow-2xl transition-all duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
               >
                 Criar meu plano grátis
                 <ArrowRight className="ml-2 h-4 w-4" />
@@ -301,39 +303,39 @@ export function LandingHero() {
                 variant="outline" 
                 size="lg"
                 onClick={() => scrollToId("como-funciona")}
-                className="w-full sm:w-auto text-base font-semibold min-h-[48px] border-2 hover:border-primary/50 hover:bg-primary/5 transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
+                className="w-full lg:w-auto text-base font-semibold min-h-[48px] border-2 hover:border-primary/50 hover:bg-primary/5 transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
               >
                 Ver como funciona
               </Button>
             </div>
 
             {/* Microcopy below CTA */}
-            <p className="mt-3 text-sm text-muted-foreground text-center lg:text-left font-medium">
+            <p className="mt-3 text-sm text-muted-foreground text-center lg:text-left font-medium max-w-sm mx-auto lg:mx-0">
               {currentProfile.microcopy}
             </p>
 
             {/* Trust Bar - wrap on mobile */}
-            <div className="flex flex-wrap items-center justify-center lg:justify-start gap-x-4 gap-y-2 mt-5 text-sm text-muted-foreground">
+            <div className="flex flex-wrap items-center justify-center lg:justify-start gap-x-3 gap-y-2 mt-5 text-sm text-muted-foreground max-w-sm mx-auto lg:mx-0 lg:max-w-none">
               <a 
                 href="mailto:support@studai.app" 
                 className="flex items-center gap-1.5 min-h-[44px] hover:text-foreground transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 rounded font-medium px-1"
               >
-                <Mail className="h-4 w-4 text-primary/70" />
-                support@studai.app
+                <Mail className="h-4 w-4 text-primary/70 shrink-0" />
+                <span className="text-xs sm:text-sm">support@studai.app</span>
               </a>
               <Link 
                 to="/seguranca" 
                 className="flex items-center gap-1.5 min-h-[44px] hover:text-foreground transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 rounded font-medium px-1"
               >
-                <Shield className="h-4 w-4 text-primary/70" />
-                Segurança
+                <Shield className="h-4 w-4 text-primary/70 shrink-0" />
+                <span className="text-xs sm:text-sm">Segurança</span>
               </Link>
               <Link 
                 to="/privacidade" 
                 className="flex items-center gap-1.5 min-h-[44px] hover:text-foreground transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 rounded font-medium px-1"
               >
-                <FileText className="h-4 w-4 text-primary/70" />
-                Privacidade
+                <FileText className="h-4 w-4 text-primary/70 shrink-0" />
+                <span className="text-xs sm:text-sm">Privacidade</span>
               </Link>
             </div>
 
