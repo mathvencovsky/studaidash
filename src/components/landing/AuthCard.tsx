@@ -19,13 +19,13 @@ const getHeaderCopy = (tab: "login" | "register", profile: ProfileKey) => {
   if (tab === "login") {
     return {
       title: "Acesse seu painel",
-      description: "Entre para continuar seu plano de estudo e acompanhar sua evolução.",
+      description: "Entre para continuar seu plano de estudo.",
       contextLine: profileData.contextLine,
     };
   }
   return {
     title: "Crie sua conta",
-    description: "Leva poucos minutos. Você recebe um e-mail para confirmar o cadastro.",
+    description: "Leva poucos minutos. Confirme pelo e-mail.",
     contextLine: profileData.contextLine,
   };
 };
@@ -132,29 +132,29 @@ export function AuthCard() {
   };
 
   return (
-    <Card className="w-full max-w-md shadow-2xl border-2 border-border/80">
+    <Card className="w-full max-w-md shadow-xl border-2 border-border/80">
       <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as "login" | "register")}>
-        <CardHeader className="pb-4">
-          <CardTitle className="text-xl font-bold">{headerCopy.title}</CardTitle>
-          <CardDescription className="text-sm font-medium">{headerCopy.description}</CardDescription>
+        <CardHeader className="pb-3 px-4 sm:px-6">
+          <CardTitle className="text-lg font-bold">{headerCopy.title}</CardTitle>
+          <CardDescription className="text-xs sm:text-sm font-medium">{headerCopy.description}</CardDescription>
           
           {/* Context line based on profile */}
-          <p className="text-xs text-primary font-bold pt-2">
+          <p className="text-xs text-primary font-bold pt-1.5">
             {headerCopy.contextLine}
           </p>
           
-          <TabsList className="grid w-full grid-cols-2 mt-4">
-            <TabsTrigger value="login" className="font-semibold">Entrar</TabsTrigger>
-            <TabsTrigger value="register" className="font-semibold">Criar conta</TabsTrigger>
+          <TabsList className="grid w-full grid-cols-2 mt-3">
+            <TabsTrigger value="login" className="font-semibold text-sm min-h-[40px]">Entrar</TabsTrigger>
+            <TabsTrigger value="register" className="font-semibold text-sm min-h-[40px]">Criar conta</TabsTrigger>
           </TabsList>
         </CardHeader>
         
-        <CardContent>
+        <CardContent className="px-4 sm:px-6 pb-5">
           {/* Login Tab */}
           <TabsContent value="login" className="mt-0">
-            <form onSubmit={handleLogin} className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="login-email" className="font-semibold">E-mail</Label>
+            <form onSubmit={handleLogin} className="space-y-3">
+              <div className="space-y-1.5">
+                <Label htmlFor="login-email" className="font-semibold text-sm">E-mail</Label>
                 <Input
                   id="login-email"
                   type="email"
@@ -164,16 +164,16 @@ export function AuthCard() {
                   disabled={isLoading}
                   autoComplete="email"
                   required
-                  className="border-2"
+                  className="border-2 min-h-[44px] text-base"
                 />
               </div>
               
-              <div className="space-y-2">
+              <div className="space-y-1.5">
                 <div className="flex items-center justify-between">
-                  <Label htmlFor="login-password" className="font-semibold">Senha</Label>
+                  <Label htmlFor="login-password" className="font-semibold text-sm">Senha</Label>
                   <a
                     href={`mailto:${SUPPORT_EMAIL}?subject=Ajuda%20para%20acessar%20minha%20conta`}
-                    className="inline-flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground transition-colors font-medium"
+                    className="inline-flex items-center gap-1 text-[10px] text-muted-foreground hover:text-foreground transition-colors font-medium min-h-[28px]"
                   >
                     <HelpCircle className="h-3 w-3" />
                     Precisa de ajuda?
@@ -188,13 +188,13 @@ export function AuthCard() {
                     onChange={(e) => setLoginPassword(e.target.value)}
                     disabled={isLoading}
                     autoComplete="current-password"
-                    className="pr-10 border-2"
+                    className="pr-12 border-2 min-h-[44px] text-base"
                     required
                   />
                   <button
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 rounded"
+                    className="absolute right-2 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 rounded p-2 min-w-[40px] min-h-[40px] flex items-center justify-center"
                     aria-label={showPassword ? "Ocultar senha" : "Mostrar senha"}
                     disabled={isLoading}
                   >
@@ -203,7 +203,7 @@ export function AuthCard() {
                 </div>
               </div>
 
-              <Button type="submit" className="w-full font-semibold bg-gradient-to-r from-primary to-accent hover:from-primary/90 hover:to-accent/90 shadow-lg" disabled={isLoading}>
+              <Button type="submit" className="w-full font-semibold min-h-[48px] text-base bg-gradient-to-r from-primary to-accent hover:from-primary/90 hover:to-accent/90 shadow-lg" disabled={isLoading}>
                 {isLoading ? (
                   <>
                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />
@@ -214,8 +214,8 @@ export function AuthCard() {
                 )}
               </Button>
 
-              <p className="text-xs text-muted-foreground text-center pt-2 font-medium">
-                Não consegue acessar? Escreva para{" "}
+              <p className="text-[10px] text-muted-foreground text-center pt-1 font-medium">
+                Não consegue acessar?{" "}
                 <a 
                   href={`mailto:${SUPPORT_EMAIL}?subject=Problema%20de%20acesso`} 
                   className="text-primary font-bold hover:underline"
@@ -228,9 +228,9 @@ export function AuthCard() {
 
           {/* Register Tab */}
           <TabsContent value="register" className="mt-0">
-            <form onSubmit={handleRegister} className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="register-email" className="font-semibold">E-mail</Label>
+            <form onSubmit={handleRegister} className="space-y-3">
+              <div className="space-y-1.5">
+                <Label htmlFor="register-email" className="font-semibold text-sm">E-mail</Label>
                 <Input
                   id="register-email"
                   type="email"
@@ -240,12 +240,12 @@ export function AuthCard() {
                   disabled={isLoading}
                   autoComplete="email"
                   required
-                  className="border-2"
+                  className="border-2 min-h-[44px] text-base"
                 />
               </div>
               
-              <div className="space-y-2">
-                <Label htmlFor="register-password" className="font-semibold">Senha</Label>
+              <div className="space-y-1.5">
+                <Label htmlFor="register-password" className="font-semibold text-sm">Senha</Label>
                 <div className="relative">
                   <Input
                     id="register-password"
@@ -255,13 +255,13 @@ export function AuthCard() {
                     onChange={(e) => setRegisterPassword(e.target.value)}
                     disabled={isLoading}
                     autoComplete="new-password"
-                    className="pr-10 border-2"
+                    className="pr-12 border-2 min-h-[44px] text-base"
                     required
                   />
                   <button
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 rounded"
+                    className="absolute right-2 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 rounded p-2 min-w-[40px] min-h-[40px] flex items-center justify-center"
                     aria-label={showPassword ? "Ocultar senha" : "Mostrar senha"}
                     disabled={isLoading}
                   >
@@ -270,8 +270,8 @@ export function AuthCard() {
                 </div>
               </div>
 
-              <div className="space-y-2">
-                <Label htmlFor="confirm-password" className="font-semibold">Confirmar senha</Label>
+              <div className="space-y-1.5">
+                <Label htmlFor="confirm-password" className="font-semibold text-sm">Confirmar senha</Label>
                 <Input
                   id="confirm-password"
                   type="password"
@@ -281,31 +281,31 @@ export function AuthCard() {
                   disabled={isLoading}
                   autoComplete="new-password"
                   required
-                  className="border-2"
+                  className="border-2 min-h-[44px] text-base"
                 />
               </div>
 
               {/* Password validation checklist */}
-              <div className="space-y-2 text-xs">
+              <div className="space-y-1.5 text-xs">
                 <div className={`flex items-center gap-2 ${passwordChecks.hasMinLength ? "text-success" : "text-muted-foreground"}`}>
                   {passwordChecks.hasMinLength ? (
-                    <CheckCircle2 className="h-4 w-4" />
+                    <CheckCircle2 className="h-3.5 w-3.5" />
                   ) : (
-                    <Circle className="h-4 w-4" />
+                    <Circle className="h-3.5 w-3.5" />
                   )}
                   <span className="font-medium">Mínimo de 6 caracteres</span>
                 </div>
                 <div className={`flex items-center gap-2 ${passwordChecks.passwordsMatch ? "text-success" : "text-muted-foreground"}`}>
                   {passwordChecks.passwordsMatch ? (
-                    <CheckCircle2 className="h-4 w-4" />
+                    <CheckCircle2 className="h-3.5 w-3.5" />
                   ) : (
-                    <Circle className="h-4 w-4" />
+                    <Circle className="h-3.5 w-3.5" />
                   )}
                   <span className="font-medium">Senhas iguais</span>
                 </div>
               </div>
 
-              <Button type="submit" className="w-full font-semibold bg-gradient-to-r from-primary to-accent hover:from-primary/90 hover:to-accent/90 shadow-lg" disabled={isLoading}>
+              <Button type="submit" className="w-full font-semibold min-h-[48px] text-base bg-gradient-to-r from-primary to-accent hover:from-primary/90 hover:to-accent/90 shadow-lg" disabled={isLoading}>
                 {isLoading ? (
                   <>
                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />
@@ -316,11 +316,11 @@ export function AuthCard() {
                 )}
               </Button>
 
-              <p className="text-xs text-muted-foreground text-center pt-2 font-medium">
+              <p className="text-[10px] text-muted-foreground text-center pt-1 font-medium leading-relaxed">
                 Ao criar sua conta, você concorda com os{" "}
-                <Link to="/termos" className="text-primary font-bold hover:underline">Termos de Uso</Link>
-                {" "}e com a{" "}
-                <Link to="/privacidade" className="text-primary font-bold hover:underline">Política de Privacidade</Link>.
+                <Link to="/termos" className="text-primary font-bold hover:underline">Termos</Link>
+                {" "}e{" "}
+                <Link to="/privacidade" className="text-primary font-bold hover:underline">Privacidade</Link>.
               </p>
             </form>
           </TabsContent>

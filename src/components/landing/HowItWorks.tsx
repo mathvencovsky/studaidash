@@ -18,57 +18,57 @@ const baseSteps: Omit<StepData, "example" | "promise">[] = [
     icon: UserPlus,
     number: "01",
     title: "Crie sua conta",
-    description: "Cadastre-se com e-mail e senha. Você recebe um e-mail de confirmação para ativar o acesso.",
+    description: "Cadastre-se com e-mail e senha. Você recebe um e-mail de confirmação.",
   },
   {
     icon: Settings2,
     number: "02",
-    title: "Informe seu objetivo e tempo diário",
-    description: "Escolha o que está estudando, a data de conclusão e quantos minutos tem por dia. O sistema gera seu plano.",
+    title: "Informe objetivo e tempo",
+    description: "Escolha o que está estudando, a data de conclusão e quanto tempo tem por dia.",
   },
   {
     icon: TrendingUp,
     number: "03",
-    title: "Execute o plano e veja seu progresso",
-    description: "Siga as tarefas do dia, marque como feito e acompanhe sua evolução semanal.",
+    title: "Execute e acompanhe",
+    description: "Siga as tarefas do dia, marque como feito e acompanhe sua evolução.",
   },
 ];
 
 const profileExamples: Record<ProfileKey, { examples: string[]; promises: string[] }> = {
   concurso: {
     examples: [
-      "Exemplo: conta criada, acesso em 2 minutos.",
-      "Exemplo: 45 min hoje, 10 min revisão, 15 questões.",
-      "Exemplo: 68% da semana concluído, 3 revisões pendentes.",
+      "Conta criada em 2 minutos",
+      "45 min hoje, 10 min revisão",
+      "68% da semana concluído",
     ],
     promises: [
-      "Pronto para configurar seu plano.",
-      "O cronograma se adapta à sua meta e rotina.",
-      "O app mostra o que fazer hoje e o que revisar depois.",
+      "Pronto para configurar",
+      "Cronograma adaptado à rotina",
+      "Clareza do que fazer hoje",
     ],
   },
   certificacao: {
     examples: [
-      "Exemplo: conta criada, acesso em 2 minutos.",
-      "Exemplo: 60 min por tópico, quiz de fixação.",
-      "Exemplo: 4 tópicos cobertos, 2 em revisão.",
+      "Conta criada em 2 minutos",
+      "60 min por tópico, quiz de fixação",
+      "4 tópicos cobertos",
     ],
     promises: [
-      "Pronto para configurar seu plano.",
-      "Trilha organizada por módulo e prioridade.",
-      "O app mostra o que fazer hoje e o que revisar depois.",
+      "Pronto para configurar",
+      "Trilha organizada por módulo",
+      "Clareza do que fazer hoje",
     ],
   },
   faculdade: {
     examples: [
-      "Exemplo: conta criada, acesso em 2 minutos.",
-      "Exemplo: 30 min Cálculo, 20 min Física, revisão semanal.",
-      "Exemplo: 3 disciplinas em dia, 1 revisão para amanhã.",
+      "Conta criada em 2 minutos",
+      "30 min Cálculo, 20 min Física",
+      "3 disciplinas em dia",
     ],
     promises: [
-      "Pronto para configurar seu plano.",
-      "Organização por disciplina e período.",
-      "O app mostra o que fazer hoje e o que revisar depois.",
+      "Pronto para configurar",
+      "Organização por disciplina",
+      "Clareza do que fazer hoje",
     ],
   },
 };
@@ -93,44 +93,45 @@ export function HowItWorks() {
 
   return (
     <SectionWrapper id="como-funciona" variant="tint" tabIndex={-1} withNoise>
-      <div className="text-center mb-10">
-        <KickerBadge variant="warm" className="mb-4">
+      <div className="text-center mb-8">
+        <KickerBadge variant="warm" className="mb-3">
           <Rocket className="h-3.5 w-3.5" />
           Comece em minutos
         </KickerBadge>
         <h2 className="display-h2 text-foreground">
           Como <HeadlineHighlight>funciona</HeadlineHighlight>
         </h2>
-        <p className="mt-3 text-muted-foreground max-w-2xl mx-auto">
-          Três passos para sair da desorganização e entrar em uma rotina de estudos que funciona.
+        <p className="mt-2 text-muted-foreground max-w-xl mx-auto text-sm">
+          Três passos para sair da desorganização e entrar em uma rotina que funciona.
         </p>
       </div>
 
-      <div className="grid md:grid-cols-3 gap-8">
+      {/* Mobile: vertical stack, Desktop: 3 columns */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-8">
         {steps.map((step, index) => (
           <div key={step.number} className="relative">
-            {/* Connector line */}
+            {/* Connector line - desktop only */}
             {index < steps.length - 1 && (
-              <div className="hidden md:block absolute top-14 left-[60%] w-[80%] h-0.5 bg-gradient-to-r from-primary/40 to-transparent" />
+              <div className="hidden md:block absolute top-12 left-[60%] w-[80%] h-0.5 bg-gradient-to-r from-primary/40 to-transparent" />
             )}
             
             <div className="text-center">
               <div className="relative inline-flex">
-                <div className="w-28 h-28 rounded-2xl bg-gradient-to-br from-primary/15 to-accent/10 flex items-center justify-center mx-auto border-2 border-primary/20 shadow-xl">
-                  <step.icon className="h-12 w-12 text-primary" />
+                <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-xl bg-gradient-to-br from-primary/15 to-accent/10 flex items-center justify-center mx-auto border-2 border-primary/20 shadow-lg">
+                  <step.icon className="h-8 w-8 sm:h-10 sm:w-10 text-primary" />
                 </div>
-                <span className="absolute -top-2 -right-2 w-10 h-10 rounded-full bg-gradient-to-br from-accent-warm to-accent-warm/80 text-accent-warm-foreground text-sm font-bold flex items-center justify-center shadow-lg">
+                <span className="absolute -top-1.5 -right-1.5 w-8 h-8 rounded-full bg-gradient-to-br from-accent-warm to-accent-warm/80 text-accent-warm-foreground text-xs font-bold flex items-center justify-center shadow-lg">
                   {step.number}
                 </span>
               </div>
-              <h3 className="mt-6 text-lg font-bold text-foreground">{step.title}</h3>
-              <p className="mt-2 text-muted-foreground text-sm max-w-xs mx-auto leading-relaxed">
+              <h3 className="mt-4 text-base sm:text-lg font-bold text-foreground">{step.title}</h3>
+              <p className="mt-1.5 text-muted-foreground text-sm max-w-xs mx-auto leading-relaxed">
                 {step.description}
               </p>
-              <p className="mt-3 text-xs bg-card text-muted-foreground px-4 py-2 rounded-full inline-block border-2 font-medium">
+              <p className="mt-2 text-xs bg-card text-muted-foreground px-3 py-1.5 rounded-full inline-block border-2 font-medium">
                 {step.example}
               </p>
-              <p className="mt-2 text-xs text-success font-bold">
+              <p className="mt-1.5 text-xs text-success font-bold">
                 {step.promise}
               </p>
             </div>
