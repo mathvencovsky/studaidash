@@ -1,5 +1,5 @@
 import { useMemo, useState } from "react";
-import { useNavigate, Link } from "react-router-dom";
+import { useNavigate, Link, useSearchParams } from "react-router-dom";
 import { Eye, EyeOff, Loader2, CheckCircle2, Circle, HelpCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -8,12 +8,33 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { useAuth } from "@/hooks/use-auth";
 import { toast } from "sonner";
+import { type ProfileKey, profiles, isValidProfile, getStoredProfile } from "./LandingHero";
 
 const SUPPORT_EMAIL = "support@studai.app";
 
+// Dynamic header copy based on tab and profile
+const getHeaderCopy = (tab: "login" | "register", profile: ProfileKey) => {
+  const profileData = profiles[profile];
+  
+  if (tab === "login") {
+    return {
+      title: "Acesse seu painel",
+      description: "Entre para continuar seu plano de estudo e acompanhar sua evolução.",
+      contextLine: profileData.contextLine,
+    };
+  }
+  return {
+    title: "Crie sua conta",
+    description: "Leva poucos minutos. Você recebe um e-mail para confirmar o cadastro.",
+    contextLine: profileData.contextLine,
+  };
+};
+
 export function AuthCard() {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const { signIn, signUp } = useAuth();
+  
   const [isLoading, setIsLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [activeTab, setActiveTab] = useState<"login" | "register">("login");
@@ -27,6 +48,13 @@ export function AuthCard() {
   const [registerPassword, setRegisterPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
 
+  // Get current profile from URL or localStorage
+  const currentProfile = useMemo((): ProfileKey => {
+    const urlProfile = searchParams.get("perfil");
+    if (isValidProfile(urlProfile)) return urlProfile;
+    return getStoredProfile();
+  }, [searchParams]);
+
   // Password validation checks
   const passwordChecks = useMemo(() => {
     const hasMinLength = registerPassword.length >= 6;
@@ -34,19 +62,10 @@ export function AuthCard() {
     return { hasMinLength, passwordsMatch };
   }, [registerPassword, confirmPassword]);
 
-  // Dynamic header copy based on active tab
+  // Dynamic header copy based on active tab and profile
   const headerCopy = useMemo(() => {
-    if (activeTab === "login") {
-      return {
-        title: "Acesse seu painel",
-        description: "Entre para continuar seu plano de estudo e acompanhar sua evolução.",
-      };
-    }
-    return {
-      title: "Crie sua conta",
-      description: "Leva poucos minutos. Você recebe um e-mail para confirmar o cadastro.",
-    };
-  }, [activeTab]);
+    return getHeaderCopy(activeTab, currentProfile);
+  }, [activeTab, currentProfile]);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -118,6 +137,11 @@ export function AuthCard() {
         <CardHeader className="pb-4">
           <CardTitle className="text-xl">{headerCopy.title}</CardTitle>
           <CardDescription className="text-sm">{headerCopy.description}</CardDescription>
+          
+          {/* Context line based on profile */}
+          <p className="text-xs text-primary font-medium pt-2">
+            {headerCopy.contextLine}
+          </p>
           
           <TabsList className="grid w-full grid-cols-2 mt-4">
             <TabsTrigger value="login">Entrar</TabsTrigger>

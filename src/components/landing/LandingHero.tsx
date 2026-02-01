@@ -1,47 +1,69 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useSearchParams, Link } from "react-router-dom";
 import { ArrowRight, CheckCircle2, Calendar, RotateCcw, TrendingUp, Mail, Shield, FileText } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { AuthCard } from "./AuthCard";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { Card, CardContent } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
-import { Link } from "react-router-dom";
 
-type ProfileKey = "concurso" | "certificacao" | "faculdade";
+export type ProfileKey = "concurso" | "certificacao" | "faculdade";
 
-const profiles: Record<ProfileKey, {
+const STORAGE_KEY = "studai_perfil";
+
+export const profiles: Record<ProfileKey, {
   label: string;
   benefits: string[];
   microcopy: string;
+  contextLine: string;
 }> = {
   concurso: {
     label: "Concurso",
     benefits: [
-      "Cronograma adaptado ao edital e data da prova",
-      "Revisões espaçadas para matérias de alto peso",
-      "Simulados com estatísticas por banca",
+      "Rotina diária pronta para executar",
+      "Revisão automática no tempo certo",
+      "Progresso semanal visível",
     ],
     microcopy: "Funciona para concursos federais, estaduais e municipais",
+    contextLine: "Foco em constância e revisão.",
   },
   certificacao: {
     label: "Certificação",
     benefits: [
-      "Trilhas alinhadas ao syllabus oficial (CFA, CPA, CEA)",
-      "Revisões programadas por módulo e nível",
-      "Métricas de prontidão para o exame",
+      "Trilha por tópicos e prioridades",
+      "Revisões para fixação",
+      "Cobertura do conteúdo por semana",
     ],
     microcopy: "CFA, CPA-10/20, CEA, CFP e outras certificações",
+    contextLine: "Cobertura e prática por tópico.",
   },
   faculdade: {
     label: "Faculdade",
     benefits: [
-      "Organização por disciplina e período",
-      "Revisões antes das provas",
-      "Acompanhamento de carga horária semanal",
+      "Organização por disciplina",
+      "Revisões semanais sem esquecer",
+      "Visão clara do que fazer hoje",
     ],
     microcopy: "Para graduação, pós ou cursos livres",
+    contextLine: "Disciplina, revisões e entregas em dia.",
   },
 };
+
+export function isValidProfile(value: string | null): value is ProfileKey {
+  return value === "concurso" || value === "certificacao" || value === "faculdade";
+}
+
+export function getStoredProfile(): ProfileKey {
+  if (typeof window === "undefined") return "concurso";
+  const stored = localStorage.getItem(STORAGE_KEY);
+  return isValidProfile(stored) ? stored : "concurso";
+}
+
+export function setStoredProfile(profile: ProfileKey): void {
+  if (typeof window !== "undefined") {
+    localStorage.setItem(STORAGE_KEY, profile);
+  }
+}
 
 // Mini Product Preview - simula interface real do app
 function MiniProductPreview() {
@@ -142,8 +164,38 @@ function MiniProductPreview() {
 }
 
 export function LandingHero() {
-  const [profile, setProfile] = useState<ProfileKey>("concurso");
+  const [searchParams, setSearchParams] = useSearchParams();
+  
+  // Initialize profile from URL, then localStorage, then default
+  const [profile, setProfile] = useState<ProfileKey>(() => {
+    const urlProfile = searchParams.get("perfil");
+    if (isValidProfile(urlProfile)) return urlProfile;
+    return getStoredProfile();
+  });
+
   const currentProfile = profiles[profile];
+
+  // Sync profile changes to URL and localStorage
+  const handleProfileChange = (value: string) => {
+    if (!isValidProfile(value)) return;
+    
+    setProfile(value);
+    setStoredProfile(value);
+    
+    // Update URL without navigation
+    const newParams = new URLSearchParams(searchParams);
+    newParams.set("perfil", value);
+    setSearchParams(newParams, { replace: true });
+  };
+
+  // Sync URL to state on mount (for shared links)
+  useEffect(() => {
+    const urlProfile = searchParams.get("perfil");
+    if (isValidProfile(urlProfile) && urlProfile !== profile) {
+      setProfile(urlProfile);
+      setStoredProfile(urlProfile);
+    }
+  }, [searchParams]);
 
   const scrollToId = (id: string) => {
     const el = document.getElementById(id);
@@ -186,7 +238,7 @@ export function LandingHero() {
               <ToggleGroup 
                 type="single" 
                 value={profile} 
-                onValueChange={(v) => v && setProfile(v as ProfileKey)}
+                onValueChange={handleProfileChange}
                 className="justify-center lg:justify-start"
               >
                 {(Object.keys(profiles) as ProfileKey[]).map((key) => (
