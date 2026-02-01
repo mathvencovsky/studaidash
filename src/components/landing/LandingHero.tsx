@@ -87,28 +87,24 @@ function MiniProductPreview() {
         Exemplo ilustrativo
       </p>
       
-      {/* Mobile: horizontal scroll with proper constraints, Desktop: grid */}
-      {/*
-        Important: avoid negative margins here.
-        They can increase the min-content width of the page on mobile and cause horizontal pan.
-      */}
-      <div className="flex w-full max-w-full min-w-0 gap-3 overflow-x-auto snap-x snap-mandatory overscroll-x-contain touch-pan-x scrollbar-hide pb-2 md:grid md:grid-cols-3 md:gap-4 md:overflow-visible md:pb-0">
+      {/* Mobile: carousel with edge-to-edge scroll; Desktop: grid */}
+      <div className="flex gap-3 overflow-x-auto snap-x snap-mandatory overscroll-x-contain scrollbar-hide -mx-4 px-4 pb-2 [scroll-padding-left:1rem] [scroll-padding-right:1rem] md:mx-0 md:px-0 md:grid md:grid-cols-3 md:gap-4 md:overflow-visible md:pb-0">
         {/* Card 1: Hoje */}
-        <Card className="shrink-0 w-[260px] min-w-[260px] snap-start bg-card border-2 border-border hover:border-primary/40 transition-all duration-300 shadow-lg md:w-auto md:min-w-0 md:shrink md:snap-none">
+        <Card className="w-[88vw] max-w-[340px] shrink-0 snap-start bg-card border-2 border-border hover:border-primary/40 transition-all duration-300 shadow-lg md:w-auto md:max-w-none md:shrink md:snap-none">
           <CardContent className="p-3 sm:p-4">
             <div className="flex items-center gap-2 mb-2 sm:mb-3">
               <div className="p-1.5 rounded-lg bg-primary/10">
                 <Calendar className="h-3 w-3 sm:h-3.5 sm:w-3.5 text-primary" />
               </div>
               <span className="text-xs sm:text-sm font-bold text-foreground">Hoje</span>
-              <span className="ml-auto text-[9px] sm:text-[10px] font-semibold bg-accent-warm/15 text-accent-warm px-1.5 sm:px-2 py-0.5 rounded-full">
+              <span className="ml-auto text-[9px] sm:text-[10px] font-semibold bg-accent-warm/15 text-accent-warm px-1.5 sm:px-2 py-0.5 rounded-full truncate max-w-[72px]">
                 3 tarefas
               </span>
             </div>
             <ul className="space-y-1.5 sm:space-y-2">
               {todayTasks.map((task, i) => (
                 <li key={i} className="flex items-center gap-1.5 sm:gap-2 text-[11px] sm:text-xs">
-                  <div className={`h-3 w-3 sm:h-3.5 sm:w-3.5 rounded-full border-2 flex items-center justify-center ${
+                  <div className={`h-3 w-3 sm:h-3.5 sm:w-3.5 rounded-full border-2 flex items-center justify-center shrink-0 ${
                     task.done 
                       ? "bg-success border-success" 
                       : "border-muted-foreground/30"
@@ -126,7 +122,7 @@ function MiniProductPreview() {
         </Card>
 
         {/* Card 2: Revisões */}
-        <Card className="shrink-0 w-[260px] min-w-[260px] snap-start bg-card border-2 border-border hover:border-accent-warm/40 transition-all duration-300 shadow-lg md:w-auto md:min-w-0 md:shrink md:snap-none">
+        <Card className="w-[88vw] max-w-[340px] shrink-0 snap-start bg-card border-2 border-border hover:border-accent-warm/40 transition-all duration-300 shadow-lg md:w-auto md:max-w-none md:shrink md:snap-none">
           <CardContent className="p-3 sm:p-4">
             <div className="flex items-center gap-2 mb-2 sm:mb-3">
               <div className="p-1.5 rounded-lg bg-accent-warm/10">
@@ -138,7 +134,7 @@ function MiniProductPreview() {
               {reviewQueue.map((item, i) => (
                 <li key={i} className="flex items-center justify-between text-[11px] sm:text-xs">
                   <span className="text-foreground font-medium truncate max-w-[100px] sm:max-w-[120px]">{item.subject}</span>
-                  <span className={`text-[9px] sm:text-[10px] px-1.5 sm:px-2 py-0.5 rounded-full font-bold ${
+                  <span className={`text-[9px] sm:text-[10px] px-1.5 sm:px-2 py-0.5 rounded-full font-bold shrink-0 ${
                     item.dueIn === "Hoje" 
                       ? "bg-accent-warm/15 text-accent-warm" 
                       : "bg-muted text-muted-foreground"
@@ -153,7 +149,7 @@ function MiniProductPreview() {
         </Card>
 
         {/* Card 3: Semana */}
-        <Card className="shrink-0 w-[260px] min-w-[260px] snap-start bg-card border-2 border-border hover:border-success/40 transition-all duration-300 shadow-lg md:w-auto md:min-w-0 md:shrink md:snap-none">
+        <Card className="w-[88vw] max-w-[340px] shrink-0 snap-start bg-card border-2 border-border hover:border-success/40 transition-all duration-300 shadow-lg md:w-auto md:max-w-none md:shrink md:snap-none">
           <CardContent className="p-3 sm:p-4">
             <div className="flex items-center gap-2 mb-2 sm:mb-3">
               <div className="p-1.5 rounded-lg bg-success/10">
