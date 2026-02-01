@@ -139,18 +139,18 @@ export function ProductSection() {
   };
 
   return (
-    <section id="produto" className="py-20 bg-background" tabIndex={-1}>
+    <section id="produto" className="py-12 md:py-16 bg-background" tabIndex={-1}>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="text-center mb-16">
+        <div className="text-center mb-10">
           <h2 className="text-2xl sm:text-3xl font-bold text-foreground">
             Veja seu plano em ação
           </h2>
-          <p className="mt-4 text-muted-foreground max-w-2xl mx-auto">
+          <p className="mt-2 text-muted-foreground max-w-2xl mx-auto">
             Prévia do painel para: <span className="font-medium text-foreground">{currentProfile === "concurso" ? "Concurso" : currentProfile === "certificacao" ? "Certificação" : "Faculdade"}</span>.
           </p>
         </div>
 
-        <div className="grid lg:grid-cols-2 gap-12 items-start">
+        <div className="grid lg:grid-cols-2 gap-10 items-start">
           {/* Dashboard Preview */}
           <div className="order-2 lg:order-1">
             <div className="bg-card rounded-xl border shadow-lg p-6">

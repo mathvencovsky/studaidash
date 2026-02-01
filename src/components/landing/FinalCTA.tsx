@@ -16,14 +16,14 @@ export function FinalCTA() {
   };
 
   return (
-    <section className="py-16 bg-background">
+    <section className="py-10 md:py-12 bg-background">
       <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
         <Card className="border-primary/20 bg-card">
-          <CardContent className="py-10 px-6 sm:px-10 text-center">
-            <h2 className="text-xl sm:text-2xl font-bold text-foreground mb-3">
+          <CardContent className="py-8 px-6 sm:px-8 text-center">
+            <h2 className="text-xl sm:text-2xl font-bold text-foreground mb-2">
               Pronto para organizar seus estudos?
             </h2>
-            <p className="text-muted-foreground mb-6 max-w-md mx-auto">
+            <p className="text-muted-foreground mb-5 max-w-md mx-auto">
               Crie sua conta gratuita e veja seu primeiro plano do dia em poucos minutos.
             </p>
             

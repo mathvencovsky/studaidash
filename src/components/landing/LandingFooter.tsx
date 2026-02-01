@@ -75,9 +75,9 @@ export function LandingFooter() {
   };
 
   return (
-    <footer className="bg-card border-t py-12" role="contentinfo">
+    <footer className="bg-card border-t py-10" role="contentinfo">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="grid grid-cols-2 md:grid-cols-5 gap-8">
+        <div className="grid grid-cols-2 md:grid-cols-5 gap-6">
           {/* Brand */}
           <div className="col-span-2 md:col-span-1">
             <div className="flex items-center gap-2 mb-4">
@@ -143,7 +143,7 @@ export function LandingFooter() {
           </nav>
         </div>
 
-        <div className="mt-12 pt-8 border-t flex flex-col sm:flex-row justify-between items-center gap-4">
+        <div className="mt-10 pt-6 border-t flex flex-col sm:flex-row justify-between items-center gap-4">
           <p className="text-sm text-muted-foreground">
             © {new Date().getFullYear()} StudAI. Todos os direitos reservados.
           </p>

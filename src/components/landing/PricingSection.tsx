@@ -82,18 +82,18 @@ export function PricingSection() {
   };
 
   return (
-    <section id="planos" className="py-20 bg-background">
+    <section id="planos" className="py-12 md:py-16 bg-background">
       <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="text-center mb-12">
+        <div className="text-center mb-10">
           <h2 className="text-2xl sm:text-3xl font-bold text-foreground">
             Planos simples e claros
           </h2>
-          <p className="mt-4 text-muted-foreground max-w-2xl mx-auto">
+          <p className="mt-2 text-muted-foreground max-w-2xl mx-auto">
             Comece no Grátis. Entre na lista do Pro para receber novidades.
           </p>
         </div>
 
-        <div className="grid md:grid-cols-2 gap-8 max-w-3xl mx-auto">
+        <div className="grid md:grid-cols-2 gap-6 max-w-3xl mx-auto">
           {plans.map((plan) => (
             <Card
               key={plan.name}
@@ -159,7 +159,7 @@ export function PricingSection() {
         </div>
 
         {/* Trust notice */}
-        <div className="mt-10 text-center space-y-3">
+        <div className="mt-8 text-center space-y-2">
           <div className="inline-flex items-center gap-2 text-sm text-muted-foreground bg-muted/50 px-4 py-2 rounded-full">
             <AlertCircle className="h-4 w-4" />
             <span>Você pode solicitar a exclusão da sua conta a qualquer momento pelo suporte.</span>
