@@ -1,30 +1,95 @@
+import { useMemo } from "react";
+import { useSearchParams } from "react-router-dom";
 import { UserPlus, Settings2, TrendingUp } from "lucide-react";
+import { type ProfileKey, isValidProfile, getStoredProfile } from "./LandingHero";
 
-const steps = [
+type StepData = {
+  icon: typeof UserPlus;
+  number: string;
+  title: string;
+  description: string;
+  example: string;
+  promise: string;
+};
+
+const baseSteps: Omit<StepData, "example" | "promise">[] = [
   {
     icon: UserPlus,
     number: "01",
     title: "Crie sua conta",
-    description: "Cadastro gratuito em menos de um minuto. Sem cartão de crédito.",
-    promise: "Você começa a usar hoje.",
+    description: "Cadastre-se com e-mail e senha. Você recebe um e-mail de confirmação para ativar o acesso.",
   },
   {
     icon: Settings2,
     number: "02",
-    title: "Defina sua meta e disponibilidade",
-    description: "Escolha seu objetivo, a data da prova e quanto tempo tem por dia.",
-    promise: "O sistema calcula seu plano.",
+    title: "Informe seu objetivo e tempo diário",
+    description: "Escolha o que está estudando, a data de conclusão e quantos minutos tem por dia. O sistema gera seu plano.",
   },
   {
     icon: TrendingUp,
     number: "03",
-    title: "Siga a trilha e acompanhe sua evolução",
-    description: "Estude conforme o plano diário, faça revisões e veja métricas claras.",
-    promise: "Você sempre sabe o próximo passo.",
+    title: "Execute o plano e veja seu progresso",
+    description: "Siga as tarefas do dia, marque como feito e acompanhe sua evolução semanal.",
   },
 ];
 
+const profileExamples: Record<ProfileKey, { examples: string[]; promises: string[] }> = {
+  concurso: {
+    examples: [
+      "Exemplo: conta criada, acesso em 2 minutos.",
+      "Exemplo: 45 min hoje, 10 min revisão, 15 questões.",
+      "Exemplo: 68% da semana concluído, 3 revisões pendentes.",
+    ],
+    promises: [
+      "Pronto para configurar seu plano.",
+      "O cronograma se adapta à sua meta e rotina.",
+      "O app mostra o que fazer hoje e o que revisar depois.",
+    ],
+  },
+  certificacao: {
+    examples: [
+      "Exemplo: conta criada, acesso em 2 minutos.",
+      "Exemplo: 60 min por tópico, quiz de fixação.",
+      "Exemplo: 4 tópicos cobertos, 2 em revisão.",
+    ],
+    promises: [
+      "Pronto para configurar seu plano.",
+      "Trilha organizada por módulo e prioridade.",
+      "O app mostra o que fazer hoje e o que revisar depois.",
+    ],
+  },
+  faculdade: {
+    examples: [
+      "Exemplo: conta criada, acesso em 2 minutos.",
+      "Exemplo: 30 min Cálculo, 20 min Física, revisão semanal.",
+      "Exemplo: 3 disciplinas em dia, 1 revisão para amanhã.",
+    ],
+    promises: [
+      "Pronto para configurar seu plano.",
+      "Organização por disciplina e período.",
+      "O app mostra o que fazer hoje e o que revisar depois.",
+    ],
+  },
+};
+
 export function HowItWorks() {
+  const [searchParams] = useSearchParams();
+
+  const currentProfile = useMemo((): ProfileKey => {
+    const urlProfile = searchParams.get("perfil");
+    if (isValidProfile(urlProfile)) return urlProfile;
+    return getStoredProfile();
+  }, [searchParams]);
+
+  const steps = useMemo((): StepData[] => {
+    const profileData = profileExamples[currentProfile];
+    return baseSteps.map((step, index) => ({
+      ...step,
+      example: profileData.examples[index],
+      promise: profileData.promises[index],
+    }));
+  }, [currentProfile]);
+
   return (
     <section id="como-funciona" tabIndex={-1} className="py-20 bg-muted/30 outline-none">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -57,6 +122,9 @@ export function HowItWorks() {
                 <h3 className="mt-6 text-lg font-semibold text-foreground">{step.title}</h3>
                 <p className="mt-2 text-muted-foreground text-sm max-w-xs mx-auto">
                   {step.description}
+                </p>
+                <p className="mt-2 text-xs text-muted-foreground/80 italic max-w-xs mx-auto">
+                  {step.example}
                 </p>
                 <p className="mt-2 text-xs text-primary font-medium">
                   {step.promise}
