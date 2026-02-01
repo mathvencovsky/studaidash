@@ -68,13 +68,13 @@ export function Testimonials() {
   const rest = ordered.slice(1, 3);
 
   return (
-    <section id="depoimentos" className="py-20 bg-background">
+    <section id="depoimentos" className="py-12 md:py-16 bg-background">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="text-center mb-12">
+        <div className="text-center mb-10">
           <h2 className="text-2xl sm:text-3xl font-bold text-foreground">
             Resultados que aparecem na rotina
           </h2>
-          <p className="mt-4 text-muted-foreground max-w-2xl mx-auto">
+          <p className="mt-2 text-muted-foreground max-w-2xl mx-auto">
             Experiências de quem usa o StudAI para ter clareza do que fazer hoje e manter revisões em dia.
           </p>
         </div>
@@ -153,7 +153,7 @@ export function Testimonials() {
           </div>
         </div>
 
-        <p className="text-center text-xs text-muted-foreground mt-10">
+        <p className="text-center text-xs text-muted-foreground mt-8">
           Depoimentos representam experiências de uso. Resultados variam conforme rotina e consistência.
         </p>
       </div>

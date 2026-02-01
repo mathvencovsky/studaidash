@@ -33,19 +33,19 @@ const trustCards = [
 
 export function TrustSection() {
   return (
-    <section id="privacidade-controle" className="py-20 bg-muted/30" tabIndex={-1}>
+    <section id="privacidade-controle" className="py-12 md:py-16 bg-muted/30" tabIndex={-1}>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="text-center mb-10">
+        <div className="text-center mb-8">
           <h2 className="text-2xl sm:text-3xl font-bold text-foreground">
             Privacidade e controle
           </h2>
-          <p className="mt-4 text-muted-foreground max-w-2xl mx-auto">
+          <p className="mt-2 text-muted-foreground max-w-2xl mx-auto">
             Seus dados continuam sob seu controle. Veja como tratamos e protegemos suas informações.
           </p>
         </div>
 
         {/* Quick summary */}
-        <div className="max-w-2xl mx-auto mb-10">
+        <div className="max-w-2xl mx-auto mb-8">
           <div className="bg-card border rounded-lg p-6">
             <h3 className="text-sm font-semibold text-foreground mb-3">
               Resumo em 30 segundos
@@ -105,7 +105,7 @@ export function TrustSection() {
         </div>
 
         {/* Links */}
-        <div className="flex flex-wrap justify-center gap-4 mt-10">
+        <div className="flex flex-wrap justify-center gap-4 mt-8">
           <Link
             to="/privacidade"
             className="inline-flex items-center gap-1 text-sm text-primary hover:underline focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 rounded"

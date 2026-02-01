@@ -212,14 +212,14 @@ export function LandingHero() {
   };
 
   return (
-    <section className="relative pt-24 pb-16 md:pt-32 md:pb-24 overflow-hidden">
+    <section className="relative pt-20 pb-12 md:pt-24 md:pb-16 overflow-hidden">
       {/* Background gradient */}
       <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-accent/5 pointer-events-none" />
       <div className="absolute top-20 right-0 w-96 h-96 bg-accent/10 rounded-full blur-3xl pointer-events-none" />
       <div className="absolute bottom-0 left-0 w-64 h-64 bg-primary/10 rounded-full blur-3xl pointer-events-none" />
       
       <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="grid lg:grid-cols-2 gap-12 lg:gap-16 items-start">
+        <div className="grid lg:grid-cols-2 gap-10 lg:gap-12 items-start">
           {/* Left Column - Content */}
           <div className="text-center lg:text-left">
             {/* Headline */}
@@ -321,7 +321,7 @@ export function LandingHero() {
           </div>
 
           {/* Right Column - Auth Card + Preview Desktop */}
-          <div className="flex flex-col gap-8">
+          <div className="flex flex-col gap-6">
             <div id="auth-card" tabIndex={-1} className="outline-none flex justify-center lg:justify-end">
               <AuthCard />
             </div>

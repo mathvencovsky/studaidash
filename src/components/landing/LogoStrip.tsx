@@ -34,10 +34,10 @@ export function LogoStrip() {
   const [activeAudience, setActiveAudience] = useState<AudienceKey | null>(null);
 
   return (
-    <section className="py-12 border-y bg-card">
+    <section className="py-8 md:py-10 border-y bg-card">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Header */}
-        <div className="text-center mb-8">
+        <div className="text-center mb-6">
           <h2 className="text-lg sm:text-xl font-semibold text-foreground">
             Clareza para estudar todos os dias
           </h2>
@@ -47,7 +47,7 @@ export function LogoStrip() {
         </div>
 
         {/* Audience chips */}
-        <div className="flex flex-wrap justify-center gap-2 mb-4">
+        <div className="flex flex-wrap justify-center gap-2 mb-3">
           {audience.map((item) => (
             <button
               key={item.key}
@@ -68,7 +68,7 @@ export function LogoStrip() {
         </div>
 
         {/* Dynamic microcopy */}
-        <div className="h-6 mb-6 text-center">
+        <div className="h-5 mb-5 text-center">
           {activeAudience && (
             <p className="text-sm text-primary animate-in fade-in duration-200">
               {audienceMicrocopy[activeAudience]}

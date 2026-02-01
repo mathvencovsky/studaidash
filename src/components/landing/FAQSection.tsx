@@ -125,13 +125,13 @@ export function FAQSection() {
   }, [profile]);
 
   return (
-    <section id="faq" className="py-20 bg-muted/30" tabIndex={-1}>
+    <section id="faq" className="py-12 md:py-16 bg-muted/30" tabIndex={-1}>
       <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="text-center mb-12">
+        <div className="text-center mb-10">
           <h2 className="text-2xl sm:text-3xl font-bold text-foreground">
             Perguntas frequentes
           </h2>
-          <p className="mt-4 text-muted-foreground">
+          <p className="mt-2 text-muted-foreground">
             Respostas diretas para dúvidas comuns
           </p>
         </div>
@@ -149,7 +149,7 @@ export function FAQSection() {
           ))}
         </Accordion>
 
-        <p className="text-center text-sm text-muted-foreground mt-8">
+        <p className="text-center text-sm text-muted-foreground mt-6">
           Ainda com dúvidas? Fale com{" "}
           <a
             href={`mailto:${SUPPORT_EMAIL}`}
