@@ -1,12 +1,14 @@
 import { useMemo } from "react";
 import { useSearchParams } from "react-router-dom";
 import { Link } from "react-router-dom";
+import { HelpCircle } from "lucide-react";
 import {
   Accordion,
   AccordionContent,
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
+import { SectionWrapper, KickerBadge, HeadlineHighlight } from "./ui";
 
 const SUPPORT_EMAIL = "support@studai.app";
 
@@ -71,7 +73,7 @@ const baseFaqs: FAQItem[] = [
       <>
         Usamos seus dados para operar a conta e registrar seu progresso. Não vendemos dados pessoais. 
         Você pode solicitar exclusão da conta e dados pelo suporte. Veja detalhes em{" "}
-        <Link to="/privacidade" className="text-primary hover:underline focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 rounded">
+        <Link to="/privacidade" className="text-primary font-medium hover:underline focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 rounded">
           Privacidade
         </Link>
         .
@@ -83,7 +85,7 @@ const baseFaqs: FAQItem[] = [
     answer: (
       <>
         Você pode solicitar a exclusão pelo e-mail{" "}
-        <a href={`mailto:${SUPPORT_EMAIL}`} className="text-primary hover:underline focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 rounded">
+        <a href={`mailto:${SUPPORT_EMAIL}`} className="text-primary font-medium hover:underline focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 rounded">
           {SUPPORT_EMAIL}
         </a>
         . Nós confirmamos o pedido e orientamos os próximos passos.
@@ -101,7 +103,7 @@ const baseFaqs: FAQItem[] = [
       <>
         O Pro está em desenvolvimento e deve incluir trilhas ilimitadas e relatórios mais detalhados. 
         Se quiser, entre na lista de espera na seção de{" "}
-        <a href="#planos" className="text-primary hover:underline focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 rounded">
+        <a href="#planos" className="text-primary font-medium hover:underline focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 rounded">
           Planos
         </a>
         .
@@ -125,41 +127,49 @@ export function FAQSection() {
   }, [profile]);
 
   return (
-    <section id="faq" className="py-12 md:py-16 bg-muted/30" tabIndex={-1}>
-      <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
+    <SectionWrapper id="faq" variant="tint" tabIndex={-1}>
+      <div className="max-w-3xl mx-auto">
         <div className="text-center mb-10">
+          <KickerBadge variant="primary" className="mb-3">
+            <HelpCircle className="h-3 w-3" />
+            Dúvidas
+          </KickerBadge>
           <h2 className="text-2xl sm:text-3xl font-bold text-foreground">
-            Perguntas frequentes
+            Perguntas <HeadlineHighlight variant="primary">frequentes</HeadlineHighlight>
           </h2>
-          <p className="mt-2 text-muted-foreground">
+          <p className="mt-3 text-muted-foreground">
             Respostas diretas para dúvidas comuns
           </p>
         </div>
 
-        <Accordion type="single" collapsible className="w-full">
+        <Accordion type="single" collapsible className="w-full space-y-3">
           {faqs.map((faq, index) => (
-            <AccordionItem key={index} value={`item-${index}`}>
-              <AccordionTrigger className="text-left focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 rounded">
+            <AccordionItem 
+              key={index} 
+              value={`item-${index}`}
+              className="bg-card border-2 rounded-lg px-4 data-[state=open]:border-primary/30 transition-all"
+            >
+              <AccordionTrigger className="text-left font-semibold text-foreground hover:no-underline py-4 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 rounded">
                 {faq.question}
               </AccordionTrigger>
-              <AccordionContent className="text-muted-foreground">
+              <AccordionContent className="text-muted-foreground pb-4">
                 {faq.answer}
               </AccordionContent>
             </AccordionItem>
           ))}
         </Accordion>
 
-        <p className="text-center text-sm text-muted-foreground mt-6">
+        <p className="text-center text-sm text-muted-foreground mt-8">
           Ainda com dúvidas? Fale com{" "}
           <a
             href={`mailto:${SUPPORT_EMAIL}`}
-            className="text-primary hover:underline focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 rounded"
+            className="text-primary font-medium hover:underline focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 rounded"
           >
             {SUPPORT_EMAIL}
           </a>
           .
         </p>
       </div>
-    </section>
+    </SectionWrapper>
   );
 }
