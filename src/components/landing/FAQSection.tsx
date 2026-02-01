@@ -1,3 +1,5 @@
+import { useMemo } from "react";
+import { useSearchParams } from "react-router-dom";
 import { Link } from "react-router-dom";
 import {
   Accordion,
@@ -8,12 +10,42 @@ import {
 
 const SUPPORT_EMAIL = "support@studai.app";
 
+type ProfileKey = "concurso" | "certificacao" | "faculdade";
+
+function readProfileFromStorage(): ProfileKey | null {
+  try {
+    const v = localStorage.getItem("studai_perfil");
+    if (v === "concurso" || v === "certificacao" || v === "faculdade") return v;
+    return null;
+  } catch {
+    return null;
+  }
+}
+
 type FAQItem = {
   question: string;
   answer: React.ReactNode;
 };
 
-const faqs: FAQItem[] = [
+const profileFAQs: Record<ProfileKey, FAQItem> = {
+  concurso: {
+    question: "Isso funciona para concursos?",
+    answer:
+      "Sim. O StudAI ajuda a organizar leituras, questões e revisões diárias para quem estuda para concursos. Você define o tempo disponível e o sistema monta o plano.",
+  },
+  certificacao: {
+    question: "Isso funciona para certificações?",
+    answer:
+      "Sim. O StudAI organiza tópicos, quizzes e revisões para quem se prepara para certificações. Você acompanha a cobertura por tema e o ritmo semanal.",
+  },
+  faculdade: {
+    question: "Isso funciona para faculdade?",
+    answer:
+      "Sim. O StudAI ajuda a separar disciplinas, exercícios e revisões semanais. É útil para quem precisa manter várias matérias em dia ao longo do semestre.",
+  },
+};
+
+const baseFaqs: FAQItem[] = [
   {
     question: "Para quem é o StudAI?",
     answer:
@@ -39,7 +71,7 @@ const faqs: FAQItem[] = [
       <>
         Usamos seus dados para operar a conta e registrar seu progresso. Não vendemos dados pessoais. 
         Você pode solicitar exclusão da conta e dados pelo suporte. Veja detalhes em{" "}
-        <Link to="/privacidade" className="text-primary hover:underline">
+        <Link to="/privacidade" className="text-primary hover:underline focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 rounded">
           Privacidade
         </Link>
         .
@@ -51,7 +83,7 @@ const faqs: FAQItem[] = [
     answer: (
       <>
         Você pode solicitar a exclusão pelo e-mail{" "}
-        <a href={`mailto:${SUPPORT_EMAIL}`} className="text-primary hover:underline">
+        <a href={`mailto:${SUPPORT_EMAIL}`} className="text-primary hover:underline focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 rounded">
           {SUPPORT_EMAIL}
         </a>
         . Nós confirmamos o pedido e orientamos os próximos passos.
@@ -69,7 +101,7 @@ const faqs: FAQItem[] = [
       <>
         O Pro está em desenvolvimento e deve incluir trilhas ilimitadas e relatórios mais detalhados. 
         Se quiser, entre na lista de espera na seção de{" "}
-        <a href="#planos" className="text-primary hover:underline">
+        <a href="#planos" className="text-primary hover:underline focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 rounded">
           Planos
         </a>
         .
@@ -79,8 +111,21 @@ const faqs: FAQItem[] = [
 ];
 
 export function FAQSection() {
+  const [params] = useSearchParams();
+
+  const profile: ProfileKey = useMemo(() => {
+    const p = params.get("perfil");
+    if (p === "concurso" || p === "certificacao" || p === "faculdade") return p;
+    return readProfileFromStorage() ?? "concurso";
+  }, [params]);
+
+  const faqs = useMemo(() => {
+    const profileQuestion = profileFAQs[profile];
+    return [profileQuestion, ...baseFaqs];
+  }, [profile]);
+
   return (
-    <section id="faq" className="py-20 bg-muted/30">
+    <section id="faq" className="py-20 bg-muted/30" tabIndex={-1}>
       <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-12">
           <h2 className="text-2xl sm:text-3xl font-bold text-foreground">
@@ -94,7 +139,7 @@ export function FAQSection() {
         <Accordion type="single" collapsible className="w-full">
           {faqs.map((faq, index) => (
             <AccordionItem key={index} value={`item-${index}`}>
-              <AccordionTrigger className="text-left">
+              <AccordionTrigger className="text-left focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 rounded">
                 {faq.question}
               </AccordionTrigger>
               <AccordionContent className="text-muted-foreground">
@@ -108,7 +153,7 @@ export function FAQSection() {
           Ainda com dúvidas? Fale com{" "}
           <a
             href={`mailto:${SUPPORT_EMAIL}`}
-            className="text-primary hover:underline"
+            className="text-primary hover:underline focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 rounded"
           >
             {SUPPORT_EMAIL}
           </a>

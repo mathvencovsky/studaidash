@@ -8,6 +8,7 @@ import {
   Testimonials,
   PricingSection,
   FAQSection,
+  FinalCTA,
   LandingFooter,
 } from "@/components/landing";
 
@@ -24,6 +25,7 @@ export default function Landing() {
         <Testimonials />
         <PricingSection />
         <FAQSection />
+        <FinalCTA />
       </main>
       <LandingFooter />
     </div>

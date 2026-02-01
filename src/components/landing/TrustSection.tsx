@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import { Database, Target, Settings, Lock, ArrowRight, Mail } from "lucide-react";
+import { Database, Target, Settings, Lock, ArrowRight, Mail, HelpCircle } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 const SUPPORT_EMAIL = "support@studai.app";
@@ -33,7 +33,7 @@ const trustCards = [
 
 export function TrustSection() {
   return (
-    <section id="privacidade-controle" className="py-20 bg-muted/30">
+    <section id="privacidade-controle" className="py-20 bg-muted/30" tabIndex={-1}>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-10">
           <h2 className="text-2xl sm:text-3xl font-bold text-foreground">
@@ -64,6 +64,28 @@ export function TrustSection() {
                 Você pode solicitar exportação ou exclusão pelo suporte.
               </li>
             </ul>
+
+            {/* Quick questions */}
+            <div className="mt-4 pt-4 border-t">
+              <h4 className="text-xs font-medium text-muted-foreground mb-2 flex items-center gap-1">
+                <HelpCircle className="h-3 w-3" />
+                Perguntas rápidas
+              </h4>
+              <div className="flex flex-wrap gap-3 text-xs">
+                <a
+                  href="#faq"
+                  className="text-primary hover:underline focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 rounded"
+                >
+                  Como solicitar exclusão?
+                </a>
+                <Link
+                  to="/seguranca"
+                  className="text-primary hover:underline focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 rounded"
+                >
+                  Como reportar vulnerabilidade?
+                </Link>
+              </div>
+            </div>
           </div>
         </div>
 
@@ -86,28 +108,28 @@ export function TrustSection() {
         <div className="flex flex-wrap justify-center gap-4 mt-10">
           <Link
             to="/privacidade"
-            className="inline-flex items-center gap-1 text-sm text-primary hover:underline"
+            className="inline-flex items-center gap-1 text-sm text-primary hover:underline focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 rounded"
           >
             Política de Privacidade
             <ArrowRight className="h-3 w-3" />
           </Link>
           <Link
             to="/seguranca"
-            className="inline-flex items-center gap-1 text-sm text-primary hover:underline"
+            className="inline-flex items-center gap-1 text-sm text-primary hover:underline focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 rounded"
           >
             Segurança
             <ArrowRight className="h-3 w-3" />
           </Link>
           <Link
             to="/termos"
-            className="inline-flex items-center gap-1 text-sm text-primary hover:underline"
+            className="inline-flex items-center gap-1 text-sm text-primary hover:underline focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 rounded"
           >
             Termos de Uso
             <ArrowRight className="h-3 w-3" />
           </Link>
           <a
             href={`mailto:${SUPPORT_EMAIL}`}
-            className="inline-flex items-center gap-1 text-sm text-primary hover:underline"
+            className="inline-flex items-center gap-1 text-sm text-primary hover:underline focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 rounded"
           >
             Falar com o suporte
             <Mail className="h-3 w-3" />
