@@ -12,7 +12,11 @@ import {
   LandingFooter,
 } from "@/components/landing";
 
+import { useOverflowDebug } from "@/lib/use-overflow-debug";
+
 export default function Landing() {
+  useOverflowDebug({ label: "landing" });
+
   return (
     <div className="min-h-screen bg-background">
       <LandingHeader />
