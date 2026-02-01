@@ -1,27 +1,33 @@
 import { Link } from "react-router-dom";
-import { Database, Target, Settings, Lock, ArrowRight } from "lucide-react";
+import { Database, Target, Settings, Lock, ArrowRight, Mail } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+
+const SUPPORT_EMAIL = "support@studai.app";
 
 const trustCards = [
   {
     icon: Database,
     title: "O que coletamos",
-    description: "E-mail para login, preferências de estudo e progresso nas trilhas. Não coletamos dados sensíveis além do necessário para o funcionamento da plataforma.",
+    description:
+      "Dados de conta (como e-mail) e informações necessárias para você organizar seus estudos, como preferências e progresso nas trilhas.",
   },
   {
     icon: Target,
-    title: "Para que usamos",
-    description: "Personalizar sua experiência de estudo, calcular métricas de progresso e enviar lembretes (se você optar). Nunca vendemos seus dados.",
+    title: "Como usamos",
+    description:
+      "Para manter sua conta funcionando, montar seu plano, registrar progresso e melhorar a experiência. Comunicações só quando necessário ou quando você optar.",
   },
   {
     icon: Settings,
-    title: "Como você controla",
-    description: "Você pode exportar seus dados, excluir sua conta ou ajustar preferências de notificação a qualquer momento nas configurações.",
+    title: "Seus controles",
+    description:
+      "Você pode solicitar exportação ou exclusão de dados pelo suporte e ajustar preferências de notificação quando disponível.",
   },
   {
     icon: Lock,
     title: "Segurança",
-    description: "Conexões criptografadas (HTTPS), autenticação segura e backups regulares. Trabalhamos continuamente para melhorar nossa segurança.",
+    description:
+      "Usamos criptografia em trânsito (HTTPS) e práticas de autenticação para proteger acesso. Segurança é um processo contínuo e evolui com o produto.",
   },
 ];
 
@@ -29,15 +35,39 @@ export function TrustSection() {
   return (
     <section id="privacidade-controle" className="py-20 bg-muted/30">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="text-center mb-12">
+        <div className="text-center mb-10">
           <h2 className="text-2xl sm:text-3xl font-bold text-foreground">
             Privacidade e controle
           </h2>
           <p className="mt-4 text-muted-foreground max-w-2xl mx-auto">
-            Seus dados são seus. Aqui está como tratamos eles.
+            Seus dados continuam sob seu controle. Veja como tratamos e protegemos suas informações.
           </p>
         </div>
 
+        {/* Quick summary */}
+        <div className="max-w-2xl mx-auto mb-10">
+          <div className="bg-card border rounded-lg p-6">
+            <h3 className="text-sm font-semibold text-foreground mb-3">
+              Resumo em 30 segundos
+            </h3>
+            <ul className="space-y-2 text-sm text-muted-foreground">
+              <li className="flex items-start gap-2">
+                <span className="text-primary mt-1">•</span>
+                Usamos seus dados para operar sua conta e registrar seu progresso.
+              </li>
+              <li className="flex items-start gap-2">
+                <span className="text-primary mt-1">•</span>
+                Não vendemos dados pessoais.
+              </li>
+              <li className="flex items-start gap-2">
+                <span className="text-primary mt-1">•</span>
+                Você pode solicitar exportação ou exclusão pelo suporte.
+              </li>
+            </ul>
+          </div>
+        </div>
+
+        {/* Trust cards */}
         <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
           {trustCards.map((card) => (
             <Card key={card.title} className="bg-card">
@@ -52,28 +82,36 @@ export function TrustSection() {
           ))}
         </div>
 
+        {/* Links */}
         <div className="flex flex-wrap justify-center gap-4 mt-10">
-          <Link 
-            to="/privacidade" 
+          <Link
+            to="/privacidade"
             className="inline-flex items-center gap-1 text-sm text-primary hover:underline"
           >
             Política de Privacidade
             <ArrowRight className="h-3 w-3" />
           </Link>
-          <Link 
-            to="/seguranca" 
+          <Link
+            to="/seguranca"
             className="inline-flex items-center gap-1 text-sm text-primary hover:underline"
           >
             Segurança
             <ArrowRight className="h-3 w-3" />
           </Link>
-          <Link 
-            to="/termos" 
+          <Link
+            to="/termos"
             className="inline-flex items-center gap-1 text-sm text-primary hover:underline"
           >
             Termos de Uso
             <ArrowRight className="h-3 w-3" />
           </Link>
+          <a
+            href={`mailto:${SUPPORT_EMAIL}`}
+            className="inline-flex items-center gap-1 text-sm text-primary hover:underline"
+          >
+            Falar com o suporte
+            <Mail className="h-3 w-3" />
+          </a>
         </div>
       </div>
     </section>
