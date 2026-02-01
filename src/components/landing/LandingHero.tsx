@@ -81,16 +81,16 @@ function MiniProductPreview() {
   ];
 
   return (
-    <div className="relative w-full overflow-hidden">
+    <div className="relative w-full min-w-0">
       {/* Subtle label */}
       <p className="text-xs text-muted-foreground text-center mb-2 font-medium">
         Exemplo ilustrativo
       </p>
       
       {/* Mobile: horizontal scroll with proper constraints, Desktop: grid */}
-      <div className="flex w-full gap-3 overflow-x-auto pb-2 snap-x snap-mandatory scrollbar-hide overscroll-x-contain sm:grid sm:grid-cols-3 sm:overflow-visible sm:pb-0">
+      <div className="flex w-full max-w-full min-w-0 gap-3 overflow-x-auto snap-x snap-mandatory scrollbar-hide -mx-4 px-4 pb-2 md:mx-0 md:px-0 md:grid md:grid-cols-3 md:gap-4 md:overflow-visible md:pb-0">
         {/* Card 1: Hoje */}
-        <Card className="flex-shrink-0 w-[240px] min-w-[240px] sm:w-auto sm:min-w-0 snap-start bg-card border-2 border-border hover:border-primary/40 transition-all duration-300 shadow-lg">
+        <Card className="shrink-0 w-[260px] min-w-[260px] snap-start bg-card border-2 border-border hover:border-primary/40 transition-all duration-300 shadow-lg md:w-auto md:min-w-0 md:shrink md:snap-none">
           <CardContent className="p-3 sm:p-4">
             <div className="flex items-center gap-2 mb-2 sm:mb-3">
               <div className="p-1.5 rounded-lg bg-primary/10">
@@ -122,7 +122,7 @@ function MiniProductPreview() {
         </Card>
 
         {/* Card 2: Revisões */}
-        <Card className="flex-shrink-0 w-[240px] min-w-[240px] sm:w-auto sm:min-w-0 snap-start bg-card border-2 border-border hover:border-accent-warm/40 transition-all duration-300 shadow-lg">
+        <Card className="shrink-0 w-[260px] min-w-[260px] snap-start bg-card border-2 border-border hover:border-accent-warm/40 transition-all duration-300 shadow-lg md:w-auto md:min-w-0 md:shrink md:snap-none">
           <CardContent className="p-3 sm:p-4">
             <div className="flex items-center gap-2 mb-2 sm:mb-3">
               <div className="p-1.5 rounded-lg bg-accent-warm/10">
@@ -149,7 +149,7 @@ function MiniProductPreview() {
         </Card>
 
         {/* Card 3: Semana */}
-        <Card className="flex-shrink-0 w-[240px] min-w-[240px] sm:w-auto sm:min-w-0 snap-start bg-card border-2 border-border hover:border-success/40 transition-all duration-300 shadow-lg">
+        <Card className="shrink-0 w-[260px] min-w-[260px] snap-start bg-card border-2 border-border hover:border-success/40 transition-all duration-300 shadow-lg md:w-auto md:min-w-0 md:shrink md:snap-none">
           <CardContent className="p-3 sm:p-4">
             <div className="flex items-center gap-2 mb-2 sm:mb-3">
               <div className="p-1.5 rounded-lg bg-success/10">
@@ -266,16 +266,23 @@ export function LandingHero() {
                 type="single" 
                 value={profile} 
                 onValueChange={handleProfileChange}
-                className="w-full max-w-sm mx-auto lg:mx-0 lg:max-w-none grid grid-cols-3 gap-1"
+                className="w-full max-w-[360px] mx-auto lg:mx-0 lg:max-w-none grid grid-cols-3 gap-2"
               >
                 {(Object.keys(profiles) as ProfileKey[]).map((key) => (
                   <ToggleGroupItem 
                     key={key} 
                     value={key}
                     variant="outline"
-                    className="px-2 sm:px-4 py-2 min-h-[44px] text-xs sm:text-sm font-semibold border-2 rounded-xl data-[state=on]:bg-primary data-[state=on]:text-primary-foreground data-[state=on]:border-primary data-[state=on]:shadow-lg hover:border-primary/50 hover:bg-primary/5 transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
+                    className="w-full px-2 sm:px-4 py-2 min-h-[44px] text-xs sm:text-sm whitespace-nowrap font-semibold border-2 rounded-xl data-[state=on]:bg-primary data-[state=on]:text-primary-foreground data-[state=on]:border-primary data-[state=on]:shadow-lg hover:border-primary/50 hover:bg-primary/5 transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
                   >
-                    {profiles[key].label}
+                    {key === "certificacao" ? (
+                      <>
+                        <span className="sm:hidden">Certif.</span>
+                        <span className="hidden sm:inline">{profiles[key].label}</span>
+                      </>
+                    ) : (
+                      profiles[key].label
+                    )}
                   </ToggleGroupItem>
                 ))}
               </ToggleGroup>
