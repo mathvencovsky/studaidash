@@ -7,12 +7,14 @@ import {
   Target, 
   Calendar, 
   RefreshCw,
-  ArrowRight
+  ArrowRight,
+  Eye
 } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { Button } from "@/components/ui/button";
 import { type ProfileKey, isValidProfile, getStoredProfile } from "./LandingHero";
+import { SectionWrapper, KickerBadge, HeadlineHighlight } from "./ui";
 
 const features = [
   {
@@ -79,7 +81,7 @@ const profilePreviews: Record<ProfileKey, ProfilePreview> = {
       { label: "Sequência", value: "12 dias" },
       { label: "Cobertura", value: "42%" },
     ],
-    subtitle: "Uma prévia do painel para quem estuda para concursos.",
+    subtitle: "Concurso",
   },
   certificacao: {
     trailName: "CFA Level I",
@@ -96,7 +98,7 @@ const profilePreviews: Record<ProfileKey, ProfilePreview> = {
       { label: "Sequência", value: "18 dias" },
       { label: "Cobertura", value: "55%" },
     ],
-    subtitle: "Uma prévia do painel para quem estuda para certificações.",
+    subtitle: "Certificação",
   },
   faculdade: {
     trailName: "Engenharia 3º Período",
@@ -113,7 +115,7 @@ const profilePreviews: Record<ProfileKey, ProfilePreview> = {
       { label: "Sequência", value: "7 dias" },
       { label: "Cobertura", value: "38%" },
     ],
-    subtitle: "Uma prévia do painel para quem organiza disciplinas da faculdade.",
+    subtitle: "Faculdade",
   },
 };
 
@@ -139,102 +141,118 @@ export function ProductSection() {
   };
 
   return (
-    <section id="produto" className="py-12 md:py-16 bg-background" tabIndex={-1}>
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="text-center mb-10">
-          <h2 className="text-2xl sm:text-3xl font-bold text-foreground">
-            Veja seu plano em ação
-          </h2>
-          <p className="mt-2 text-muted-foreground max-w-2xl mx-auto">
-            Prévia do painel para: <span className="font-medium text-foreground">{currentProfile === "concurso" ? "Concurso" : currentProfile === "certificacao" ? "Certificação" : "Faculdade"}</span>.
-          </p>
-        </div>
+    <SectionWrapper id="produto" variant="plain" tabIndex={-1}>
+      <div className="text-center mb-10">
+        <KickerBadge variant="primary" className="mb-3">
+          <Eye className="h-3 w-3" />
+          Prévia do produto
+        </KickerBadge>
+        <h2 className="text-2xl sm:text-3xl font-bold text-foreground">
+          Veja seu <HeadlineHighlight variant="primary">plano em ação</HeadlineHighlight>
+        </h2>
+        <p className="mt-3 text-muted-foreground max-w-2xl mx-auto">
+          Prévia do painel para: <span className="font-semibold text-foreground">{preview.subtitle}</span>.
+        </p>
+      </div>
 
-        <div className="grid lg:grid-cols-2 gap-10 items-start">
-          {/* Dashboard Preview */}
-          <div className="order-2 lg:order-1">
-            <div className="bg-card rounded-xl border shadow-lg p-6">
-              <div className="space-y-4">
-                {/* Header */}
-                <div className="flex items-center justify-between pb-4 border-b">
-                  <div>
-                    <p className="text-sm text-muted-foreground">Olá, estudante.</p>
-                    <p className="text-xs text-muted-foreground">Visão geral do progresso</p>
-                  </div>
-                  <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center">
-                    <span className="text-sm font-medium text-primary">J</span>
-                  </div>
+      <div className="grid lg:grid-cols-2 gap-10 items-start">
+        {/* Dashboard Preview */}
+        <div className="order-2 lg:order-1">
+          <div className="bg-card rounded-xl border-2 border-border shadow-2xl p-6 relative">
+            {/* Decorative badge */}
+            <div className="absolute -top-3 left-6">
+              <span className="bg-accent-warm text-accent-warm-foreground text-xs font-semibold px-3 py-1 rounded-full shadow-lg">
+                Exemplo ilustrativo
+              </span>
+            </div>
+
+            <div className="space-y-4 mt-2">
+              {/* Header */}
+              <div className="flex items-center justify-between pb-4 border-b">
+                <div>
+                  <p className="text-sm font-medium text-foreground">Olá, estudante.</p>
+                  <p className="text-xs text-muted-foreground">Visão geral do progresso</p>
                 </div>
-
-                {/* Trail Card */}
-                <Card className="border-primary/20">
-                  <CardContent className="p-4">
-                    <div className="flex items-center justify-between mb-3">
-                      <span className="text-sm font-medium">{preview.trailName}</span>
-                      <span className="text-xs text-muted-foreground">{preview.trailProgress}% concluído</span>
-                    </div>
-                    <Progress value={preview.trailProgress} className="h-2" />
-                    <p className="text-xs text-muted-foreground mt-2">
-                      {preview.trailDaysLeft} dias restantes • {preview.trailHoursPerDay}/dia necessárias
-                    </p>
-                  </CardContent>
-                </Card>
-
-                {/* Daily Tasks */}
-                <Card>
-                  <CardContent className="p-4">
-                    <p className="text-sm font-medium mb-3">Plano de hoje</p>
-                    <div className="space-y-2">
-                      {preview.tasks.map((task, i) => (
-                        <div key={i} className="flex items-center gap-2 text-sm">
-                          <div className={`w-4 h-4 rounded border ${task.done ? 'bg-primary border-primary' : 'border-muted-foreground/30'}`} />
-                          <span className={task.done ? 'line-through text-muted-foreground' : ''}>{task.label}</span>
-                        </div>
-                      ))}
-                    </div>
-                  </CardContent>
-                </Card>
-
-                {/* Stats */}
-                <div className="grid grid-cols-3 gap-3">
-                  {preview.stats.map((stat) => (
-                    <div key={stat.label} className="text-center p-3 bg-muted/50 rounded-lg">
-                      <p className="text-lg font-semibold text-foreground">{stat.value}</p>
-                      <p className="text-xs text-muted-foreground">{stat.label}</p>
-                    </div>
-                  ))}
+                <div className="w-10 h-10 rounded-full bg-gradient-to-br from-primary to-accent flex items-center justify-center shadow-lg">
+                  <span className="text-sm font-bold text-primary-foreground">J</span>
                 </div>
               </div>
-            </div>
-            <p className="text-xs text-muted-foreground text-center mt-3">Exemplo ilustrativo.</p>
-          </div>
 
-          {/* Features Grid */}
-          <div className="order-1 lg:order-2 flex flex-col">
-            <div className="grid sm:grid-cols-2 gap-4">
-              {features.map((feature) => (
-                <div
-                  key={feature.title}
-                  className="p-4 rounded-lg border bg-card hover:border-primary/30 transition-colors"
-                >
-                  <feature.icon className="h-8 w-8 text-primary mb-3" />
-                  <h3 className="font-medium text-foreground mb-1">{feature.title}</h3>
-                  <p className="text-sm text-muted-foreground">{feature.description}</p>
-                  <p className="text-xs text-primary/80 mt-2 font-medium">{feature.why}</p>
+              {/* Trail Card */}
+              <Card className="border-2 border-primary/30 bg-primary/5 shadow-md">
+                <CardContent className="p-4">
+                  <div className="flex items-center justify-between mb-3">
+                    <span className="text-sm font-semibold text-foreground">{preview.trailName}</span>
+                    <span className="text-xs font-medium bg-primary/10 text-primary px-2 py-0.5 rounded-full">{preview.trailProgress}% concluído</span>
+                  </div>
+                  <Progress value={preview.trailProgress} className="h-2.5" />
+                  <p className="text-xs text-muted-foreground mt-2">
+                    {preview.trailDaysLeft} dias restantes • {preview.trailHoursPerDay}/dia necessárias
+                  </p>
+                </CardContent>
+              </Card>
+
+              {/* Daily Tasks */}
+              <Card className="shadow-md">
+                <CardContent className="p-4">
+                  <p className="text-sm font-semibold mb-3 text-foreground">Plano de hoje</p>
+                  <div className="space-y-2.5">
+                    {preview.tasks.map((task, i) => (
+                      <div key={i} className="flex items-center gap-2.5 text-sm">
+                        <div className={`w-4 h-4 rounded-full border-2 flex items-center justify-center ${task.done ? 'bg-success border-success' : 'border-muted-foreground/40'}`}>
+                          {task.done && <span className="text-success-foreground text-[10px]">✓</span>}
+                        </div>
+                        <span className={task.done ? 'line-through text-muted-foreground' : 'text-foreground'}>{task.label}</span>
+                      </div>
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Stats */}
+              <div className="grid grid-cols-3 gap-3">
+                {preview.stats.map((stat) => (
+                  <div key={stat.label} className="text-center p-3 bg-muted/60 rounded-xl border">
+                    <p className="text-lg font-bold text-foreground">{stat.value}</p>
+                    <p className="text-xs text-muted-foreground font-medium">{stat.label}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Features Grid */}
+        <div className="order-1 lg:order-2 flex flex-col">
+          <div className="grid sm:grid-cols-2 gap-4">
+            {features.map((feature) => (
+              <div
+                key={feature.title}
+                className="p-4 rounded-xl border-2 bg-card hover:border-primary/40 hover:shadow-lg transition-all duration-200 group"
+              >
+                <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center mb-3 group-hover:bg-primary/15 transition-colors">
+                  <feature.icon className="h-5 w-5 text-primary" />
                 </div>
-              ))}
-            </div>
-            
-            {/* CTA */}
-            <div className="mt-8 text-center">
-              <Button size="lg" onClick={scrollToAuth} className="text-base focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2">
-                Começar grátis
-                <ArrowRight className="ml-2 h-4 w-4" />
-              </Button>
-            </div>
+                <h3 className="font-semibold text-foreground mb-1">{feature.title}</h3>
+                <p className="text-sm text-muted-foreground">{feature.description}</p>
+                <p className="text-xs text-accent-warm font-semibold mt-2">{feature.why}</p>
+              </div>
+            ))}
+          </div>
+          
+          {/* CTA */}
+          <div className="mt-8 text-center">
+            <Button 
+              size="lg" 
+              onClick={scrollToAuth} 
+              className="text-base shadow-lg shadow-primary/25 hover:shadow-xl hover:shadow-primary/30 transition-all focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2"
+            >
+              Começar grátis
+              <ArrowRight className="ml-2 h-4 w-4" />
+            </Button>
           </div>
         </div>
       </div>
-    </section>
+    </SectionWrapper>
   );
 }

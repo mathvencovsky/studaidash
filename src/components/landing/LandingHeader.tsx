@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { GraduationCap, Menu, X } from "lucide-react";
+import { GraduationCap, Menu } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 
@@ -35,7 +35,6 @@ export function LandingHeader() {
     const authCard = document.querySelector("#auth-card");
     if (authCard) {
       authCard.scrollIntoView({ behavior: "smooth" });
-      // Focus on email input after scroll
       setTimeout(() => {
         const emailInput = authCard.querySelector('input[type="email"]') as HTMLInputElement;
         emailInput?.focus();
@@ -56,19 +55,19 @@ export function LandingHeader() {
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
           <div className="flex items-center gap-2">
-            <div className="w-8 h-8 rounded-md bg-primary flex items-center justify-center">
-              <GraduationCap className="w-4 h-4 text-primary-foreground" />
+            <div className="w-9 h-9 rounded-lg bg-gradient-to-br from-primary to-accent flex items-center justify-center shadow-lg">
+              <GraduationCap className="w-5 h-5 text-primary-foreground" />
             </div>
-            <span className="font-semibold text-foreground">StudAI</span>
+            <span className="font-bold text-foreground text-lg">StudAI</span>
           </div>
 
           {/* Desktop Navigation */}
-          <nav className="hidden md:flex items-center gap-6">
+          <nav className="hidden md:flex items-center gap-1">
             {navLinks.map((link) => (
               <button
                 key={link.href}
                 onClick={() => scrollToSection(link.href)}
-                className="text-sm text-muted-foreground hover:text-foreground transition-colors"
+                className="px-3 py-2 text-sm text-muted-foreground hover:text-foreground hover:bg-muted/50 rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2"
               >
                 {link.label}
               </button>
@@ -76,11 +75,20 @@ export function LandingHeader() {
           </nav>
 
           {/* Desktop CTAs */}
-          <div className="hidden md:flex items-center gap-3">
-            <Button variant="ghost" size="sm" onClick={scrollToAuth}>
+          <div className="hidden md:flex items-center gap-2">
+            <Button 
+              variant="ghost" 
+              size="sm" 
+              onClick={scrollToAuth}
+              className="focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2"
+            >
               Entrar
             </Button>
-            <Button size="sm" onClick={scrollToAuth}>
+            <Button 
+              size="sm" 
+              onClick={scrollToAuth}
+              className="shadow-lg shadow-primary/20 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2"
+            >
               Começar grátis
             </Button>
           </div>
@@ -88,28 +96,28 @@ export function LandingHeader() {
           {/* Mobile Menu */}
           <Sheet open={mobileOpen} onOpenChange={setMobileOpen}>
             <SheetTrigger asChild className="md:hidden">
-              <Button variant="ghost" size="icon">
+              <Button variant="ghost" size="icon" className="focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2">
                 <Menu className="h-5 w-5" />
               </Button>
             </SheetTrigger>
             <SheetContent side="right" className="w-72">
               <div className="flex flex-col gap-6 mt-8">
-                <nav className="flex flex-col gap-4">
+                <nav className="flex flex-col gap-2">
                   {navLinks.map((link) => (
                     <button
                       key={link.href}
                       onClick={() => scrollToSection(link.href)}
-                      className="text-left text-muted-foreground hover:text-foreground transition-colors"
+                      className="text-left text-foreground hover:bg-muted/50 px-3 py-2 rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2"
                     >
                       {link.label}
                     </button>
                   ))}
                 </nav>
                 <div className="flex flex-col gap-2 pt-4 border-t">
-                  <Button variant="outline" onClick={scrollToAuth}>
+                  <Button variant="outline" onClick={scrollToAuth} className="focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2">
                     Entrar
                   </Button>
-                  <Button onClick={scrollToAuth}>
+                  <Button onClick={scrollToAuth} className="shadow-lg shadow-primary/20 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2">
                     Começar grátis
                   </Button>
                 </div>

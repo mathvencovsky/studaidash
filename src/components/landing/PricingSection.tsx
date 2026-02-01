@@ -1,9 +1,10 @@
 import { useMemo } from "react";
 import { useSearchParams } from "react-router-dom";
-import { Check, Clock, AlertCircle, Mail } from "lucide-react";
+import { Check, Clock, AlertCircle, Mail, CreditCard, Star } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { type ProfileKey, isValidProfile, getStoredProfile } from "./LandingHero";
+import { SectionWrapper, KickerBadge, HeadlineHighlight } from "./ui";
 
 const SUPPORT_EMAIL = "support@studai.app";
 
@@ -82,13 +83,17 @@ export function PricingSection() {
   };
 
   return (
-    <section id="planos" className="py-12 md:py-16 bg-background">
-      <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
+    <SectionWrapper id="planos" variant="plain">
+      <div className="max-w-5xl mx-auto">
         <div className="text-center mb-10">
+          <KickerBadge variant="warm" className="mb-3">
+            <CreditCard className="h-3 w-3" />
+            Planos
+          </KickerBadge>
           <h2 className="text-2xl sm:text-3xl font-bold text-foreground">
-            Planos simples e claros
+            Planos <HeadlineHighlight>simples e claros</HeadlineHighlight>
           </h2>
-          <p className="mt-2 text-muted-foreground max-w-2xl mx-auto">
+          <p className="mt-3 text-muted-foreground max-w-2xl mx-auto">
             Comece no Grátis. Entre na lista do Pro para receber novidades.
           </p>
         </div>
@@ -97,29 +102,38 @@ export function PricingSection() {
           {plans.map((plan) => (
             <Card
               key={plan.name}
-              className={`relative ${
+              className={`relative border-2 transition-all hover:shadow-xl ${
                 plan.highlighted
-                  ? "border-primary shadow-lg"
-                  : "border-border"
+                  ? "border-primary shadow-xl bg-gradient-to-br from-card to-primary/5"
+                  : "border-border hover:border-primary/30"
               }`}
             >
+              {plan.highlighted && (
+                <div className="absolute -top-3 left-1/2 -translate-x-1/2">
+                  <span className="bg-accent-warm text-accent-warm-foreground text-xs font-bold px-4 py-1 rounded-full shadow-lg flex items-center gap-1">
+                    <Star className="h-3 w-3" />
+                    Recomendado
+                  </span>
+                </div>
+              )}
+
               {plan.status === "waitlist" && (
                 <div className="absolute -top-3 left-1/2 -translate-x-1/2">
-                  <span className="bg-muted text-muted-foreground text-xs font-medium px-3 py-1 rounded-full flex items-center gap-1">
+                  <span className="bg-muted text-muted-foreground text-xs font-semibold px-3 py-1 rounded-full flex items-center gap-1 border">
                     <Clock className="h-3 w-3" />
                     Em breve
                   </span>
                 </div>
               )}
 
-              <CardHeader>
-                <CardTitle className="text-xl">{plan.name}</CardTitle>
-                <p className="text-sm text-muted-foreground">{plan.tagline}</p>
+              <CardHeader className="pt-8">
+                <CardTitle className="text-xl font-bold">{plan.name}</CardTitle>
+                <p className="text-sm text-muted-foreground font-medium">{plan.tagline}</p>
 
-                <div className="pt-2">
-                  <span className="text-3xl font-bold">{plan.price}</span>
+                <div className="pt-3">
+                  <span className="text-4xl font-bold text-foreground">{plan.price}</span>
                   {plan.status === "available" && (
-                    <p className="text-xs text-muted-foreground mt-1">Grátis para sempre</p>
+                    <p className="text-xs text-success font-semibold mt-1">Grátis para sempre</p>
                   )}
                 </div>
                 <CardDescription className="pt-2">{plan.description}</CardDescription>
@@ -128,20 +142,21 @@ export function PricingSection() {
               <CardContent>
                 <ul className="space-y-3 mb-6">
                   {plan.features.map((feature) => (
-                    <li key={feature} className="flex items-center gap-2 text-sm">
+                    <li key={feature} className="flex items-center gap-2.5 text-sm">
                       {plan.status === "waitlist" ? (
                         <Clock className="h-4 w-4 text-muted-foreground shrink-0" />
                       ) : (
-                        <Check className="h-4 w-4 text-primary shrink-0" />
+                        <Check className="h-4 w-4 text-success shrink-0" />
                       )}
-                      <span>{feature}</span>
+                      <span className="text-foreground">{feature}</span>
                     </li>
                   ))}
                 </ul>
 
                 <Button
-                  className="w-full"
+                  className={`w-full ${plan.highlighted ? 'shadow-lg shadow-primary/25' : ''}`}
                   variant={plan.highlighted ? "default" : "outline"}
+                  size="lg"
                   onClick={plan.status === "available" ? scrollToAuth : joinWaitlist}
                 >
                   {plan.status === "waitlist" && <Mail className="mr-2 h-4 w-4" />}
@@ -159,21 +174,21 @@ export function PricingSection() {
         </div>
 
         {/* Trust notice */}
-        <div className="mt-8 text-center space-y-2">
-          <div className="inline-flex items-center gap-2 text-sm text-muted-foreground bg-muted/50 px-4 py-2 rounded-full">
-            <AlertCircle className="h-4 w-4" />
+        <div className="mt-8 text-center space-y-3">
+          <div className="inline-flex items-center gap-2 text-sm text-foreground bg-muted/60 px-5 py-2.5 rounded-full border">
+            <AlertCircle className="h-4 w-4 text-muted-foreground" />
             <span>Você pode solicitar a exclusão da sua conta a qualquer momento pelo suporte.</span>
           </div>
 
           <p className="text-xs text-muted-foreground">
             <Mail className="h-3 w-3 inline mr-1" />
             Dúvidas sobre planos? Fale com{" "}
-            <a href={`mailto:${SUPPORT_EMAIL}`} className="text-primary hover:underline">
+            <a href={`mailto:${SUPPORT_EMAIL}`} className="text-primary font-medium hover:underline">
               {SUPPORT_EMAIL}
             </a>
           </p>
         </div>
       </div>
-    </section>
+    </SectionWrapper>
   );
 }

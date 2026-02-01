@@ -1,7 +1,8 @@
 import { useMemo } from "react";
 import { useSearchParams } from "react-router-dom";
-import { UserPlus, Settings2, TrendingUp } from "lucide-react";
+import { UserPlus, Settings2, TrendingUp, Rocket } from "lucide-react";
 import { type ProfileKey, isValidProfile, getStoredProfile } from "./LandingHero";
+import { SectionWrapper, KickerBadge, HeadlineHighlight } from "./ui";
 
 type StepData = {
   icon: typeof UserPlus;
@@ -91,49 +92,51 @@ export function HowItWorks() {
   }, [currentProfile]);
 
   return (
-    <section id="como-funciona" tabIndex={-1} className="py-12 md:py-16 bg-muted/30 outline-none">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="text-center mb-10">
-          <h2 className="text-2xl sm:text-3xl font-bold text-foreground">
-            Como funciona
-          </h2>
-          <p className="mt-2 text-muted-foreground max-w-2xl mx-auto">
-            Três passos para sair da desorganização e entrar em uma rotina de estudos que funciona.
-          </p>
-        </div>
-
-        <div className="grid md:grid-cols-3 gap-6">
-          {steps.map((step, index) => (
-            <div key={step.number} className="relative">
-              {/* Connector line */}
-              {index < steps.length - 1 && (
-                <div className="hidden md:block absolute top-12 left-[60%] w-[80%] h-px bg-border" />
-              )}
-              
-              <div className="text-center">
-                <div className="relative inline-flex">
-                  <div className="w-24 h-24 rounded-2xl bg-primary/10 flex items-center justify-center mx-auto">
-                    <step.icon className="h-10 w-10 text-primary" />
-                  </div>
-                  <span className="absolute -top-2 -right-2 w-8 h-8 rounded-full bg-primary text-primary-foreground text-sm font-semibold flex items-center justify-center">
-                    {step.number}
-                  </span>
-                </div>
-                <h3 className="mt-6 text-lg font-semibold text-foreground">{step.title}</h3>
-                <p className="mt-2 text-muted-foreground text-sm max-w-xs mx-auto">
-                  {step.description}
-                </p>
-                <p className="mt-2 text-xs text-muted-foreground/80 italic max-w-xs mx-auto">
-                  {step.example}
-                </p>
-                <p className="mt-2 text-xs text-primary font-medium">
-                  {step.promise}
-                </p>
-              </div>
-            </div>
-          ))}
-        </div>
+    <SectionWrapper id="como-funciona" variant="tint" tabIndex={-1}>
+      <div className="text-center mb-10">
+        <KickerBadge variant="warm" className="mb-3">
+          <Rocket className="h-3 w-3" />
+          Comece em minutos
+        </KickerBadge>
+        <h2 className="text-2xl sm:text-3xl font-bold text-foreground">
+          Como <HeadlineHighlight>funciona</HeadlineHighlight>
+        </h2>
+        <p className="mt-3 text-muted-foreground max-w-2xl mx-auto">
+          Três passos para sair da desorganização e entrar em uma rotina de estudos que funciona.
+        </p>
       </div>
-    </section>
+
+      <div className="grid md:grid-cols-3 gap-8">
+        {steps.map((step, index) => (
+          <div key={step.number} className="relative">
+            {/* Connector line */}
+            {index < steps.length - 1 && (
+              <div className="hidden md:block absolute top-14 left-[60%] w-[80%] h-0.5 bg-gradient-to-r from-primary/30 to-transparent" />
+            )}
+            
+            <div className="text-center">
+              <div className="relative inline-flex">
+                <div className="w-28 h-28 rounded-2xl bg-gradient-to-br from-primary/15 to-accent/10 flex items-center justify-center mx-auto border-2 border-primary/20 shadow-lg">
+                  <step.icon className="h-12 w-12 text-primary" />
+                </div>
+                <span className="absolute -top-2 -right-2 w-10 h-10 rounded-full bg-accent-warm text-accent-warm-foreground text-sm font-bold flex items-center justify-center shadow-lg">
+                  {step.number}
+                </span>
+              </div>
+              <h3 className="mt-6 text-lg font-bold text-foreground">{step.title}</h3>
+              <p className="mt-2 text-muted-foreground text-sm max-w-xs mx-auto">
+                {step.description}
+              </p>
+              <p className="mt-3 text-xs bg-muted/60 text-muted-foreground px-3 py-1.5 rounded-full inline-block">
+                {step.example}
+              </p>
+              <p className="mt-2 text-xs text-success font-semibold">
+                {step.promise}
+              </p>
+            </div>
+          </div>
+        ))}
+      </div>
+    </SectionWrapper>
   );
 }

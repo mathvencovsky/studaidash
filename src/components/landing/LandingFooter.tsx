@@ -75,16 +75,16 @@ export function LandingFooter() {
   };
 
   return (
-    <footer className="bg-card border-t py-10" role="contentinfo">
+    <footer className="bg-card border-t-2 py-10" role="contentinfo">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="grid grid-cols-2 md:grid-cols-5 gap-6">
+        <div className="grid grid-cols-2 md:grid-cols-5 gap-8">
           {/* Brand */}
           <div className="col-span-2 md:col-span-1">
             <div className="flex items-center gap-2 mb-4">
-              <div className="w-8 h-8 rounded-md bg-primary flex items-center justify-center">
-                <GraduationCap className="w-4 h-4 text-primary-foreground" />
+              <div className="w-9 h-9 rounded-lg bg-gradient-to-br from-primary to-accent flex items-center justify-center shadow-lg">
+                <GraduationCap className="w-5 h-5 text-primary-foreground" />
               </div>
-              <span className="font-semibold text-foreground">StudAI</span>
+              <span className="font-bold text-foreground text-lg">StudAI</span>
             </div>
 
             <p className="text-sm text-muted-foreground mb-4">
@@ -95,7 +95,7 @@ export function LandingFooter() {
               Suporte:{" "}
               <a
                 href={`mailto:${SUPPORT_EMAIL}`}
-                className="text-primary hover:underline focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 rounded"
+                className="text-primary font-medium hover:underline focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 rounded"
               >
                 {SUPPORT_EMAIL}
               </a>
@@ -104,7 +104,7 @@ export function LandingFooter() {
 
           {/* Produto */}
           <nav aria-label="Produto">
-            <h4 className="font-medium text-foreground mb-3 text-sm">Produto</h4>
+            <h4 className="font-bold text-foreground mb-3 text-sm">Produto</h4>
             <ul className="space-y-2">
               {footerLinks.produto.map((link) => (
                 <li key={link.label}>{renderLink(link)}</li>
@@ -114,7 +114,7 @@ export function LandingFooter() {
 
           {/* Empresa */}
           <nav aria-label="Empresa">
-            <h4 className="font-medium text-foreground mb-3 text-sm">Empresa</h4>
+            <h4 className="font-bold text-foreground mb-3 text-sm">Empresa</h4>
             <ul className="space-y-2">
               {footerLinks.empresa.map((link) => (
                 <li key={link.label}>{renderLink(link)}</li>
@@ -124,7 +124,7 @@ export function LandingFooter() {
 
           {/* Suporte */}
           <nav aria-label="Suporte">
-            <h4 className="font-medium text-foreground mb-3 text-sm">Suporte</h4>
+            <h4 className="font-bold text-foreground mb-3 text-sm">Suporte</h4>
             <ul className="space-y-2">
               {footerLinks.suporte.map((link) => (
                 <li key={link.label}>{renderLink(link)}</li>
@@ -134,7 +134,7 @@ export function LandingFooter() {
 
           {/* Legal */}
           <nav aria-label="Legal">
-            <h4 className="font-medium text-foreground mb-3 text-sm">Legal</h4>
+            <h4 className="font-bold text-foreground mb-3 text-sm">Legal</h4>
             <ul className="space-y-2">
               {footerLinks.legal.map((link) => (
                 <li key={link.label}>{renderLink(link)}</li>
