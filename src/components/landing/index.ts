@@ -8,4 +8,5 @@ export { TrustSection } from "./TrustSection";
 export { Testimonials } from "./Testimonials";
 export { PricingSection } from "./PricingSection";
 export { FAQSection } from "./FAQSection";
+export { FinalCTA } from "./FinalCTA";
 export { LandingFooter } from "./LandingFooter";

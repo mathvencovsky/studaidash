@@ -139,14 +139,14 @@ export function ProductSection() {
   };
 
   return (
-    <section id="produto" className="py-20 bg-background">
+    <section id="produto" className="py-20 bg-background" tabIndex={-1}>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-16">
           <h2 className="text-2xl sm:text-3xl font-bold text-foreground">
             Veja seu plano em ação
           </h2>
           <p className="mt-4 text-muted-foreground max-w-2xl mx-auto">
-            {preview.subtitle}
+            Prévia do painel para: <span className="font-medium text-foreground">{currentProfile === "concurso" ? "Concurso" : currentProfile === "certificacao" ? "Certificação" : "Faculdade"}</span>.
           </p>
         </div>
 
@@ -227,7 +227,7 @@ export function ProductSection() {
             
             {/* CTA */}
             <div className="mt-8 text-center">
-              <Button size="lg" onClick={scrollToAuth} className="text-base">
+              <Button size="lg" onClick={scrollToAuth} className="text-base focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2">
                 Começar grátis
                 <ArrowRight className="ml-2 h-4 w-4" />
               </Button>
