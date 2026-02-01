@@ -25,7 +25,6 @@ const testimonials = [
     name: "Marina C.",
     role: "Concurso",
     context: "Rotina: 1h por dia",
-    highlight: "Plano do dia pronto e revisões recorrentes",
     changes: [
       "Plano de hoje pronto ao abrir",
       "Fila de revisões recorrentes",
@@ -36,11 +35,10 @@ const testimonials = [
   },
   {
     focus: "certificacao" as const,
-    quote: "Consegui enxergar o que estava faltando na semana e manter prática sem me perder no conteúdo.",
+    quote: "Consegui enxergar o que estava faltando na semana e manter prática sem me perder.",
     name: "Ricardo M.",
     role: "Certificação",
     context: "Objetivo: prova em 90 dias",
-    highlight: "Cobertura semanal por tópico",
     changes: [
       "Cobertura semanal por tópico",
       "Prática direcionada por peso",
@@ -55,7 +53,6 @@ const testimonials = [
     name: "Juliana A.",
     role: "Faculdade",
     context: "Rotina: noites e fins de semana",
-    highlight: "Organização por disciplina",
     changes: [
       "Organização por disciplina",
       "Revisões semanais automáticas",
@@ -94,26 +91,27 @@ export function Testimonials() {
 
   return (
     <SectionWrapper id="depoimentos" variant="plain">
-      <div className="text-center mb-8">
-        <KickerBadge variant="primary" className="mb-3">
+      <div className="text-center mb-6">
+        <KickerBadge variant="primary" className="mb-2">
           <MessageSquare className="h-3.5 w-3.5" />
           Exemplos de uso
         </KickerBadge>
         <h2 className="display-h2 text-foreground">
           Resultados na <HeadlineHighlight variant="primary">rotina</HeadlineHighlight>
         </h2>
-        <p className="mt-2 text-muted-foreground max-w-xl mx-auto text-sm">
+        <p className="mt-2 text-muted-foreground max-w-lg mx-auto text-sm">
           Como usuários organizam seus estudos com o StudAI.
         </p>
       </div>
 
-      <div className="grid lg:grid-cols-5 gap-5">
+      {/* Mobile: stack cards, Desktop: grid */}
+      <div className="flex flex-col lg:grid lg:grid-cols-5 gap-4">
         {/* Featured testimonial - split layout */}
-        <Card className="lg:col-span-3 border-2 border-border hover:border-primary/30 transition-all duration-300 hover:shadow-premium-lg bg-card">
-          <CardContent className="p-5 md:p-6">
+        <Card className="lg:col-span-3 border-2 border-border hover:border-primary/30 transition-all duration-300 hover:shadow-lg bg-card">
+          <CardContent className="p-4 sm:p-5">
             {/* Header with tag and context */}
-            <div className="flex flex-wrap items-center gap-2 mb-4">
-              <span className={`text-xs font-bold px-3 py-1 rounded-full border ${featured.colorClass}`}>
+            <div className="flex flex-wrap items-center gap-2 mb-3">
+              <span className={`text-xs font-bold px-2.5 py-1 rounded-full border ${featured.colorClass}`}>
                 {featured.role}
               </span>
               <span className="text-xs text-muted-foreground">
@@ -122,17 +120,15 @@ export function Testimonials() {
             </div>
 
             {/* Split layout: quote + changes */}
-            <div className="grid md:grid-cols-2 gap-5">
+            <div className="grid sm:grid-cols-2 gap-4">
               {/* Column A: Quote + Author */}
               <div className="flex flex-col justify-between">
-                <div>
-                  <p className="text-foreground text-base leading-relaxed font-medium mb-4">
-                    "{featured.quote}"
-                  </p>
-                </div>
-                <div className="flex items-center gap-3 mt-auto">
-                  <Avatar className="h-10 w-10 border-2 border-primary/20">
-                    <AvatarFallback className="bg-primary/10 text-primary text-sm font-bold">
+                <p className="text-foreground text-sm sm:text-base leading-relaxed font-medium mb-3">
+                  "{featured.quote}"
+                </p>
+                <div className="flex items-center gap-2.5">
+                  <Avatar className="h-9 w-9 border-2 border-primary/20">
+                    <AvatarFallback className="bg-primary/10 text-primary text-xs font-bold">
                       {featured.initials}
                     </AvatarFallback>
                   </Avatar>
@@ -144,14 +140,14 @@ export function Testimonials() {
               </div>
 
               {/* Column B: What changed */}
-              <div className="bg-muted/50 rounded-lg p-4 border border-border">
-                <p className="text-xs font-bold text-muted-foreground uppercase tracking-wide mb-3">
+              <div className="bg-muted/50 rounded-lg p-3 border border-border">
+                <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-wide mb-2">
                   O que mudou
                 </p>
-                <ul className="space-y-2">
+                <ul className="space-y-1.5">
                   {featured.changes.map((change, idx) => (
-                    <li key={idx} className="flex items-start gap-2 text-sm text-foreground">
-                      <CheckCircle2 className="h-4 w-4 text-success mt-0.5 shrink-0" />
+                    <li key={idx} className="flex items-start gap-2 text-xs text-foreground">
+                      <CheckCircle2 className="h-3.5 w-3.5 text-success mt-0.5 shrink-0" />
                       <span>{change}</span>
                     </li>
                   ))}
@@ -162,36 +158,36 @@ export function Testimonials() {
         </Card>
 
         {/* Secondary testimonials */}
-        <div className="lg:col-span-2 flex flex-col gap-4">
+        <div className="lg:col-span-2 flex flex-col gap-3">
           {rest.map((t) => (
             <Card 
               key={t.name} 
-              className="flex-1 border-2 border-border hover:border-primary/30 transition-all duration-300 hover:shadow-premium-md hover:-translate-y-0.5 bg-card"
+              className="flex-1 border-2 border-border hover:border-primary/30 transition-all duration-300 hover:shadow-md bg-card"
             >
-              <CardContent className="p-4">
+              <CardContent className="p-3 sm:p-4">
                 {/* Tag + context */}
-                <div className="flex items-center gap-2 mb-3">
-                  <span className={`text-xs font-bold px-2.5 py-0.5 rounded-full border ${t.colorClass}`}>
+                <div className="flex items-center gap-2 mb-2">
+                  <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full border ${t.colorClass}`}>
                     {t.role}
                   </span>
-                  <span className="text-xs text-muted-foreground">
+                  <span className="text-[10px] text-muted-foreground">
                     {t.context}
                   </span>
                 </div>
 
-                {/* Main quote - shorter */}
-                <p className="text-foreground text-sm leading-relaxed font-medium mb-3">
+                {/* Main quote */}
+                <p className="text-foreground text-xs sm:text-sm leading-relaxed font-medium mb-2">
                   "{t.quote}"
                 </p>
 
                 {/* Compact changes */}
-                <div className="flex flex-wrap gap-1.5 mb-3">
+                <div className="flex flex-wrap gap-1 mb-2">
                   {t.changes.slice(0, 2).map((change, idx) => (
                     <span 
                       key={idx} 
-                      className="inline-flex items-center gap-1 text-xs text-muted-foreground bg-muted px-2 py-0.5 rounded"
+                      className="inline-flex items-center gap-1 text-[10px] text-muted-foreground bg-muted px-1.5 py-0.5 rounded"
                     >
-                      <CheckCircle2 className="h-3 w-3 text-success" />
+                      <CheckCircle2 className="h-2.5 w-2.5 text-success" />
                       {change}
                     </span>
                   ))}
@@ -199,14 +195,12 @@ export function Testimonials() {
 
                 {/* Author */}
                 <div className="flex items-center gap-2">
-                  <Avatar className="h-7 w-7 border border-border">
-                    <AvatarFallback className="bg-muted text-foreground text-xs font-semibold">
+                  <Avatar className="h-6 w-6 border border-border">
+                    <AvatarFallback className="bg-muted text-foreground text-[10px] font-semibold">
                       {t.initials}
                     </AvatarFallback>
                   </Avatar>
-                  <div>
-                    <p className="font-semibold text-foreground text-xs">{t.name}</p>
-                  </div>
+                  <p className="font-semibold text-foreground text-xs">{t.name}</p>
                 </div>
               </CardContent>
             </Card>
@@ -215,15 +209,15 @@ export function Testimonials() {
       </div>
 
       {/* Footer with disclaimer + CTA */}
-      <div className="mt-8 flex flex-col sm:flex-row items-center justify-between gap-4">
-        <p className="text-xs text-muted-foreground">
+      <div className="mt-6 flex flex-col sm:flex-row items-center justify-between gap-3">
+        <p className="text-[10px] sm:text-xs text-muted-foreground text-center sm:text-left">
           Exemplos ilustrativos. Resultados variam conforme rotina e consistência.
         </p>
         <Button 
           variant="outline" 
           size="sm" 
           onClick={handleCTAClick}
-          className="group"
+          className="min-h-[40px] group"
         >
           Começar grátis
           <ArrowRight className="h-3.5 w-3.5 ml-1 group-hover:translate-x-0.5 transition-transform" />

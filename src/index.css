@@ -4,6 +4,22 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Mobile-first: prevent horizontal scroll */
+html, body {
+  overflow-x: hidden;
+  -webkit-overflow-scrolling: touch;
+}
+
+#root {
+  width: 100%;
+  min-height: 100vh;
+  min-height: 100dvh; /* Dynamic viewport height for mobile */
+  margin: 0;
+  padding: 0;
+  text-align: initial;
+  overflow-x: hidden;
+}
+
 /* StudAI Design System - Professional Tech Company */
 
 @layer base {

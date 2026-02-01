@@ -33,17 +33,17 @@ const profileFAQs: Record<ProfileKey, FAQItem> = {
   concurso: {
     question: "Isso funciona para concursos?",
     answer:
-      "Sim. O StudAI ajuda a organizar leituras, questões e revisões diárias para quem estuda para concursos. Você define o tempo disponível e o sistema monta o plano.",
+      "Sim. O StudAI ajuda a organizar leituras, questões e revisões diárias para quem estuda para concursos.",
   },
   certificacao: {
     question: "Isso funciona para certificações?",
     answer:
-      "Sim. O StudAI organiza tópicos, quizzes e revisões para quem se prepara para certificações. Você acompanha a cobertura por tema e o ritmo semanal.",
+      "Sim. O StudAI organiza tópicos, quizzes e revisões para certificações. Você acompanha a cobertura por tema.",
   },
   faculdade: {
     question: "Isso funciona para faculdade?",
     answer:
-      "Sim. O StudAI ajuda a separar disciplinas, exercícios e revisões semanais. É útil para quem precisa manter várias matérias em dia ao longo do semestre.",
+      "Sim. O StudAI ajuda a separar disciplinas, exercícios e revisões semanais para manter tudo em dia.",
   },
 };
 
@@ -51,17 +51,17 @@ const baseFaqs: FAQItem[] = [
   {
     question: "Para quem é o StudAI?",
     answer:
-      "Para quem precisa estudar com consistência e quer um plano claro do que fazer hoje e do que revisar depois. Funciona bem para concursos, certificações e faculdade.",
+      "Para quem precisa estudar com consistência e quer um plano claro do que fazer hoje e do que revisar depois.",
   },
   {
     question: "Como começo a usar?",
     answer:
-      "Crie sua conta, escolha seu objetivo e informe quanto tempo você tem por dia. Em poucos minutos você já vê seu plano do dia e o acompanhamento da semana.",
+      "Crie sua conta, escolha seu objetivo e informe quanto tempo tem por dia. Em minutos você vê seu plano.",
   },
   {
     question: "Preciso pagar para usar?",
     answer:
-      "Não. O plano Grátis dá acesso ao essencial para organizar e acompanhar seus estudos. O Pro estará disponível no futuro com recursos avançados.",
+      "Não. O plano Grátis dá acesso ao essencial. O Pro estará disponível no futuro com recursos avançados.",
   },
   {
     question: "Funciona no celular?",
@@ -71,40 +71,38 @@ const baseFaqs: FAQItem[] = [
     question: "Como vocês tratam meus dados?",
     answer: (
       <>
-        Usamos seus dados para operar a conta e registrar seu progresso. Não vendemos dados pessoais. 
-        Você pode solicitar exclusão da conta e dados pelo suporte. Veja detalhes em{" "}
-        <Link to="/privacidade" className="text-primary font-bold hover:underline focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 rounded">
-          Privacidade
+        Usamos seus dados para operar a conta e registrar progresso. Não vendemos dados pessoais.{" "}
+        <Link to="/privacidade" className="text-primary font-bold hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary rounded">
+          Ver mais
         </Link>
         .
       </>
     ),
   },
   {
-    question: "Como posso excluir minha conta?",
+    question: "Como excluir minha conta?",
     answer: (
       <>
-        Você pode solicitar a exclusão pelo e-mail{" "}
-        <a href={`mailto:${SUPPORT_EMAIL}`} className="text-primary font-bold hover:underline focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 rounded">
+        Solicite exclusão pelo e-mail{" "}
+        <a href={`mailto:${SUPPORT_EMAIL}`} className="text-primary font-bold hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary rounded">
           {SUPPORT_EMAIL}
         </a>
-        . Nós confirmamos o pedido e orientamos os próximos passos.
+        .
       </>
     ),
   },
   {
     question: "Como funciona a revisão?",
     answer:
-      "O StudAI organiza o que deve ser revisado e ajuda você a manter revisões recorrentes. A forma exata pode variar conforme seu uso e o tipo de trilha.",
+      "O StudAI organiza o que deve ser revisado e ajuda a manter revisões recorrentes baseadas no tempo.",
   },
   {
     question: "O que muda no Pro?",
     answer: (
       <>
-        O Pro está em desenvolvimento e deve incluir trilhas ilimitadas e relatórios mais detalhados. 
-        Se quiser, entre na lista de espera na seção de{" "}
-        <a href="#planos" className="text-primary font-bold hover:underline focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 rounded">
-          Planos
+        O Pro está em desenvolvimento e deve incluir trilhas ilimitadas e relatórios detalhados.{" "}
+        <a href="#planos" className="text-primary font-bold hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary rounded">
+          Ver planos
         </a>
         .
       </>
@@ -128,46 +126,45 @@ export function FAQSection() {
 
   return (
     <SectionWrapper id="faq" variant="tint" tabIndex={-1}>
-      <div className="max-w-3xl mx-auto">
-        <div className="text-center mb-10">
-          <KickerBadge variant="primary" className="mb-4">
+      <div className="max-w-2xl mx-auto">
+        <div className="text-center mb-8">
+          <KickerBadge variant="primary" className="mb-3">
             <HelpCircle className="h-3.5 w-3.5" />
             Dúvidas
           </KickerBadge>
           <h2 className="display-h2 text-foreground">
             Perguntas <HeadlineHighlight variant="primary">frequentes</HeadlineHighlight>
           </h2>
-          <p className="mt-3 text-muted-foreground">
+          <p className="mt-2 text-muted-foreground text-sm">
             Respostas diretas para dúvidas comuns
           </p>
         </div>
 
-        <Accordion type="single" collapsible className="w-full space-y-3">
+        <Accordion type="single" collapsible className="w-full space-y-2">
           {faqs.map((faq, index) => (
             <AccordionItem 
               key={index} 
               value={`item-${index}`}
-              className="bg-card border-2 rounded-xl px-5 data-[state=open]:border-primary/40 data-[state=open]:shadow-lg transition-all"
+              className="bg-card border-2 rounded-xl px-4 data-[state=open]:border-primary/40 data-[state=open]:shadow-md transition-all"
             >
-              <AccordionTrigger className="text-left font-bold text-foreground hover:no-underline py-5 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 rounded">
+              <AccordionTrigger className="text-left font-bold text-foreground text-sm hover:no-underline py-4 min-h-[52px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 rounded">
                 {faq.question}
               </AccordionTrigger>
-              <AccordionContent className="text-muted-foreground pb-5 leading-relaxed font-medium">
+              <AccordionContent className="text-muted-foreground pb-4 text-sm leading-relaxed font-medium">
                 {faq.answer}
               </AccordionContent>
             </AccordionItem>
           ))}
         </Accordion>
 
-        <p className="text-center text-sm text-muted-foreground mt-8 font-medium">
-          Ainda com dúvidas? Fale com{" "}
+        <p className="text-center text-xs text-muted-foreground mt-6 font-medium">
+          Ainda com dúvidas?{" "}
           <a
             href={`mailto:${SUPPORT_EMAIL}`}
-            className="text-primary font-bold hover:underline focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 rounded"
+            className="text-primary font-bold hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 rounded"
           >
             {SUPPORT_EMAIL}
           </a>
-          .
         </p>
       </div>
     </SectionWrapper>

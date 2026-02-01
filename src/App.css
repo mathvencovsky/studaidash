@@ -1,8 +1,27 @@
-/* Clean slate - no Vite template styles */
+/* App-level styles - minimal, no template defaults */
+
+/* Remove any remaining Vite template styles */
 #root {
-  min-height: 100vh;
   width: 100%;
+  min-height: 100vh;
+  min-height: 100dvh;
   margin: 0;
   padding: 0;
   text-align: initial;
+}
+
+/* Smooth scrolling for anchor navigation */
+html {
+  scroll-behavior: smooth;
+}
+
+/* Focus visible improvements */
+:focus-visible {
+  outline: 2px solid hsl(var(--primary));
+  outline-offset: 2px;
+}
+
+/* Remove focus outline for mouse users */
+:focus:not(:focus-visible) {
+  outline: none;
 }

@@ -36,7 +36,8 @@ export function SectionWrapper({
       tabIndex={tabIndex}
       className={cn(
         variantStyles[variant],
-        compact ? "py-10 md:py-12" : "py-12 md:py-16",
+        // Mobile-first spacing: py-10 mobile, py-12/14 desktop
+        compact ? "py-8 md:py-10" : "py-10 md:py-12 lg:py-14",
         "outline-none relative overflow-hidden",
         withNoise && "noise-bg",
         className
