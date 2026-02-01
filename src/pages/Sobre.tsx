@@ -64,7 +64,7 @@ export default function Sobre() {
           <section className="mb-8">
             <h2 className="text-xl font-semibold text-foreground mb-4">O problema que resolvemos</h2>
             <p className="text-muted-foreground">
-              Muita gente estuda muito, mas sem direção. Abre livros, assiste aulas, faz exercícios — mas não tem clareza se está evoluindo. O resultado? Ansiedade, procrastinação e desistência.
+              Muita gente estuda muito, mas sem direção. Abre livros, assiste aulas, faz exercícios, mas não tem clareza se está evoluindo. O resultado? Ansiedade, procrastinação e desistência.
             </p>
             <p className="text-muted-foreground mt-2">
               O StudAI organiza seus estudos em trilhas personalizadas, cria planos diários realistas e mostra seu progresso real. Você sempre sabe o que fazer hoje e como está sua evolução.

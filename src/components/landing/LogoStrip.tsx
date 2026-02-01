@@ -41,7 +41,7 @@ export function LogoStrip() {
     <section className="py-12 border-y bg-muted/30">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <p className="text-center text-sm text-muted-foreground mb-8">
-          Feito para quem precisa estudar com constância — sem depender de motivação.
+          Feito para quem precisa estudar com constância. Sem depender de motivação.
         </p>
         
         <div className="flex flex-wrap justify-center items-center gap-8 md:gap-12 mb-10">

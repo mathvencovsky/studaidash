@@ -4,7 +4,7 @@ import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 
 const testimonials = [
   {
-    quote: "Consegui manter a constância que nunca tive antes. O plano diário me ajuda a não procrastinar — sei exatamente o que fazer quando sento para estudar.",
+    quote: "Consegui manter a constância que nunca tive antes. O plano diário me ajuda a não procrastinar. Sei exatamente o que fazer quando sento para estudar.",
     name: "Marina C.",
     role: "Concurso Público",
     initials: "MC",
@@ -16,7 +16,7 @@ const testimonials = [
     initials: "RM",
   },
   {
-    quote: "Finalmente consigo ver meu progresso real. Não é sobre estudar muito, é sobre estudar certo — e a plataforma me mostrou isso.",
+    quote: "Finalmente consigo ver meu progresso real. Não é sobre estudar muito, é sobre estudar certo. A plataforma me mostrou isso.",
     name: "Juliana A.",
     role: "Residência Médica",
     initials: "JA",
