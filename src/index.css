@@ -1,19 +1,25 @@
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-/* StudAI Design System - Vibrant, memorable, YC-inspired */
+/* StudAI Design System - Premium, YC-inspired with bold personality */
 
 @layer base {
   :root {
+    /* Typography */
+    --font-display: 'Plus Jakarta Sans', system-ui, sans-serif;
+    --font-body: 'Plus Jakarta Sans', system-ui, sans-serif;
+
     --background: 220 20% 98%;
-    --foreground: 234 85% 15%;
+    --foreground: 234 85% 12%;
 
     --card: 0 0% 100%;
-    --card-foreground: 234 85% 15%;
+    --card-foreground: 234 85% 12%;
 
     --popover: 0 0% 100%;
-    --popover-foreground: 234 85% 15%;
+    --popover-foreground: 234 85% 12%;
 
     --primary: 234 67% 30%;
     --primary-foreground: 0 0% 100%;
@@ -22,12 +28,12 @@
     --secondary-foreground: 234 67% 30%;
 
     --muted: 220 20% 94%;
-    --muted-foreground: 220 15% 40%;
+    --muted-foreground: 220 20% 35%;
 
     --accent: 222 89% 55%;
     --accent-foreground: 0 0% 100%;
 
-    /* Warm accent - coral/orange for energy */
+    /* Warm accent - coral/orange for energy and highlights */
     --accent-warm: 24 95% 53%;
     --accent-warm-foreground: 0 0% 100%;
 
@@ -56,15 +62,24 @@
     --input: 220 20% 88%;
     --ring: 234 67% 30%;
 
-    --radius: 0.5rem;
+    --radius: 0.75rem;
 
     /* Gradients */
     --gradient-start: 234 67% 30%;
     --gradient-end: 222 89% 55%;
     --gradient-warm: 24 95% 53%;
 
+    /* Premium Shadows */
+    --shadow-sm: 0 1px 2px 0 hsl(234 85% 12% / 0.05);
+    --shadow-md: 0 4px 6px -1px hsl(234 85% 12% / 0.08), 0 2px 4px -2px hsl(234 85% 12% / 0.06);
+    --shadow-lg: 0 10px 15px -3px hsl(234 85% 12% / 0.1), 0 4px 6px -4px hsl(234 85% 12% / 0.08);
+    --shadow-xl: 0 20px 25px -5px hsl(234 85% 12% / 0.12), 0 8px 10px -6px hsl(234 85% 12% / 0.08);
+    --shadow-2xl: 0 25px 50px -12px hsl(234 85% 12% / 0.25);
+    --shadow-glow-primary: 0 0 30px -5px hsl(var(--primary) / 0.4);
+    --shadow-glow-warm: 0 0 30px -5px hsl(var(--accent-warm) / 0.4);
+
     --sidebar-background: 0 0% 100%;
-    --sidebar-foreground: 234 85% 15%;
+    --sidebar-foreground: 234 85% 12%;
     --sidebar-primary: 234 67% 30%;
     --sidebar-primary-foreground: 0 0% 100%;
     --sidebar-accent: 220 30% 94%;
@@ -110,6 +125,12 @@
     --input: 234 50% 18%;
     --ring: 222 89% 55%;
 
+    --shadow-sm: 0 1px 2px 0 hsl(0 0% 0% / 0.2);
+    --shadow-md: 0 4px 6px -1px hsl(0 0% 0% / 0.3), 0 2px 4px -2px hsl(0 0% 0% / 0.2);
+    --shadow-lg: 0 10px 15px -3px hsl(0 0% 0% / 0.35), 0 4px 6px -4px hsl(0 0% 0% / 0.25);
+    --shadow-xl: 0 20px 25px -5px hsl(0 0% 0% / 0.4), 0 8px 10px -6px hsl(0 0% 0% / 0.3);
+    --shadow-2xl: 0 25px 50px -12px hsl(0 0% 0% / 0.5);
+
     --sidebar-background: 234 70% 8%;
     --sidebar-foreground: 220 20% 95%;
     --sidebar-primary: 222 89% 55%;
@@ -126,8 +147,46 @@
     @apply border-border;
   }
 
+  html {
+    font-family: var(--font-body);
+  }
+
   body {
     @apply bg-background text-foreground;
+    font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+  }
+
+  /* Display typography for headings */
+  .display-h1 {
+    font-family: var(--font-display);
+    @apply text-4xl sm:text-5xl lg:text-6xl font-extrabold tracking-tight leading-[1.1];
+  }
+
+  .display-h2 {
+    font-family: var(--font-display);
+    @apply text-2xl sm:text-3xl lg:text-4xl font-bold tracking-tight leading-[1.2];
+  }
+
+  .display-h3 {
+    font-family: var(--font-display);
+    @apply text-xl sm:text-2xl font-bold tracking-tight leading-[1.25];
+  }
+}
+
+/* Noise/grain texture for visual signature */
+@layer utilities {
+  .noise-bg {
+    position: relative;
+  }
+  
+  .noise-bg::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise' x='0' y='0'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
+    opacity: 0.03;
+    pointer-events: none;
+    z-index: 0;
   }
 }
 
@@ -166,5 +225,43 @@
   /* Smooth scroll for mobile */
   .scroll-smooth {
     -webkit-overflow-scrolling: touch;
+  }
+
+  /* Premium shadow utilities */
+  .shadow-premium-sm {
+    box-shadow: var(--shadow-sm);
+  }
+  
+  .shadow-premium-md {
+    box-shadow: var(--shadow-md);
+  }
+  
+  .shadow-premium-lg {
+    box-shadow: var(--shadow-lg);
+  }
+  
+  .shadow-premium-xl {
+    box-shadow: var(--shadow-xl);
+  }
+  
+  .shadow-premium-2xl {
+    box-shadow: var(--shadow-2xl);
+  }
+
+  .shadow-glow-primary {
+    box-shadow: var(--shadow-glow-primary);
+  }
+
+  .shadow-glow-warm {
+    box-shadow: var(--shadow-glow-warm);
+  }
+
+  /* Gradient text utility */
+  .gradient-text {
+    @apply bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent;
+  }
+
+  .gradient-text-warm {
+    @apply bg-gradient-to-r from-accent-warm to-primary bg-clip-text text-transparent;
   }
 }

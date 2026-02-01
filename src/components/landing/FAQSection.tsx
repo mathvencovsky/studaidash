@@ -73,7 +73,7 @@ const baseFaqs: FAQItem[] = [
       <>
         Usamos seus dados para operar a conta e registrar seu progresso. Não vendemos dados pessoais. 
         Você pode solicitar exclusão da conta e dados pelo suporte. Veja detalhes em{" "}
-        <Link to="/privacidade" className="text-primary font-medium hover:underline focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 rounded">
+        <Link to="/privacidade" className="text-primary font-bold hover:underline focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 rounded">
           Privacidade
         </Link>
         .
@@ -85,7 +85,7 @@ const baseFaqs: FAQItem[] = [
     answer: (
       <>
         Você pode solicitar a exclusão pelo e-mail{" "}
-        <a href={`mailto:${SUPPORT_EMAIL}`} className="text-primary font-medium hover:underline focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 rounded">
+        <a href={`mailto:${SUPPORT_EMAIL}`} className="text-primary font-bold hover:underline focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 rounded">
           {SUPPORT_EMAIL}
         </a>
         . Nós confirmamos o pedido e orientamos os próximos passos.
@@ -103,7 +103,7 @@ const baseFaqs: FAQItem[] = [
       <>
         O Pro está em desenvolvimento e deve incluir trilhas ilimitadas e relatórios mais detalhados. 
         Se quiser, entre na lista de espera na seção de{" "}
-        <a href="#planos" className="text-primary font-medium hover:underline focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 rounded">
+        <a href="#planos" className="text-primary font-bold hover:underline focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 rounded">
           Planos
         </a>
         .
@@ -130,11 +130,11 @@ export function FAQSection() {
     <SectionWrapper id="faq" variant="tint" tabIndex={-1}>
       <div className="max-w-3xl mx-auto">
         <div className="text-center mb-10">
-          <KickerBadge variant="primary" className="mb-3">
-            <HelpCircle className="h-3 w-3" />
+          <KickerBadge variant="primary" className="mb-4">
+            <HelpCircle className="h-3.5 w-3.5" />
             Dúvidas
           </KickerBadge>
-          <h2 className="text-2xl sm:text-3xl font-bold text-foreground">
+          <h2 className="display-h2 text-foreground">
             Perguntas <HeadlineHighlight variant="primary">frequentes</HeadlineHighlight>
           </h2>
           <p className="mt-3 text-muted-foreground">
@@ -147,23 +147,23 @@ export function FAQSection() {
             <AccordionItem 
               key={index} 
               value={`item-${index}`}
-              className="bg-card border-2 rounded-lg px-4 data-[state=open]:border-primary/30 transition-all"
+              className="bg-card border-2 rounded-xl px-5 data-[state=open]:border-primary/40 data-[state=open]:shadow-lg transition-all"
             >
-              <AccordionTrigger className="text-left font-semibold text-foreground hover:no-underline py-4 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 rounded">
+              <AccordionTrigger className="text-left font-bold text-foreground hover:no-underline py-5 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 rounded">
                 {faq.question}
               </AccordionTrigger>
-              <AccordionContent className="text-muted-foreground pb-4">
+              <AccordionContent className="text-muted-foreground pb-5 leading-relaxed font-medium">
                 {faq.answer}
               </AccordionContent>
             </AccordionItem>
           ))}
         </Accordion>
 
-        <p className="text-center text-sm text-muted-foreground mt-8">
+        <p className="text-center text-sm text-muted-foreground mt-8 font-medium">
           Ainda com dúvidas? Fale com{" "}
           <a
             href={`mailto:${SUPPORT_EMAIL}`}
-            className="text-primary font-medium hover:underline focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 rounded"
+            className="text-primary font-bold hover:underline focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 rounded"
           >
             {SUPPORT_EMAIL}
           </a>

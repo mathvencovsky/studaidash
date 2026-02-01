@@ -8,16 +8,16 @@ interface KickerBadgeProps {
 }
 
 const variantStyles = {
-  warm: "border-accent-warm/30 bg-accent-warm/10 text-accent-warm",
-  primary: "border-primary/30 bg-primary/10 text-primary",
-  cool: "border-accent-cool/30 bg-accent-cool/10 text-accent-cool",
+  warm: "border-accent-warm/40 bg-accent-warm/10 text-accent-warm shadow-sm",
+  primary: "border-primary/40 bg-primary/10 text-primary shadow-sm",
+  cool: "border-accent-cool/40 bg-accent-cool/10 text-accent-cool shadow-sm",
 };
 
 export function KickerBadge({ children, variant = "warm", className }: KickerBadgeProps) {
   return (
     <span
       className={cn(
-        "inline-flex items-center gap-1.5 px-3 py-1 text-xs font-medium rounded-full border",
+        "inline-flex items-center gap-1.5 px-3.5 py-1.5 text-xs font-semibold rounded-full border-2 tracking-wide uppercase",
         variantStyles[variant],
         className
       )}

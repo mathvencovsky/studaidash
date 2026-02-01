@@ -27,7 +27,7 @@ const testimonials = [
     meta: "Rotina: 1h por dia",
     highlight: "Plano do dia pronto e revisões recorrentes",
     initials: "MC",
-    color: "bg-accent-warm/15 text-accent-warm",
+    color: "bg-accent-warm/20 text-accent-warm border-accent-warm/30",
   },
   {
     focus: "certificacao" as const,
@@ -38,7 +38,7 @@ const testimonials = [
     meta: "Objetivo: prova em 90 dias",
     highlight: "Cobertura semanal por tópico",
     initials: "RM",
-    color: "bg-primary/15 text-primary",
+    color: "bg-primary/20 text-primary border-primary/30",
   },
   {
     focus: "faculdade" as const,
@@ -49,7 +49,7 @@ const testimonials = [
     meta: "Rotina: noites e fins de semana",
     highlight: "Organização por disciplina e semana",
     initials: "JA",
-    color: "bg-success/15 text-success",
+    color: "bg-success/20 text-success border-success/30",
   },
 ];
 
@@ -74,11 +74,11 @@ export function Testimonials() {
   return (
     <SectionWrapper id="depoimentos" variant="plain">
       <div className="text-center mb-10">
-        <KickerBadge variant="primary" className="mb-3">
-          <MessageSquare className="h-3 w-3" />
+        <KickerBadge variant="primary" className="mb-4">
+          <MessageSquare className="h-3.5 w-3.5" />
           Experiências reais
         </KickerBadge>
-        <h2 className="text-2xl sm:text-3xl font-bold text-foreground">
+        <h2 className="display-h2 text-foreground">
           Resultados que aparecem na <HeadlineHighlight variant="primary">rotina</HeadlineHighlight>
         </h2>
         <p className="mt-3 text-muted-foreground max-w-2xl mx-auto">
@@ -88,23 +88,23 @@ export function Testimonials() {
 
       <div className="grid lg:grid-cols-3 gap-6">
         {/* Featured testimonial */}
-        <Card className="lg:col-span-2 relative overflow-hidden border-2 border-primary/20 shadow-xl bg-gradient-to-br from-card to-primary/5">
+        <Card className="lg:col-span-2 relative overflow-hidden border-2 border-primary/30 shadow-2xl bg-gradient-to-br from-card via-card to-primary/5">
           <CardContent className="pt-8 pb-6">
             {/* Decorative quote */}
-            <div className="absolute top-4 right-4 w-16 h-16 rounded-full bg-accent-warm/10 flex items-center justify-center">
-              <span className="text-4xl text-accent-warm/40 font-serif">"</span>
+            <div className="absolute top-4 right-4 w-20 h-20 rounded-full bg-accent-warm/10 flex items-center justify-center">
+              <span className="text-5xl text-accent-warm/30 font-serif">"</span>
             </div>
             
             <div className="flex flex-wrap items-center gap-2 mb-4">
-              <span className={`text-xs font-semibold px-3 py-1 rounded-full ${featured.color}`}>
+              <span className={`text-xs font-bold px-3 py-1.5 rounded-full border-2 ${featured.color}`}>
                 {featured.role}
               </span>
-              <span className="text-xs text-muted-foreground font-medium">
+              <span className="text-xs text-muted-foreground font-semibold">
                 {featured.highlight}
               </span>
             </div>
             
-            <p className="text-xs text-muted-foreground mb-4 font-medium">
+            <p className="text-xs text-muted-foreground mb-4 font-semibold">
               {featured.meta}
             </p>
 
@@ -113,14 +113,14 @@ export function Testimonials() {
             </p>
 
             <div className="flex items-center gap-3">
-              <Avatar className="h-12 w-12 border-2 border-primary/20">
-                <AvatarFallback className="bg-primary/10 text-primary text-sm font-bold">
+              <Avatar className="h-12 w-12 border-2 border-primary/30 shadow-md">
+                <AvatarFallback className="bg-primary/15 text-primary text-sm font-bold">
                   {featured.initials}
                 </AvatarFallback>
               </Avatar>
               <div>
-                <p className="font-semibold text-foreground">{featured.name}</p>
-                <p className="text-xs text-muted-foreground">{featured.role}</p>
+                <p className="font-bold text-foreground">{featured.name}</p>
+                <p className="text-xs text-muted-foreground font-medium">{featured.role}</p>
               </div>
             </div>
           </CardContent>
@@ -129,29 +129,29 @@ export function Testimonials() {
         {/* Secondary testimonials */}
         <div className="flex flex-col gap-6">
           {rest.map((t) => (
-            <Card key={t.name} className="relative flex-1 border-2 hover:border-primary/30 transition-all hover:shadow-lg">
+            <Card key={t.name} className="relative flex-1 border-2 hover:border-primary/40 transition-all duration-300 hover:shadow-xl transform hover:-translate-y-0.5">
               <CardContent className="pt-6 pb-5">
                 <div className="flex items-center gap-2 mb-3">
-                  <span className={`text-xs font-semibold px-2.5 py-0.5 rounded-full ${t.color}`}>
+                  <span className={`text-xs font-bold px-3 py-1 rounded-full border-2 ${t.color}`}>
                     {t.role}
                   </span>
-                  <span className="text-xs text-muted-foreground font-medium">
+                  <span className="text-xs text-muted-foreground font-semibold">
                     {t.meta}
                   </span>
                 </div>
 
-                <p className="text-foreground mb-4 relative z-10 text-sm leading-relaxed">
+                <p className="text-foreground mb-4 relative z-10 text-sm leading-relaxed font-medium">
                   {t.quote}
                 </p>
 
                 <div className="flex items-center gap-3">
-                  <Avatar className="h-9 w-9 border border-border">
-                    <AvatarFallback className="bg-muted text-foreground text-xs font-semibold">
+                  <Avatar className="h-9 w-9 border-2 border-border">
+                    <AvatarFallback className="bg-muted text-foreground text-xs font-bold">
                       {t.initials}
                     </AvatarFallback>
                   </Avatar>
                   <div>
-                    <p className="font-semibold text-foreground text-sm">{t.name}</p>
+                    <p className="font-bold text-foreground text-sm">{t.name}</p>
                     <p className="text-xs text-muted-foreground">{t.role}</p>
                   </div>
                 </div>
@@ -161,7 +161,7 @@ export function Testimonials() {
         </div>
       </div>
 
-      <p className="text-center text-xs text-muted-foreground mt-8">
+      <p className="text-center text-xs text-muted-foreground mt-8 font-medium">
         Depoimentos representam experiências de uso. Resultados variam conforme rotina e consistência.
       </p>
     </SectionWrapper>

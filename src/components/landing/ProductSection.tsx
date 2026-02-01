@@ -143,34 +143,34 @@ export function ProductSection() {
   return (
     <SectionWrapper id="produto" variant="plain" tabIndex={-1}>
       <div className="text-center mb-10">
-        <KickerBadge variant="primary" className="mb-3">
-          <Eye className="h-3 w-3" />
+        <KickerBadge variant="primary" className="mb-4">
+          <Eye className="h-3.5 w-3.5" />
           Prévia do produto
         </KickerBadge>
-        <h2 className="text-2xl sm:text-3xl font-bold text-foreground">
+        <h2 className="display-h2 text-foreground">
           Veja seu <HeadlineHighlight variant="primary">plano em ação</HeadlineHighlight>
         </h2>
         <p className="mt-3 text-muted-foreground max-w-2xl mx-auto">
-          Prévia do painel para: <span className="font-semibold text-foreground">{preview.subtitle}</span>.
+          Prévia do painel para: <span className="font-bold text-foreground">{preview.subtitle}</span>.
         </p>
       </div>
 
       <div className="grid lg:grid-cols-2 gap-10 items-start">
         {/* Dashboard Preview */}
         <div className="order-2 lg:order-1">
-          <div className="bg-card rounded-xl border-2 border-border shadow-2xl p-6 relative">
+          <div className="bg-card rounded-2xl border-2 border-border shadow-2xl p-6 relative">
             {/* Decorative badge */}
             <div className="absolute -top-3 left-6">
-              <span className="bg-accent-warm text-accent-warm-foreground text-xs font-semibold px-3 py-1 rounded-full shadow-lg">
+              <span className="bg-gradient-to-r from-accent-warm to-accent-warm/80 text-accent-warm-foreground text-xs font-bold px-4 py-1.5 rounded-full shadow-lg">
                 Exemplo ilustrativo
               </span>
             </div>
 
             <div className="space-y-4 mt-2">
               {/* Header */}
-              <div className="flex items-center justify-between pb-4 border-b">
+              <div className="flex items-center justify-between pb-4 border-b-2">
                 <div>
-                  <p className="text-sm font-medium text-foreground">Olá, estudante.</p>
+                  <p className="text-sm font-bold text-foreground">Olá, estudante.</p>
                   <p className="text-xs text-muted-foreground">Visão geral do progresso</p>
                 </div>
                 <div className="w-10 h-10 rounded-full bg-gradient-to-br from-primary to-accent flex items-center justify-center shadow-lg">
@@ -179,30 +179,30 @@ export function ProductSection() {
               </div>
 
               {/* Trail Card */}
-              <Card className="border-2 border-primary/30 bg-primary/5 shadow-md">
+              <Card className="border-2 border-primary/40 bg-gradient-to-br from-primary/5 to-accent/5 shadow-lg">
                 <CardContent className="p-4">
                   <div className="flex items-center justify-between mb-3">
-                    <span className="text-sm font-semibold text-foreground">{preview.trailName}</span>
-                    <span className="text-xs font-medium bg-primary/10 text-primary px-2 py-0.5 rounded-full">{preview.trailProgress}% concluído</span>
+                    <span className="text-sm font-bold text-foreground">{preview.trailName}</span>
+                    <span className="text-xs font-bold bg-primary/15 text-primary px-3 py-1 rounded-full">{preview.trailProgress}% concluído</span>
                   </div>
                   <Progress value={preview.trailProgress} className="h-2.5" />
-                  <p className="text-xs text-muted-foreground mt-2">
+                  <p className="text-xs text-muted-foreground mt-2 font-medium">
                     {preview.trailDaysLeft} dias restantes • {preview.trailHoursPerDay}/dia necessárias
                   </p>
                 </CardContent>
               </Card>
 
               {/* Daily Tasks */}
-              <Card className="shadow-md">
+              <Card className="shadow-lg border-2">
                 <CardContent className="p-4">
-                  <p className="text-sm font-semibold mb-3 text-foreground">Plano de hoje</p>
+                  <p className="text-sm font-bold mb-3 text-foreground">Plano de hoje</p>
                   <div className="space-y-2.5">
                     {preview.tasks.map((task, i) => (
                       <div key={i} className="flex items-center gap-2.5 text-sm">
                         <div className={`w-4 h-4 rounded-full border-2 flex items-center justify-center ${task.done ? 'bg-success border-success' : 'border-muted-foreground/40'}`}>
                           {task.done && <span className="text-success-foreground text-[10px]">✓</span>}
                         </div>
-                        <span className={task.done ? 'line-through text-muted-foreground' : 'text-foreground'}>{task.label}</span>
+                        <span className={`font-medium ${task.done ? 'line-through text-muted-foreground' : 'text-foreground'}`}>{task.label}</span>
                       </div>
                     ))}
                   </div>
@@ -212,9 +212,9 @@ export function ProductSection() {
               {/* Stats */}
               <div className="grid grid-cols-3 gap-3">
                 {preview.stats.map((stat) => (
-                  <div key={stat.label} className="text-center p-3 bg-muted/60 rounded-xl border">
+                  <div key={stat.label} className="text-center p-3 bg-muted/50 rounded-xl border-2 border-border">
                     <p className="text-lg font-bold text-foreground">{stat.value}</p>
-                    <p className="text-xs text-muted-foreground font-medium">{stat.label}</p>
+                    <p className="text-xs text-muted-foreground font-semibold">{stat.label}</p>
                   </div>
                 ))}
               </div>
@@ -228,14 +228,14 @@ export function ProductSection() {
             {features.map((feature) => (
               <div
                 key={feature.title}
-                className="p-4 rounded-xl border-2 bg-card hover:border-primary/40 hover:shadow-lg transition-all duration-200 group"
+                className="p-5 rounded-xl border-2 bg-card hover:border-primary/40 hover:shadow-xl transition-all duration-300 group transform hover:-translate-y-0.5"
               >
-                <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center mb-3 group-hover:bg-primary/15 transition-colors">
+                <div className="w-11 h-11 rounded-xl bg-gradient-to-br from-primary/15 to-accent/10 flex items-center justify-center mb-3 group-hover:from-primary/20 group-hover:to-accent/15 transition-colors shadow-sm">
                   <feature.icon className="h-5 w-5 text-primary" />
                 </div>
-                <h3 className="font-semibold text-foreground mb-1">{feature.title}</h3>
-                <p className="text-sm text-muted-foreground">{feature.description}</p>
-                <p className="text-xs text-accent-warm font-semibold mt-2">{feature.why}</p>
+                <h3 className="font-bold text-foreground mb-1">{feature.title}</h3>
+                <p className="text-sm text-muted-foreground leading-relaxed">{feature.description}</p>
+                <p className="text-xs text-accent-warm font-bold mt-2">{feature.why}</p>
               </div>
             ))}
           </div>
@@ -245,7 +245,7 @@ export function ProductSection() {
             <Button 
               size="lg" 
               onClick={scrollToAuth} 
-              className="text-base shadow-lg shadow-primary/25 hover:shadow-xl hover:shadow-primary/30 transition-all focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2"
+              className="text-base font-semibold bg-gradient-to-r from-primary to-accent hover:from-primary/90 hover:to-accent/90 shadow-xl shadow-primary/25 hover:shadow-2xl hover:shadow-primary/35 transition-all duration-300 transform hover:-translate-y-0.5 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2"
             >
               Começar grátis
               <ArrowRight className="ml-2 h-4 w-4" />

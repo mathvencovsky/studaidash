@@ -132,20 +132,20 @@ export function AuthCard() {
   };
 
   return (
-    <Card className="w-full max-w-md shadow-lg border-border/50">
+    <Card className="w-full max-w-md shadow-2xl border-2 border-border/80">
       <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as "login" | "register")}>
         <CardHeader className="pb-4">
-          <CardTitle className="text-xl">{headerCopy.title}</CardTitle>
-          <CardDescription className="text-sm">{headerCopy.description}</CardDescription>
+          <CardTitle className="text-xl font-bold">{headerCopy.title}</CardTitle>
+          <CardDescription className="text-sm font-medium">{headerCopy.description}</CardDescription>
           
           {/* Context line based on profile */}
-          <p className="text-xs text-primary font-medium pt-2">
+          <p className="text-xs text-primary font-bold pt-2">
             {headerCopy.contextLine}
           </p>
           
           <TabsList className="grid w-full grid-cols-2 mt-4">
-            <TabsTrigger value="login">Entrar</TabsTrigger>
-            <TabsTrigger value="register">Criar conta</TabsTrigger>
+            <TabsTrigger value="login" className="font-semibold">Entrar</TabsTrigger>
+            <TabsTrigger value="register" className="font-semibold">Criar conta</TabsTrigger>
           </TabsList>
         </CardHeader>
         
@@ -154,7 +154,7 @@ export function AuthCard() {
           <TabsContent value="login" className="mt-0">
             <form onSubmit={handleLogin} className="space-y-4">
               <div className="space-y-2">
-                <Label htmlFor="login-email">E-mail</Label>
+                <Label htmlFor="login-email" className="font-semibold">E-mail</Label>
                 <Input
                   id="login-email"
                   type="email"
@@ -164,15 +164,16 @@ export function AuthCard() {
                   disabled={isLoading}
                   autoComplete="email"
                   required
+                  className="border-2"
                 />
               </div>
               
               <div className="space-y-2">
                 <div className="flex items-center justify-between">
-                  <Label htmlFor="login-password">Senha</Label>
+                  <Label htmlFor="login-password" className="font-semibold">Senha</Label>
                   <a
                     href={`mailto:${SUPPORT_EMAIL}?subject=Ajuda%20para%20acessar%20minha%20conta`}
-                    className="inline-flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground transition-colors"
+                    className="inline-flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground transition-colors font-medium"
                   >
                     <HelpCircle className="h-3 w-3" />
                     Precisa de ajuda?
@@ -187,13 +188,13 @@ export function AuthCard() {
                     onChange={(e) => setLoginPassword(e.target.value)}
                     disabled={isLoading}
                     autoComplete="current-password"
-                    className="pr-10"
+                    className="pr-10 border-2"
                     required
                   />
                   <button
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 rounded"
                     aria-label={showPassword ? "Ocultar senha" : "Mostrar senha"}
                     disabled={isLoading}
                   >
@@ -202,7 +203,7 @@ export function AuthCard() {
                 </div>
               </div>
 
-              <Button type="submit" className="w-full" disabled={isLoading}>
+              <Button type="submit" className="w-full font-semibold bg-gradient-to-r from-primary to-accent hover:from-primary/90 hover:to-accent/90 shadow-lg" disabled={isLoading}>
                 {isLoading ? (
                   <>
                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />
@@ -213,11 +214,11 @@ export function AuthCard() {
                 )}
               </Button>
 
-              <p className="text-xs text-muted-foreground text-center pt-2">
+              <p className="text-xs text-muted-foreground text-center pt-2 font-medium">
                 Não consegue acessar? Escreva para{" "}
                 <a 
                   href={`mailto:${SUPPORT_EMAIL}?subject=Problema%20de%20acesso`} 
-                  className="text-primary hover:underline"
+                  className="text-primary font-bold hover:underline"
                 >
                   {SUPPORT_EMAIL}
                 </a>
@@ -229,7 +230,7 @@ export function AuthCard() {
           <TabsContent value="register" className="mt-0">
             <form onSubmit={handleRegister} className="space-y-4">
               <div className="space-y-2">
-                <Label htmlFor="register-email">E-mail</Label>
+                <Label htmlFor="register-email" className="font-semibold">E-mail</Label>
                 <Input
                   id="register-email"
                   type="email"
@@ -239,11 +240,12 @@ export function AuthCard() {
                   disabled={isLoading}
                   autoComplete="email"
                   required
+                  className="border-2"
                 />
               </div>
               
               <div className="space-y-2">
-                <Label htmlFor="register-password">Senha</Label>
+                <Label htmlFor="register-password" className="font-semibold">Senha</Label>
                 <div className="relative">
                   <Input
                     id="register-password"
@@ -253,13 +255,13 @@ export function AuthCard() {
                     onChange={(e) => setRegisterPassword(e.target.value)}
                     disabled={isLoading}
                     autoComplete="new-password"
-                    className="pr-10"
+                    className="pr-10 border-2"
                     required
                   />
                   <button
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 rounded"
                     aria-label={showPassword ? "Ocultar senha" : "Mostrar senha"}
                     disabled={isLoading}
                   >
@@ -269,7 +271,7 @@ export function AuthCard() {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="confirm-password">Confirmar senha</Label>
+                <Label htmlFor="confirm-password" className="font-semibold">Confirmar senha</Label>
                 <Input
                   id="confirm-password"
                   type="password"
@@ -279,30 +281,31 @@ export function AuthCard() {
                   disabled={isLoading}
                   autoComplete="new-password"
                   required
+                  className="border-2"
                 />
               </div>
 
               {/* Password validation checklist */}
-              <div className="space-y-1.5 text-xs">
-                <div className={`flex items-center gap-2 ${passwordChecks.hasMinLength ? "text-primary" : "text-muted-foreground"}`}>
+              <div className="space-y-2 text-xs">
+                <div className={`flex items-center gap-2 ${passwordChecks.hasMinLength ? "text-success" : "text-muted-foreground"}`}>
                   {passwordChecks.hasMinLength ? (
-                    <CheckCircle2 className="h-3.5 w-3.5" />
+                    <CheckCircle2 className="h-4 w-4" />
                   ) : (
-                    <Circle className="h-3.5 w-3.5" />
+                    <Circle className="h-4 w-4" />
                   )}
-                  <span>Mínimo de 6 caracteres</span>
+                  <span className="font-medium">Mínimo de 6 caracteres</span>
                 </div>
-                <div className={`flex items-center gap-2 ${passwordChecks.passwordsMatch ? "text-primary" : "text-muted-foreground"}`}>
+                <div className={`flex items-center gap-2 ${passwordChecks.passwordsMatch ? "text-success" : "text-muted-foreground"}`}>
                   {passwordChecks.passwordsMatch ? (
-                    <CheckCircle2 className="h-3.5 w-3.5" />
+                    <CheckCircle2 className="h-4 w-4" />
                   ) : (
-                    <Circle className="h-3.5 w-3.5" />
+                    <Circle className="h-4 w-4" />
                   )}
-                  <span>Senhas iguais</span>
+                  <span className="font-medium">Senhas iguais</span>
                 </div>
               </div>
 
-              <Button type="submit" className="w-full" disabled={isLoading}>
+              <Button type="submit" className="w-full font-semibold bg-gradient-to-r from-primary to-accent hover:from-primary/90 hover:to-accent/90 shadow-lg" disabled={isLoading}>
                 {isLoading ? (
                   <>
                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />
@@ -313,11 +316,11 @@ export function AuthCard() {
                 )}
               </Button>
 
-              <p className="text-xs text-muted-foreground text-center pt-2">
+              <p className="text-xs text-muted-foreground text-center pt-2 font-medium">
                 Ao criar sua conta, você concorda com os{" "}
-                <Link to="/termos" className="text-primary hover:underline">Termos de Uso</Link>
+                <Link to="/termos" className="text-primary font-bold hover:underline">Termos de Uso</Link>
                 {" "}e com a{" "}
-                <Link to="/privacidade" className="text-primary hover:underline">Política de Privacidade</Link>.
+                <Link to="/privacidade" className="text-primary font-bold hover:underline">Política de Privacidade</Link>.
               </p>
             </form>
           </TabsContent>

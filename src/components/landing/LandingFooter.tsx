@@ -49,7 +49,7 @@ export function LandingFooter() {
 
   const renderLink = (link: FooterLink) => {
     const baseClass =
-      "text-sm text-muted-foreground hover:text-foreground transition-colors focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 rounded";
+      "text-sm text-muted-foreground hover:text-foreground transition-colors focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 rounded font-medium";
 
     if (link.kind === "hash") {
       return (
@@ -75,27 +75,27 @@ export function LandingFooter() {
   };
 
   return (
-    <footer className="bg-card border-t-2 py-10" role="contentinfo">
+    <footer className="bg-card border-t-2 py-12" role="contentinfo">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="grid grid-cols-2 md:grid-cols-5 gap-8">
           {/* Brand */}
           <div className="col-span-2 md:col-span-1">
-            <div className="flex items-center gap-2 mb-4">
-              <div className="w-9 h-9 rounded-lg bg-gradient-to-br from-primary to-accent flex items-center justify-center shadow-lg">
+            <div className="flex items-center gap-2.5 mb-4">
+              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-primary to-accent flex items-center justify-center shadow-lg">
                 <GraduationCap className="w-5 h-5 text-primary-foreground" />
               </div>
-              <span className="font-bold text-foreground text-lg">StudAI</span>
+              <span className="font-bold text-foreground text-xl">StudAI</span>
             </div>
 
-            <p className="text-sm text-muted-foreground mb-4">
+            <p className="text-sm text-muted-foreground mb-4 leading-relaxed font-medium">
               Organize seus estudos com clareza. Acompanhe seu progresso com consistência.
             </p>
 
-            <p className="text-xs text-muted-foreground">
+            <p className="text-xs text-muted-foreground font-medium">
               Suporte:{" "}
               <a
                 href={`mailto:${SUPPORT_EMAIL}`}
-                className="text-primary font-medium hover:underline focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 rounded"
+                className="text-primary font-bold hover:underline focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 rounded"
               >
                 {SUPPORT_EMAIL}
               </a>
@@ -104,8 +104,8 @@ export function LandingFooter() {
 
           {/* Produto */}
           <nav aria-label="Produto">
-            <h4 className="font-bold text-foreground mb-3 text-sm">Produto</h4>
-            <ul className="space-y-2">
+            <h4 className="font-bold text-foreground mb-4 text-sm">Produto</h4>
+            <ul className="space-y-2.5">
               {footerLinks.produto.map((link) => (
                 <li key={link.label}>{renderLink(link)}</li>
               ))}
@@ -114,8 +114,8 @@ export function LandingFooter() {
 
           {/* Empresa */}
           <nav aria-label="Empresa">
-            <h4 className="font-bold text-foreground mb-3 text-sm">Empresa</h4>
-            <ul className="space-y-2">
+            <h4 className="font-bold text-foreground mb-4 text-sm">Empresa</h4>
+            <ul className="space-y-2.5">
               {footerLinks.empresa.map((link) => (
                 <li key={link.label}>{renderLink(link)}</li>
               ))}
@@ -124,8 +124,8 @@ export function LandingFooter() {
 
           {/* Suporte */}
           <nav aria-label="Suporte">
-            <h4 className="font-bold text-foreground mb-3 text-sm">Suporte</h4>
-            <ul className="space-y-2">
+            <h4 className="font-bold text-foreground mb-4 text-sm">Suporte</h4>
+            <ul className="space-y-2.5">
               {footerLinks.suporte.map((link) => (
                 <li key={link.label}>{renderLink(link)}</li>
               ))}
@@ -134,8 +134,8 @@ export function LandingFooter() {
 
           {/* Legal */}
           <nav aria-label="Legal">
-            <h4 className="font-bold text-foreground mb-3 text-sm">Legal</h4>
-            <ul className="space-y-2">
+            <h4 className="font-bold text-foreground mb-4 text-sm">Legal</h4>
+            <ul className="space-y-2.5">
               {footerLinks.legal.map((link) => (
                 <li key={link.label}>{renderLink(link)}</li>
               ))}
@@ -143,33 +143,33 @@ export function LandingFooter() {
           </nav>
         </div>
 
-        <div className="mt-10 pt-6 border-t flex flex-col sm:flex-row justify-between items-center gap-4">
-          <p className="text-sm text-muted-foreground">
+        <div className="mt-10 pt-6 border-t-2 flex flex-col sm:flex-row justify-between items-center gap-4">
+          <p className="text-sm text-muted-foreground font-medium">
             © {new Date().getFullYear()} StudAI. Todos os direitos reservados.
           </p>
 
-          <div className="flex items-center gap-4 text-sm">
+          <div className="flex items-center gap-5 text-sm">
             <a
               href={`mailto:${SUPPORT_EMAIL}`}
-              className="text-muted-foreground hover:text-foreground transition-colors focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 rounded"
+              className="text-muted-foreground hover:text-foreground transition-colors focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 rounded font-medium"
             >
               {SUPPORT_EMAIL}
             </a>
             <Link
               to="/privacidade"
-              className="text-muted-foreground hover:text-foreground transition-colors focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 rounded"
+              className="text-muted-foreground hover:text-foreground transition-colors focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 rounded font-medium"
             >
               Privacidade
             </Link>
             <Link
               to="/termos"
-              className="text-muted-foreground hover:text-foreground transition-colors focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 rounded"
+              className="text-muted-foreground hover:text-foreground transition-colors focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 rounded font-medium"
             >
               Termos
             </Link>
             <Link
               to="/seguranca"
-              className="text-muted-foreground hover:text-foreground transition-colors focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 rounded"
+              className="text-muted-foreground hover:text-foreground transition-colors focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 rounded font-medium"
             >
               Segurança
             </Link>
