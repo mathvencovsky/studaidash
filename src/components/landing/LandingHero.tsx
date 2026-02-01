@@ -88,7 +88,11 @@ function MiniProductPreview() {
       </p>
       
       {/* Mobile: horizontal scroll with proper constraints, Desktop: grid */}
-      <div className="flex w-full max-w-full min-w-0 gap-3 overflow-x-auto snap-x snap-mandatory scrollbar-hide -mx-4 px-4 pb-2 md:mx-0 md:px-0 md:grid md:grid-cols-3 md:gap-4 md:overflow-visible md:pb-0">
+      {/*
+        Important: avoid negative margins here.
+        They can increase the min-content width of the page on mobile and cause horizontal pan.
+      */}
+      <div className="flex w-full max-w-full min-w-0 gap-3 overflow-x-auto snap-x snap-mandatory overscroll-x-contain touch-pan-x scrollbar-hide pb-2 md:grid md:grid-cols-3 md:gap-4 md:overflow-visible md:pb-0">
         {/* Card 1: Hoje */}
         <Card className="shrink-0 w-[260px] min-w-[260px] snap-start bg-card border-2 border-border hover:border-primary/40 transition-all duration-300 shadow-lg md:w-auto md:min-w-0 md:shrink md:snap-none">
           <CardContent className="p-3 sm:p-4">
@@ -235,12 +239,13 @@ export function LandingHero() {
       <div className="hidden md:block absolute bottom-0 left-0 w-72 h-72 bg-primary/10 rounded-full blur-3xl pointer-events-none" />
       
       <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="grid lg:grid-cols-2 gap-8 lg:gap-12 items-start">
+        {/* Explicit base columns to avoid implicit grid sizing causing horizontal overflow on mobile */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12 items-start">
           {/* Left Column - Content */}
-          <div className="text-center lg:text-left">
+          <div className="min-w-0 text-center lg:text-left">
             {/* Kicker Badge - constrained width on mobile */}
             <div className="flex justify-center lg:justify-start mb-4">
-              <KickerBadge variant="warm" className="max-w-[280px] sm:max-w-none">
+              <KickerBadge variant="warm" className="max-w-[calc(100vw-2rem)] sm:max-w-none">
                 <Sparkles className="h-3.5 w-3.5 shrink-0" />
                 <span className="min-w-0 whitespace-normal text-center">
                   Para concursos, certificações e faculdade
@@ -289,7 +294,7 @@ export function LandingHero() {
             </div>
 
             {/* Dynamic Benefits - constrained width */}
-            <ul className="mt-5 space-y-2 max-w-sm mx-auto lg:mx-0 lg:max-w-lg text-left">
+            <ul className="mt-5 space-y-2 w-full max-w-[360px] mx-auto lg:mx-0 lg:max-w-lg text-left">
               {currentProfile.benefits.map((benefit, index) => (
                 <li key={index} className="flex items-start gap-2.5 text-sm text-foreground">
                   <CheckCircle2 className="h-4 w-4 text-success shrink-0 mt-0.5" />
@@ -299,7 +304,7 @@ export function LandingHero() {
             </ul>
 
             {/* CTAs - full width stacked on mobile */}
-            <div className="flex flex-col gap-3 mt-6 max-w-sm mx-auto lg:mx-0 lg:max-w-none lg:flex-row">
+            <div className="flex flex-col gap-3 mt-6 w-full max-w-[360px] mx-auto lg:mx-0 lg:max-w-none lg:flex-row">
               <Button 
                 size="lg" 
                 onClick={() => scrollToId("auth-card")}
@@ -319,12 +324,12 @@ export function LandingHero() {
             </div>
 
             {/* Microcopy below CTA */}
-            <p className="mt-3 text-sm text-muted-foreground text-center lg:text-left font-medium max-w-sm mx-auto lg:mx-0">
+            <p className="mt-3 text-sm text-muted-foreground text-center lg:text-left font-medium w-full max-w-[360px] mx-auto lg:mx-0 lg:max-w-lg">
               {currentProfile.microcopy}
             </p>
 
             {/* Trust Bar - wrap on mobile */}
-            <div className="flex flex-wrap items-center justify-center lg:justify-start gap-x-3 gap-y-2 mt-5 text-sm text-muted-foreground max-w-sm mx-auto lg:mx-0 lg:max-w-none">
+            <div className="flex flex-wrap items-center justify-center lg:justify-start gap-x-3 gap-y-2 mt-5 text-sm text-muted-foreground w-full max-w-[360px] mx-auto lg:mx-0 lg:max-w-none">
               <a 
                 href="mailto:support@studai.app" 
                 className="flex items-center gap-1.5 min-h-[44px] hover:text-foreground transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 rounded font-medium px-1"
@@ -349,13 +354,13 @@ export function LandingHero() {
             </div>
 
             {/* Product Preview - Mobile */}
-            <div className="mt-8 lg:hidden">
+            <div className="mt-8 lg:hidden max-w-full overflow-hidden">
               <MiniProductPreview />
             </div>
           </div>
 
           {/* Right Column - Auth Card + Preview Desktop */}
-          <div className="flex flex-col gap-6">
+          <div className="min-w-0 flex flex-col gap-6">
             <div id="auth-card" tabIndex={-1} className="outline-none flex justify-center lg:justify-end">
               <AuthCard />
             </div>

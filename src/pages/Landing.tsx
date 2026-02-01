@@ -12,10 +12,13 @@ import {
   LandingFooter,
 } from "@/components/landing";
 
-import { useOverflowDebug } from "@/lib/use-overflow-debug";
+import { useEffect } from "react";
+import { runOverflowDebug } from "@/lib/overflow-debug";
 
 export default function Landing() {
-  useOverflowDebug({ label: "landing" });
+  useEffect(() => {
+    runOverflowDebug();
+  }, []);
 
   return (
     <div className="min-h-screen bg-background">
