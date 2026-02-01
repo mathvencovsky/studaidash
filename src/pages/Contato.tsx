@@ -3,6 +3,8 @@ import { ArrowLeft, Mail, MessageSquare, Clock } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
+const SUPPORT_EMAIL = "support@studai.app";
+
 export default function Contato() {
   return (
     <div className="min-h-screen bg-background">
@@ -40,8 +42,12 @@ export default function Contato() {
               <p className="text-muted-foreground text-sm mb-4">
                 Para dúvidas gerais, suporte técnico ou feedback.
               </p>
-              {/* TODO: Substituir por e-mail real */}
-              <p className="text-foreground font-medium">contato@studai.com.br</p>
+              <a 
+                href={`mailto:${SUPPORT_EMAIL}`}
+                className="text-foreground font-medium hover:text-primary transition-colors"
+              >
+                {SUPPORT_EMAIL}
+              </a>
               <div className="flex items-center gap-1 text-xs text-muted-foreground mt-2">
                 <Clock className="h-3 w-3" />
                 <span>Resposta em até 48 horas úteis</span>
@@ -61,8 +67,12 @@ export default function Contato() {
               <p className="text-muted-foreground text-sm mb-4">
                 Para reportar vulnerabilidades ou problemas de segurança.
               </p>
-              {/* TODO: Substituir por e-mail real */}
-              <p className="text-foreground font-medium">security@studai.com.br</p>
+              <a 
+                href={`mailto:${SUPPORT_EMAIL}`}
+                className="text-foreground font-medium hover:text-primary transition-colors"
+              >
+                {SUPPORT_EMAIL}
+              </a>
               <Link 
                 to="/seguranca" 
                 className="text-xs text-primary hover:underline mt-2 inline-block"
@@ -81,18 +91,16 @@ export default function Contato() {
               Confira nossa{" "}
               <Link to="/#faq" className="text-primary hover:underline">
                 seção de perguntas frequentes
-              </Link>{" "}
-              — talvez sua dúvida já tenha sido respondida.
+              </Link>.
+              Talvez sua dúvida já tenha sido respondida.
             </p>
           </div>
         </div>
 
-        {/* Company Info Placeholder */}
+        {/* Company Info */}
         <div className="mt-12 text-center text-sm text-muted-foreground">
-          {/* TODO: Adicionar informações da empresa quando disponíveis */}
           <p>StudAI</p>
           <p>Brasil</p>
-          {/* <p>CNPJ: XX.XXX.XXX/0001-XX</p> */}
         </div>
       </main>
     </div>

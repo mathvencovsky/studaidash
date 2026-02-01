@@ -47,7 +47,6 @@ export default function Privacidade() {
             <p className="text-muted-foreground">
               O StudAI é uma plataforma de organização de estudos. Esta política explica como coletamos, usamos e protegemos suas informações.
             </p>
-            {/* TODO: Adicionar razão social e CNPJ quando disponíveis */}
           </section>
 
           <section className="mb-8">
@@ -133,8 +132,10 @@ export default function Privacidade() {
               Dúvidas sobre privacidade? Entre em contato:
             </p>
             <p className="text-foreground mt-2">
-              {/* TODO: Substituir por e-mail real */}
-              <strong>E-mail:</strong> privacidade@studai.com.br
+              <strong>E-mail:</strong>{" "}
+              <a href="mailto:support@studai.app" className="text-primary hover:underline">
+                support@studai.app
+              </a>
             </p>
           </section>
         </div>

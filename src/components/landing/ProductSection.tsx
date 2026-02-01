@@ -57,7 +57,7 @@ export function ProductSection() {
             O que o StudAI faz por você
           </h2>
           <p className="mt-4 text-muted-foreground max-w-2xl mx-auto">
-            Uma plataforma para organizar, executar e acompanhar seus estudos — tudo em um só lugar.
+            Uma plataforma para organizar, executar e acompanhar seus estudos. Tudo em um só lugar.
           </p>
         </div>
 

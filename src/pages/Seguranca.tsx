@@ -3,6 +3,8 @@ import { ArrowLeft, Shield, AlertTriangle, Mail } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
+const SUPPORT_EMAIL = "support@studai.app";
+
 export default function Seguranca() {
   return (
     <div className="min-h-screen bg-background">
@@ -78,8 +80,12 @@ export default function Seguranca() {
               <h3 className="font-medium text-foreground mb-2">Como reportar</h3>
               <div className="flex items-center gap-2 text-foreground">
                 <Mail className="h-4 w-4 text-primary" />
-                {/* TODO: Substituir por e-mail real */}
-                <span>security@studai.com.br</span>
+                <a 
+                  href={`mailto:${SUPPORT_EMAIL}`}
+                  className="hover:text-primary transition-colors"
+                >
+                  {SUPPORT_EMAIL}
+                </a>
               </div>
               <p className="text-sm text-muted-foreground mt-2">
                 Inclua detalhes suficientes para reproduzir o problema. Responderemos assim que possível.

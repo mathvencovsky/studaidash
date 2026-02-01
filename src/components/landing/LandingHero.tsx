@@ -60,7 +60,7 @@ export function LandingHero() {
             </h1>
             
             <p className="mt-6 text-lg text-muted-foreground max-w-xl mx-auto lg:mx-0">
-              Plataforma de estudos para quem precisa de rotina organizada, revisões no tempo certo e métricas claras de evolução — seja para concursos, certificações ou transições de carreira.
+              Plataforma de estudos para quem precisa de rotina organizada, revisões no tempo certo e métricas claras de evolução. Seja para concursos, certificações ou transições de carreira.
             </p>
 
             {/* Before → After Block */}

@@ -156,7 +156,7 @@ export function TrailOverviewCard({
               <span className="font-medium">Projeção ajustada pela IA:</span>{" "}
               {onTrack 
                 ? `Conclusão em ${formatDateBR(estimatedFinishDate)} mantendo ritmo atual`
-                : `Conclusão em ${formatDateBR(estimatedFinishDate)} — ${status.message}`
+                : `Conclusão em ${formatDateBR(estimatedFinishDate)}. ${status.message}`
               }
             </p>
           </div>

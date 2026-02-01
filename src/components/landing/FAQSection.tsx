@@ -28,7 +28,7 @@ const faqs = [
   },
   {
     question: "Funciona no celular?",
-    answer: "Sim. A plataforma é responsiva e funciona em qualquer dispositivo — computador, tablet ou celular.",
+    answer: "Sim. A plataforma é responsiva e funciona em qualquer dispositivo: computador, tablet ou celular.",
   },
   {
     question: "Como funciona o sistema de revisões?",

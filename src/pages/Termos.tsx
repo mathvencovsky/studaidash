@@ -115,8 +115,10 @@ export default function Termos() {
               Dúvidas sobre estes termos? Entre em contato:
             </p>
             <p className="text-foreground mt-2">
-              {/* TODO: Substituir por e-mail real */}
-              <strong>E-mail:</strong> contato@studai.com.br
+              <strong>E-mail:</strong>{" "}
+              <a href="mailto:support@studai.app" className="text-primary hover:underline">
+                support@studai.app
+              </a>
             </p>
           </section>
         </div>

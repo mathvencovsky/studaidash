@@ -412,7 +412,7 @@ function getDefaultTracksCatalog(): Track[] {
     },
     {
       id: "concurso-bacen",
-      title: "BACEN — Área Econômica",
+      title: "BACEN: Área Econômica",
       category: "Concursos",
       level: "Avançado",
       estimatedHours: 300,
@@ -484,7 +484,7 @@ function getDefaultTracksCatalog(): Track[] {
     },
     {
       id: "pmp-certification",
-      title: "PMP — Project Management Professional",
+      title: "PMP: Project Management Professional",
       category: "Certificações",
       level: "Avançado",
       estimatedHours: 60,
