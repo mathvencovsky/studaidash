@@ -1,52 +1,84 @@
-import { Check, AlertCircle } from "lucide-react";
+import { useMemo } from "react";
+import { useSearchParams } from "react-router-dom";
+import { Check, Clock, AlertCircle, Mail } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { type ProfileKey, isValidProfile, getStoredProfile } from "./LandingHero";
+
+const SUPPORT_EMAIL = "support@studai.app";
+
+function profileLabel(p: ProfileKey): string {
+  if (p === "certificacao") return "Certificação";
+  if (p === "faculdade") return "Faculdade";
+  return "Concurso";
+}
 
 const plans = [
   {
     name: "Grátis",
     price: "R$ 0",
-    period: "para sempre",
-    description: "Para começar a organizar seus estudos",
+    tagline: "Para organizar e manter consistência",
+    description: "Comece com o essencial. Sem cartão e sem compromisso.",
     features: [
       "1 trilha ativa",
-      "Plano diário personalizado",
-      "Quizzes e revisões",
-      "Métricas de progresso",
+      "Plano do dia com tarefas claras",
+      "Revisões e prática",
+      "Progresso semanal",
       "Suporte por e-mail",
     ],
-    cta: "Começar grátis",
-    highlighted: false,
-    available: true,
+    cta: "Começar agora",
+    highlighted: true,
+    status: "available" as const,
   },
   {
     name: "Pro",
     price: "Em breve",
-    period: "",
-    description: "Para quem quer ir além",
+    tagline: "Para quem quer mais controle e profundidade",
+    description: "Entre na lista de espera e receba novidades quando estiver disponível.",
     features: [
       "Trilhas ilimitadas",
       "Relatórios avançados",
-      "Sessões de estudo com IA",
+      "Sessões de estudo assistidas",
       "Prioridade no suporte",
       "Exportação de dados",
     ],
-    cta: "Avise-me quando disponível",
-    highlighted: true,
-    available: false,
+    cta: "Entrar na lista de espera",
+    highlighted: false,
+    status: "waitlist" as const,
   },
 ];
 
 export function PricingSection() {
+  const [searchParams] = useSearchParams();
+
+  const profile = useMemo((): ProfileKey => {
+    const urlProfile = searchParams.get("perfil");
+    if (isValidProfile(urlProfile)) return urlProfile;
+    return getStoredProfile();
+  }, [searchParams]);
+
   const scrollToAuth = () => {
-    const authCard = document.querySelector("#auth-card");
-    if (authCard) {
-      authCard.scrollIntoView({ behavior: "smooth" });
+    const el = document.getElementById("auth-card");
+    if (!el) return;
+
+    el.scrollIntoView({ behavior: "smooth", block: "start" });
+
+    window.requestAnimationFrame(() => {
       setTimeout(() => {
-        const emailInput = authCard.querySelector('input[type="email"]') as HTMLInputElement;
+        const emailInput = el.querySelector('input[type="email"]') as HTMLInputElement | null;
         emailInput?.focus();
-      }, 500);
-    }
+      }, 150);
+    });
+  };
+
+  const joinWaitlist = () => {
+    const label = profileLabel(profile);
+    const subject = encodeURIComponent(`Lista de espera StudAI Pro (${label})`);
+    const body = encodeURIComponent(
+      `Olá, gostaria de entrar na lista de espera do StudAI Pro.\n\nPerfil: ${label}\nE-mail: \n\nObrigado.`
+    );
+
+    window.location.href = `mailto:${SUPPORT_EMAIL}?subject=${subject}&body=${body}`;
   };
 
   return (
@@ -54,10 +86,10 @@ export function PricingSection() {
       <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-12">
           <h2 className="text-2xl sm:text-3xl font-bold text-foreground">
-            Planos simples e transparentes
+            Planos simples e claros
           </h2>
           <p className="mt-4 text-muted-foreground max-w-2xl mx-auto">
-            Comece grátis. Faça upgrade quando precisar.
+            Comece no Grátis. Entre na lista do Pro para receber novidades.
           </p>
         </div>
 
@@ -71,51 +103,75 @@ export function PricingSection() {
                   : "border-border"
               }`}
             >
-              {plan.highlighted && (
+              {plan.status === "waitlist" && (
                 <div className="absolute -top-3 left-1/2 -translate-x-1/2">
-                  <span className="bg-primary text-primary-foreground text-xs font-medium px-3 py-1 rounded-full">
+                  <span className="bg-muted text-muted-foreground text-xs font-medium px-3 py-1 rounded-full flex items-center gap-1">
+                    <Clock className="h-3 w-3" />
                     Em breve
                   </span>
                 </div>
               )}
+
               <CardHeader>
                 <CardTitle className="text-xl">{plan.name}</CardTitle>
-                <div className="flex items-baseline gap-1">
+                <p className="text-sm text-muted-foreground">{plan.tagline}</p>
+
+                <div className="pt-2">
                   <span className="text-3xl font-bold">{plan.price}</span>
-                  {plan.period && (
-                    <span className="text-muted-foreground text-sm">/{plan.period}</span>
+                  {plan.status === "available" && (
+                    <p className="text-xs text-muted-foreground mt-1">Grátis para sempre</p>
                   )}
                 </div>
-                <CardDescription>{plan.description}</CardDescription>
+                <CardDescription className="pt-2">{plan.description}</CardDescription>
               </CardHeader>
+
               <CardContent>
                 <ul className="space-y-3 mb-6">
                   {plan.features.map((feature) => (
                     <li key={feature} className="flex items-center gap-2 text-sm">
-                      <Check className="h-4 w-4 text-primary shrink-0" />
+                      {plan.status === "waitlist" ? (
+                        <Clock className="h-4 w-4 text-muted-foreground shrink-0" />
+                      ) : (
+                        <Check className="h-4 w-4 text-primary shrink-0" />
+                      )}
                       <span>{feature}</span>
                     </li>
                   ))}
                 </ul>
+
                 <Button
                   className="w-full"
                   variant={plan.highlighted ? "default" : "outline"}
-                  onClick={plan.available ? scrollToAuth : undefined}
-                  disabled={!plan.available}
+                  onClick={plan.status === "available" ? scrollToAuth : joinWaitlist}
                 >
+                  {plan.status === "waitlist" && <Mail className="mr-2 h-4 w-4" />}
                   {plan.cta}
                 </Button>
+
+                {plan.status === "waitlist" && (
+                  <p className="text-xs text-muted-foreground text-center mt-3">
+                    Sem spam. Você recebe apenas atualizações sobre disponibilidade.
+                  </p>
+                )}
               </CardContent>
             </Card>
           ))}
         </div>
 
-        {/* No tricks notice */}
-        <div className="mt-10 text-center">
+        {/* Trust notice */}
+        <div className="mt-10 text-center space-y-3">
           <div className="inline-flex items-center gap-2 text-sm text-muted-foreground bg-muted/50 px-4 py-2 rounded-full">
             <AlertCircle className="h-4 w-4" />
-            <span>Sem pegadinhas: você pode cancelar ou excluir sua conta a qualquer momento.</span>
+            <span>Você pode solicitar a exclusão da sua conta a qualquer momento pelo suporte.</span>
           </div>
+
+          <p className="text-xs text-muted-foreground">
+            <Mail className="h-3 w-3 inline mr-1" />
+            Dúvidas sobre planos? Fale com{" "}
+            <a href={`mailto:${SUPPORT_EMAIL}`} className="text-primary hover:underline">
+              {SUPPORT_EMAIL}
+            </a>
+          </p>
         </div>
       </div>
     </section>
