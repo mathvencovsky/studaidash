@@ -88,7 +88,7 @@ function MiniProductPreview() {
       </p>
       
       {/* Mobile: horizontal scroll with proper constraints, Desktop: grid */}
-      <div className="flex gap-3 overflow-x-auto pb-2 snap-x snap-mandatory scrollbar-hide -mx-4 px-4 sm:mx-0 sm:px-0 sm:grid sm:grid-cols-3 sm:overflow-visible sm:pb-0">
+      <div className="flex w-full gap-3 overflow-x-auto pb-2 snap-x snap-mandatory scrollbar-hide overscroll-x-contain sm:grid sm:grid-cols-3 sm:overflow-visible sm:pb-0">
         {/* Card 1: Hoje */}
         <Card className="flex-shrink-0 w-[240px] min-w-[240px] sm:w-auto sm:min-w-0 snap-start bg-card border-2 border-border hover:border-primary/40 transition-all duration-300 shadow-lg">
           <CardContent className="p-3 sm:p-4">
