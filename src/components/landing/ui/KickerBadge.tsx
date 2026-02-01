@@ -17,7 +17,8 @@ export function KickerBadge({ children, variant = "warm", className }: KickerBad
   return (
     <span
       className={cn(
-        "inline-flex items-center gap-1.5 px-3.5 py-1.5 text-xs font-semibold rounded-full border-2 tracking-wide uppercase",
+        // Allow wrapping on very small screens to prevent horizontal overflow
+        "inline-flex flex-wrap items-center justify-center gap-1.5 px-3.5 py-1.5 text-xs font-semibold rounded-full border-2 tracking-wide uppercase leading-tight max-w-full min-w-0",
         variantStyles[variant],
         className
       )}

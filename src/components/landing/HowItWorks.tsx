@@ -120,7 +120,7 @@ export function HowItWorks() {
                 <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-xl bg-gradient-to-br from-primary/15 to-accent/10 flex items-center justify-center mx-auto border-2 border-primary/20 shadow-lg">
                   <step.icon className="h-8 w-8 sm:h-10 sm:w-10 text-primary" />
                 </div>
-                <span className="absolute -top-1.5 -right-1.5 w-8 h-8 rounded-full bg-gradient-to-br from-accent-warm to-accent-warm/80 text-accent-warm-foreground text-xs font-bold flex items-center justify-center shadow-lg">
+                <span className="absolute top-1 right-1 w-8 h-8 rounded-full bg-gradient-to-br from-accent-warm to-accent-warm/80 text-accent-warm-foreground text-xs font-bold flex items-center justify-center shadow-lg">
                   {step.number}
                 </span>
               </div>

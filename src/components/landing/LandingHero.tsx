@@ -240,9 +240,11 @@ export function LandingHero() {
           <div className="text-center lg:text-left">
             {/* Kicker Badge - constrained width on mobile */}
             <div className="flex justify-center lg:justify-start mb-4">
-              <KickerBadge variant="warm" className="max-w-full">
+              <KickerBadge variant="warm" className="max-w-[280px] sm:max-w-none">
                 <Sparkles className="h-3.5 w-3.5 shrink-0" />
-                <span className="truncate">Para concursos, certificações e faculdade</span>
+                <span className="min-w-0 whitespace-normal text-center">
+                  Para concursos, certificações e faculdade
+                </span>
               </KickerBadge>
             </div>
 
