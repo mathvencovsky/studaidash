@@ -7,6 +7,7 @@ import { ThemeProvider } from "next-themes";
 import { AuthProvider } from "@/hooks/use-auth";
 import { ProtectedRoute, PublicOnlyRoute } from "@/components/auth";
 import { AppLayout } from "@/components/layout/AppLayout";
+import { I18nProvider } from "@/i18n";
 
 // Pages
 import Landing from "./pages/Landing";
@@ -47,6 +48,7 @@ const queryClient = new QueryClient();
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <ThemeProvider attribute="class" defaultTheme="light" enableSystem>
+      <I18nProvider>
       <AuthProvider>
         <TooltipProvider>
           <Toaster />
@@ -263,6 +265,7 @@ const App = () => (
           </BrowserRouter>
         </TooltipProvider>
       </AuthProvider>
+      </I18nProvider>
     </ThemeProvider>
   </QueryClientProvider>
 );
