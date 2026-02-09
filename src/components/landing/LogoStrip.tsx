@@ -2,55 +2,51 @@ import { useState } from "react";
 import { Link } from "react-router-dom";
 import { CheckCircle2, Shield, Lock, Mail, Zap } from "lucide-react";
 import { SectionWrapper, KickerBadge } from "./ui";
+import { useI18n } from "@/i18n";
 
 const SUPPORT_EMAIL = "support@studai.app";
 
 type AudienceKey = "concurso" | "certificacao" | "faculdade" | "residencia" | "transicao" | "grupo";
 
-const audience: { key: AudienceKey; label: string }[] = [
-  { key: "concurso", label: "Concurso" },
-  { key: "certificacao", label: "Certificação" },
-  { key: "faculdade", label: "Faculdade" },
-  { key: "residencia", label: "Residência" },
-  { key: "transicao", label: "Transição" },
-  { key: "grupo", label: "Grupo de estudo" },
-];
-
-const audienceMicrocopy: Record<AudienceKey, string> = {
-  concurso: "Foco em constância e revisão.",
-  certificacao: "Cobertura por tópico e prática.",
-  faculdade: "Disciplinas organizadas e revisões semanais.",
-  residencia: "Organização para alto volume de conteúdo.",
-  transicao: "Clareza para aprender novas áreas.",
-  grupo: "Acompanhamento compartilhado de progresso.",
-};
-
-const credibilityBullets = [
-  "Plano de hoje com tarefas claras",
-  "Fila de revisões para manter consistência",
-  "Indicadores semanais para ajustar o ritmo",
-];
-
 export function LogoStrip() {
+  const { t } = useI18n();
   const [activeAudience, setActiveAudience] = useState<AudienceKey | null>(null);
+
+  const audience: { key: AudienceKey; label: string }[] = [
+    { key: "concurso", label: t("logostrip.concurso") },
+    { key: "certificacao", label: t("logostrip.certificacao") },
+    { key: "faculdade", label: t("logostrip.faculdade") },
+    { key: "residencia", label: t("logostrip.residencia") },
+    { key: "transicao", label: t("logostrip.transicao") },
+    { key: "grupo", label: t("logostrip.grupo") },
+  ];
+
+  const audienceMicrocopy: Record<AudienceKey, string> = {
+    concurso: t("logostrip.micro.concurso"),
+    certificacao: t("logostrip.micro.certificacao"),
+    faculdade: t("logostrip.micro.faculdade"),
+    residencia: t("logostrip.micro.residencia"),
+    transicao: t("logostrip.micro.transicao"),
+    grupo: t("logostrip.micro.grupo"),
+  };
+
+  const credibilityBullets = [
+    t("logostrip.bullet1"),
+    t("logostrip.bullet2"),
+    t("logostrip.bullet3"),
+  ];
 
   return (
     <SectionWrapper variant="split" compact>
-      {/* Header */}
       <div className="text-center mb-5">
         <KickerBadge variant="primary" className="mb-2">
           <Zap className="h-3.5 w-3.5" />
-          Prova de valor
+          {t("logostrip.kicker")}
         </KickerBadge>
-        <h2 className="display-h3 text-foreground">
-          Clareza para estudar todos os dias
-        </h2>
-        <p className="mt-2 text-sm text-muted-foreground max-w-lg mx-auto">
-          Plano do dia, revisões e progresso semanal no mesmo lugar.
-        </p>
+        <h2 className="display-h3 text-foreground">{t("logostrip.headline")}</h2>
+        <p className="mt-2 text-sm text-muted-foreground max-w-lg mx-auto">{t("logostrip.subheadline")}</p>
       </div>
 
-      {/* Audience chips - wrap nicely on mobile */}
       <div className="flex flex-wrap justify-center gap-2 mb-2">
         {audience.map((item) => (
           <button
@@ -71,7 +67,6 @@ export function LogoStrip() {
         ))}
       </div>
 
-      {/* Dynamic microcopy */}
       <div className="h-6 mb-4 text-center">
         {activeAudience && (
           <p className="text-sm font-semibold text-accent-warm animate-in fade-in duration-200">
@@ -80,9 +75,7 @@ export function LogoStrip() {
         )}
       </div>
 
-      {/* Credibility + trust links */}
       <div className="flex flex-col gap-4">
-        {/* Credibility bullets - stack on mobile */}
         <div className="flex flex-col sm:flex-row flex-wrap justify-center items-center gap-3 sm:gap-x-5">
           {credibilityBullets.map((bullet) => (
             <span key={bullet} className="flex items-center gap-2 text-sm text-foreground font-medium">
@@ -92,28 +85,18 @@ export function LogoStrip() {
           ))}
         </div>
 
-        {/* Trust links */}
         <div className="flex flex-wrap justify-center items-center gap-3 text-xs text-muted-foreground">
-          <Link 
-            to="/privacidade" 
-            className="inline-flex items-center gap-1.5 min-h-[40px] px-2 hover:text-foreground transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 rounded font-semibold"
-          >
+          <Link to="/privacidade" className="inline-flex items-center gap-1.5 min-h-[40px] px-2 hover:text-foreground transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 rounded font-semibold">
             <Shield className="h-3.5 w-3.5" />
-            Privacidade
+            {t("common.privacy")}
           </Link>
-          <Link 
-            to="/seguranca" 
-            className="inline-flex items-center gap-1.5 min-h-[40px] px-2 hover:text-foreground transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 rounded font-semibold"
-          >
+          <Link to="/seguranca" className="inline-flex items-center gap-1.5 min-h-[40px] px-2 hover:text-foreground transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 rounded font-semibold">
             <Lock className="h-3.5 w-3.5" />
-            Segurança
+            {t("common.security")}
           </Link>
-          <a
-            href={`mailto:${SUPPORT_EMAIL}`}
-            className="inline-flex items-center gap-1.5 min-h-[40px] px-2 hover:text-foreground transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 rounded font-semibold"
-          >
+          <a href={`mailto:${SUPPORT_EMAIL}`} className="inline-flex items-center gap-1.5 min-h-[40px] px-2 hover:text-foreground transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 rounded font-semibold">
             <Mail className="h-3.5 w-3.5" />
-            Suporte
+            {t("common.support")}
           </a>
         </div>
       </div>
