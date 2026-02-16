@@ -14,13 +14,516 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      contents: {
+        Row: {
+          ai_summary: string | null
+          ai_transcript: string | null
+          author: string | null
+          category: string
+          created_at: string
+          description: string
+          duration_in_seconds: number
+          id: string
+          language: string | null
+          level: string | null
+          link: string
+          published_at: string | null
+          thumbnail_url: string | null
+          title: string
+          type: string
+          updated_at: string
+        }
+        Insert: {
+          ai_summary?: string | null
+          ai_transcript?: string | null
+          author?: string | null
+          category?: string
+          created_at?: string
+          description: string
+          duration_in_seconds?: number
+          id?: string
+          language?: string | null
+          level?: string | null
+          link: string
+          published_at?: string | null
+          thumbnail_url?: string | null
+          title: string
+          type?: string
+          updated_at?: string
+        }
+        Update: {
+          ai_summary?: string | null
+          ai_transcript?: string | null
+          author?: string | null
+          category?: string
+          created_at?: string
+          description?: string
+          duration_in_seconds?: number
+          id?: string
+          language?: string | null
+          level?: string | null
+          link?: string
+          published_at?: string | null
+          thumbnail_url?: string | null
+          title?: string
+          type?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      favourite_contents: {
+        Row: {
+          content_id: string
+          created_at: string
+          id: string
+          user_id: string
+        }
+        Insert: {
+          content_id: string
+          created_at?: string
+          id?: string
+          user_id: string
+        }
+        Update: {
+          content_id?: string
+          created_at?: string
+          id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "favourite_contents_content_id_fkey"
+            columns: ["content_id"]
+            isOneToOne: false
+            referencedRelation: "contents"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      favourite_modules: {
+        Row: {
+          created_at: string
+          id: string
+          module_id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          module_id: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          module_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "favourite_modules_module_id_fkey"
+            columns: ["module_id"]
+            isOneToOne: false
+            referencedRelation: "modules"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      feedback: {
+        Row: {
+          comment: string | null
+          created_at: string
+          id: string
+          rating: number
+          url: string
+          user_id: string
+        }
+        Insert: {
+          comment?: string | null
+          created_at?: string
+          id?: string
+          rating: number
+          url: string
+          user_id: string
+        }
+        Update: {
+          comment?: string | null
+          created_at?: string
+          id?: string
+          rating?: number
+          url?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      learning_preferences: {
+        Row: {
+          content_length: string | null
+          created_at: string
+          days: string[] | null
+          formats: string[] | null
+          id: string
+          interests: string[]
+          minutes_per_day: number | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          content_length?: string | null
+          created_at?: string
+          days?: string[] | null
+          formats?: string[] | null
+          id?: string
+          interests?: string[]
+          minutes_per_day?: number | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          content_length?: string | null
+          created_at?: string
+          days?: string[] | null
+          formats?: string[] | null
+          id?: string
+          interests?: string[]
+          minutes_per_day?: number | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      module_contents: {
+        Row: {
+          content_id: string
+          created_at: string
+          id: string
+          is_required: boolean
+          module_id: string
+          position: number
+        }
+        Insert: {
+          content_id: string
+          created_at?: string
+          id?: string
+          is_required?: boolean
+          module_id: string
+          position?: number
+        }
+        Update: {
+          content_id?: string
+          created_at?: string
+          id?: string
+          is_required?: boolean
+          module_id?: string
+          position?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "module_contents_content_id_fkey"
+            columns: ["content_id"]
+            isOneToOne: false
+            referencedRelation: "contents"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "module_contents_module_id_fkey"
+            columns: ["module_id"]
+            isOneToOne: false
+            referencedRelation: "modules"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      modules: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          description: string
+          downvote_count: number
+          id: string
+          title: string
+          updated_at: string
+          upvote_count: number
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          description: string
+          downvote_count?: number
+          id?: string
+          title: string
+          updated_at?: string
+          upvote_count?: number
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          description?: string
+          downvote_count?: number
+          id?: string
+          title?: string
+          updated_at?: string
+          upvote_count?: number
+        }
+        Relationships: []
+      }
+      profiles: {
+        Row: {
+          avatar_url: string | null
+          created_at: string
+          display_name: string | null
+          email: string | null
+          id: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          avatar_url?: string | null
+          created_at?: string
+          display_name?: string | null
+          email?: string | null
+          id?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          avatar_url?: string | null
+          created_at?: string
+          display_name?: string | null
+          email?: string | null
+          id?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      tracks: {
+        Row: {
+          created_at: string
+          description: string
+          id: string
+          parent_by_module_id: Json
+          position_by_module_id: Json | null
+          root_module_id: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          description: string
+          id?: string
+          parent_by_module_id?: Json
+          position_by_module_id?: Json | null
+          root_module_id: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          description?: string
+          id?: string
+          parent_by_module_id?: Json
+          position_by_module_id?: Json | null
+          root_module_id?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "tracks_root_module_id_fkey"
+            columns: ["root_module_id"]
+            isOneToOne: false
+            referencedRelation: "modules"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      user_content_progress: {
+        Row: {
+          completion_date: string | null
+          content_id: string
+          created_at: string
+          id: string
+          is_completed: boolean
+          module_id: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          completion_date?: string | null
+          content_id: string
+          created_at?: string
+          id?: string
+          is_completed?: boolean
+          module_id: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          completion_date?: string | null
+          content_id?: string
+          created_at?: string
+          id?: string
+          is_completed?: boolean
+          module_id?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_content_progress_content_id_fkey"
+            columns: ["content_id"]
+            isOneToOne: false
+            referencedRelation: "contents"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "user_content_progress_module_id_fkey"
+            columns: ["module_id"]
+            isOneToOne: false
+            referencedRelation: "modules"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      user_login_days: {
+        Row: {
+          created_at: string
+          date: string
+          id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          date?: string
+          id?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          date?: string
+          id?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      user_module_progress: {
+        Row: {
+          completion_date: string | null
+          created_at: string
+          id: string
+          module_id: string
+          start_date: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          completion_date?: string | null
+          created_at?: string
+          id?: string
+          module_id: string
+          start_date?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          completion_date?: string | null
+          created_at?: string
+          id?: string
+          module_id?: string
+          start_date?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_module_progress_module_id_fkey"
+            columns: ["module_id"]
+            isOneToOne: false
+            referencedRelation: "modules"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      user_track_progress: {
+        Row: {
+          completion_date: string | null
+          created_at: string
+          id: string
+          start_date: string
+          track_id: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          completion_date?: string | null
+          created_at?: string
+          id?: string
+          start_date?: string
+          track_id: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          completion_date?: string | null
+          created_at?: string
+          id?: string
+          start_date?: string
+          track_id?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_track_progress_track_id_fkey"
+            columns: ["track_id"]
+            isOneToOne: false
+            referencedRelation: "tracks"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      votes: {
+        Row: {
+          created_at: string
+          id: string
+          module_id: string
+          updated_at: string
+          user_id: string
+          value: number
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          module_id: string
+          updated_at?: string
+          user_id: string
+          value: number
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          module_id?: string
+          updated_at?: string
+          user_id?: string
+          value?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "votes_module_id_fkey"
+            columns: ["module_id"]
+            isOneToOne: false
+            referencedRelation: "modules"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      is_admin: { Args: never; Returns: boolean }
     }
     Enums: {
       [_ in never]: never
