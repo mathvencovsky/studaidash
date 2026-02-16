@@ -39,6 +39,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { FloatingChatButton } from "@/components/chat/FloatingChatButton";
 
 interface AppLayoutProps {
   children: React.ReactNode;
@@ -321,6 +322,7 @@ export function AppLayout({ children }: AppLayoutProps) {
         {/* Main Content */}
         <main className="flex-1 overflow-x-hidden overflow-y-auto">
           {children}
+          <FloatingChatButton />
         </main>
 
         {/* Mobile Bottom Navigation */}

@@ -1,5 +1,6 @@
 import { ChevronRight, Check } from "lucide-react";
 import type { CFAModule } from "@/types/studai";
+import { VoteButtons } from "@/components/modules/VoteButtons";
 
 interface ProgressSectionProps {
   modules: CFAModule[];
@@ -68,9 +69,12 @@ export function ProgressSection({ modules, overallProgress, onModuleClick }: Pro
                 </div>
               </div>
 
-              {!isLocked && (
-                <ChevronRight className="w-4 h-4 text-muted-foreground shrink-0" />
-              )}
+              <div className="flex items-center gap-1 shrink-0">
+                <VoteButtons moduleId={module.id} compact />
+                {!isLocked && (
+                  <ChevronRight className="w-4 h-4 text-muted-foreground shrink-0" />
+                )}
+              </div>
             </button>
           );
         })}
