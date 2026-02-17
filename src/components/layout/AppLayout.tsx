@@ -26,7 +26,8 @@ import {
   User,
   HelpCircle,
   LogOut,
-  FileText
+  FileText,
+  Shield
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
@@ -69,6 +70,7 @@ const analyticsItems = [
 
 const ferramentasItems = [
   { to: "/salvos", icon: Bookmark, label: "Salvos" },
+  { to: "/admin", icon: Shield, label: "Admin" },
   { to: "/configuracoes", icon: Settings, label: "Configurações" },
 ];
 
