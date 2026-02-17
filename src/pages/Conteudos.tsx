@@ -1,69 +1,107 @@
+import { useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { BookOpen, Video, FileText, Headphones, Play, BookMarked } from "lucide-react";
+import { Skeleton } from "@/components/ui/skeleton";
+import { BookOpen, Video, FileText, Headphones, Play, BookMarked, ExternalLink } from "lucide-react";
+import { useContentsQuery } from "@/hooks/use-contents";
+import type { Content } from "@/api/contents";
 
 const contentTypes = [
   { id: "all", label: "Todos", icon: BookOpen },
-  { id: "videos", label: "Vídeos", icon: Video },
-  { id: "readings", label: "Leituras", icon: FileText },
-  { id: "podcasts", label: "Podcasts", icon: Headphones },
-];
-
-const contents = [
-  {
-    id: "1",
-    title: "Introdução à Distribuição Normal",
-    type: "video",
-    duration: "15min",
-    module: "Probability Concepts",
-    completed: true,
-  },
-  {
-    id: "2",
-    title: "Cálculos com Z-Score - Teoria",
-    type: "reading",
-    duration: "10min",
-    module: "Probability Concepts",
-    completed: true,
-  },
-  {
-    id: "3",
-    title: "Aplicações Práticas de Probabilidade",
-    type: "video",
-    duration: "22min",
-    module: "Probability Concepts",
-    completed: false,
-  },
-  {
-    id: "4",
-    title: "Time Value of Money - Conceitos",
-    type: "reading",
-    duration: "18min",
-    module: "Time Value of Money",
-    completed: true,
-  },
-  {
-    id: "5",
-    title: "Podcast: Dicas para o CFA",
-    type: "podcast",
-    duration: "35min",
-    module: "Geral",
-    completed: false,
-  },
+  { id: "youtube_video", label: "Vídeos", icon: Video },
+  { id: "article", label: "Leituras", icon: FileText },
+  { id: "quiz", label: "Quizzes", icon: BookOpen },
 ];
 
 const getTypeIcon = (type: string) => {
   switch (type) {
-    case "video": return Video;
-    case "reading": return FileText;
-    case "podcast": return Headphones;
+    case "youtube_video": return Video;
+    case "article": return FileText;
+    case "quiz": return BookOpen;
     default: return BookOpen;
   }
 };
 
+const formatDuration = (seconds: number) => {
+  if (seconds < 60) return `${seconds}s`;
+  const mins = Math.floor(seconds / 60);
+  if (mins < 60) return `${mins}min`;
+  const hrs = Math.floor(mins / 60);
+  const remainMins = mins % 60;
+  return `${hrs}h${remainMins > 0 ? ` ${remainMins}min` : ""}`;
+};
+
+const getTypeLabel = (type: string) => {
+  switch (type) {
+    case "youtube_video": return "Vídeo";
+    case "article": return "Artigo";
+    case "quiz": return "Quiz";
+    case "assignment": return "Exercício";
+    case "lab": return "Lab";
+    default: return type;
+  }
+};
+
+function ContentCard({ content }: { content: Content }) {
+  const TypeIcon = getTypeIcon(content.type);
+
+  return (
+    <Card className="hover:shadow-sm transition-shadow">
+      <CardContent className="p-4 flex items-center gap-4">
+        {content.thumbnail_url ? (
+          <img
+            src={content.thumbnail_url}
+            alt={content.title}
+            className="w-16 h-10 rounded object-cover shrink-0"
+          />
+        ) : (
+          <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
+            <TypeIcon size={20} className="text-primary" />
+          </div>
+        )}
+        <div className="flex-1 min-w-0">
+          <h3 className="font-medium text-sm truncate">{content.title}</h3>
+          <div className="flex items-center gap-2 mt-1 text-xs text-muted-foreground">
+            <Badge variant="outline" className="text-[10px] px-1.5 py-0">
+              {getTypeLabel(content.type)}
+            </Badge>
+            {content.duration_in_seconds > 0 && (
+              <span>{formatDuration(content.duration_in_seconds)}</span>
+            )}
+            {content.author && (
+              <>
+                <span>•</span>
+                <span className="truncate">{content.author}</span>
+              </>
+            )}
+            {content.level && (
+              <>
+                <span>•</span>
+                <span className="capitalize">{content.level}</span>
+              </>
+            )}
+          </div>
+        </div>
+        <Button size="sm" variant="outline" asChild>
+          <a href={content.link} target="_blank" rel="noopener noreferrer">
+            <ExternalLink size={16} />
+          </a>
+        </Button>
+      </CardContent>
+    </Card>
+  );
+}
+
 export default function Conteudos() {
+  const { data: contents, isLoading } = useContentsQuery();
+  const [activeTab, setActiveTab] = useState("all");
+
+  const filtered = contents?.filter((c) =>
+    activeTab === "all" ? true : c.type === activeTab
+  ) ?? [];
+
   return (
     <div className="px-4 sm:px-6 lg:px-8 py-4 sm:py-6 pb-24 md:pb-8 max-w-7xl mx-auto space-y-6">
       <div>
@@ -75,7 +113,7 @@ export default function Conteudos() {
         </p>
       </div>
 
-      <Tabs defaultValue="all" className="w-full">
+      <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
         <TabsList className="w-full justify-start overflow-x-auto">
           {contentTypes.map((type) => (
             <TabsTrigger key={type.id} value={type.id} className="flex items-center gap-1.5">
@@ -85,46 +123,30 @@ export default function Conteudos() {
           ))}
         </TabsList>
 
-        <TabsContent value="all" className="mt-4 space-y-3">
-          {contents.map((content) => {
-            const TypeIcon = getTypeIcon(content.type);
-            return (
-              <Card key={content.id} className="hover:shadow-sm transition-shadow">
+        <div className="mt-4 space-y-3">
+          {isLoading ? (
+            Array.from({ length: 5 }).map((_, i) => (
+              <Card key={i}>
                 <CardContent className="p-4 flex items-center gap-4">
-                  <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
-                    <TypeIcon size={20} className="text-primary" />
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <h3 className="font-medium text-sm truncate">{content.title}</h3>
-                    <div className="flex items-center gap-2 mt-1 text-xs text-muted-foreground">
-                      <span>{content.duration}</span>
-                      <span>•</span>
-                      <span>{content.module}</span>
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    {content.completed && (
-                      <Badge variant="secondary" className="text-xs">
-                        Concluído
-                      </Badge>
-                    )}
-                    <Button size="sm" variant={content.completed ? "outline" : "default"}>
-                      {content.completed ? <BookMarked size={16} /> : <Play size={16} />}
-                    </Button>
+                  <Skeleton className="w-10 h-10 rounded-lg" />
+                  <div className="flex-1 space-y-2">
+                    <Skeleton className="h-4 w-3/4" />
+                    <Skeleton className="h-3 w-1/2" />
                   </div>
                 </CardContent>
               </Card>
-            );
-          })}
-        </TabsContent>
-
-        {["videos", "readings", "podcasts"].map((type) => (
-          <TabsContent key={type} value={type} className="mt-4">
-            <div className="text-center py-8 text-muted-foreground">
-              <p>Filtrando por {type}...</p>
+            ))
+          ) : filtered.length === 0 ? (
+            <div className="text-center py-12 text-muted-foreground">
+              <BookOpen className="mx-auto h-12 w-12 mb-3 opacity-50" />
+              <p className="text-sm">Nenhum conteúdo encontrado</p>
             </div>
-          </TabsContent>
-        ))}
+          ) : (
+            filtered.map((content) => (
+              <ContentCard key={content.id} content={content} />
+            ))
+          )}
+        </div>
       </Tabs>
     </div>
   );
