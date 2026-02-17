@@ -34,6 +34,7 @@ import Revisoes from "./pages/Revisoes";
 import ROIEstudo from "./pages/ROIEstudo";
 import Salvos from "./pages/Salvos";
 import PesquisarTrilhas from "./pages/PesquisarTrilhas";
+import Admin from "./pages/Admin";
 import NotFound from "./pages/NotFound";
 
 // Legal & Public Pages
@@ -249,6 +250,14 @@ const App = () => (
                 element={
                   <ProtectedRoute>
                     <AppLayout><Salvos /></AppLayout>
+                  </ProtectedRoute>
+                } 
+              />
+              <Route 
+                path="/admin" 
+                element={
+                  <ProtectedRoute>
+                    <AppLayout><Admin /></AppLayout>
                   </ProtectedRoute>
                 } 
               />
