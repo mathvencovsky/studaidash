@@ -1,0 +1,926 @@
+================================================================================
+STUDAI LANDING PAGE - FULL CODE BACKUP
+Generated: 2026-03-01
+================================================================================
+
+================================================================================
+FILE: src/pages/Landing.tsx
+================================================================================
+import {
+  LandingHeader,
+  LandingHero,
+  LogoStrip,
+  ProductSection,
+  HowItWorks,
+  TrustSection,
+  Testimonials,
+  PricingSection,
+  FAQSection,
+  FinalCTA,
+  LandingFooter,
+} from "@/components/landing";
+
+import { useEffect } from "react";
+import { runOverflowDebug } from "@/lib/overflow-debug";
+
+export default function Landing() {
+  useEffect(() => {
+    runOverflowDebug();
+  }, []);
+
+  return (
+    <div className="min-h-screen bg-background">
+      <LandingHeader />
+      <main>
+        <LandingHero />
+        <LogoStrip />
+        <ProductSection />
+        <HowItWorks />
+        <TrustSection />
+        <Testimonials />
+        <PricingSection />
+        <FAQSection />
+        <FinalCTA />
+      </main>
+      <LandingFooter />
+    </div>
+  );
+}
+
+================================================================================
+FILE: src/components/landing/index.ts
+================================================================================
+export { LandingHeader } from "./LandingHeader";
+export { LandingHero } from "./LandingHero";
+export { AuthCard } from "./AuthCard";
+export { LogoStrip } from "./LogoStrip";
+export { ProductSection } from "./ProductSection";
+export { HowItWorks } from "./HowItWorks";
+export { TrustSection } from "./TrustSection";
+export { Testimonials } from "./Testimonials";
+export { PricingSection } from "./PricingSection";
+export { FAQSection } from "./FAQSection";
+export { FinalCTA } from "./FinalCTA";
+export { LandingFooter } from "./LandingFooter";
+
+================================================================================
+FILE: src/components/landing/LandingHeader.tsx
+================================================================================
+import { useState, useEffect } from "react";
+import { GraduationCap, Menu, Globe } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
+import { useI18n } from "@/i18n";
+
+export function LandingHeader() {
+  const { t, locale, setLocale } = useI18n();
+  const [isScrolled, setIsScrolled] = useState(false);
+  const [mobileOpen, setMobileOpen] = useState(false);
+
+  const navLinks = [
+    { label: t("header.product"), href: "#produto" },
+    { label: t("header.howItWorks"), href: "#como-funciona" },
+    { label: t("header.testimonials"), href: "#depoimentos" },
+    { label: t("header.plans"), href: "#planos" },
+    { label: t("header.faq"), href: "#faq" },
+  ];
+
+  useEffect(() => {
+    const handleScroll = () => {
+      setIsScrolled(window.scrollY > 10);
+    };
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
+
+  const scrollToSection = (href: string) => {
+    const element = document.querySelector(href);
+    if (element) {
+      element.scrollIntoView({ behavior: "smooth" });
+    }
+    setMobileOpen(false);
+  };
+
+  const scrollToAuth = () => {
+    const authCard = document.querySelector("#auth-card");
+    if (authCard) {
+      authCard.scrollIntoView({ behavior: "smooth" });
+      setTimeout(() => {
+        const emailInput = authCard.querySelector('input[type="email"]') as HTMLInputElement;
+        emailInput?.focus();
+      }, 500);
+    }
+    setMobileOpen(false);
+  };
+
+  const toggleLocale = () => {
+    setLocale(locale === "pt-BR" ? "en-US" : "pt-BR");
+  };
+
+  return (
+    <header
+      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
+        isScrolled 
+          ? "bg-card/95 backdrop-blur-md border-b-2 shadow-lg" 
+          : "bg-transparent"
+      }`}
+    >
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="flex items-center justify-between h-16">
+          {/* Logo */}
+          <div className="flex items-center gap-2.5">
+            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-primary to-accent flex items-center justify-center shadow-lg">
+              <GraduationCap className="w-5 h-5 text-primary-foreground" />
+            </div>
+            <span className="font-bold text-foreground text-xl">StudAI</span>
+          </div>
+
+          {/* Desktop Navigation */}
+          <nav className="hidden md:flex items-center gap-1">
+            {navLinks.map((link) => (
+              <button
+                key={link.href}
+                onClick={() => scrollToSection(link.href)}
+                className="px-4 py-2 text-sm font-semibold text-muted-foreground hover:text-foreground hover:bg-muted/50 rounded-lg transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2"
+              >
+                {link.label}
+              </button>
+            ))}
+          </nav>
+
+          {/* Desktop CTAs */}
+          <div className="hidden md:flex items-center gap-3">
+            {/* Language Toggle */}
+            <button
+              onClick={toggleLocale}
+              className="flex items-center gap-1.5 px-3 py-2 text-xs font-bold text-muted-foreground hover:text-foreground rounded-lg border-2 border-border hover:border-primary/40 transition-all focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2"
+              aria-label={locale === "pt-BR" ? "Switch to English" : "Mudar para Português"}
+            >
+              <Globe className="h-3.5 w-3.5" />
+              {locale === "pt-BR" ? "EN" : "PT"}
+            </button>
+            <Button 
+              variant="ghost" 
+              size="sm" 
+              onClick={scrollToAuth}
+              className="font-semibold focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2"
+            >
+              {t("common.login")}
+            </Button>
+            <Button 
+              size="sm" 
+              onClick={scrollToAuth}
+              className="font-semibold bg-gradient-to-r from-primary to-accent hover:from-primary/90 hover:to-accent/90 shadow-lg shadow-primary/20 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2"
+            >
+              {t("common.startFree")}
+            </Button>
+          </div>
+
+          {/* Mobile Menu */}
+          <Sheet open={mobileOpen} onOpenChange={setMobileOpen}>
+            <SheetTrigger asChild className="md:hidden">
+              <Button variant="ghost" size="icon" className="focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2">
+                <Menu className="h-5 w-5" />
+              </Button>
+            </SheetTrigger>
+            <SheetContent side="right" className="w-72">
+              <div className="flex flex-col gap-6 mt-8">
+                {/* Language Toggle - Mobile */}
+                <button
+                  onClick={toggleLocale}
+                  className="flex items-center gap-2 px-4 py-3 text-sm font-bold text-foreground hover:bg-muted/50 rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2"
+                >
+                  <Globe className="h-4 w-4" />
+                  {locale === "pt-BR" ? "English" : "Português"}
+                </button>
+                <nav className="flex flex-col gap-2">
+                  {navLinks.map((link) => (
+                    <button
+                      key={link.href}
+                      onClick={() => scrollToSection(link.href)}
+                      className="text-left font-semibold text-foreground hover:bg-muted/50 px-4 py-3 rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2"
+                    >
+                      {link.label}
+                    </button>
+                  ))}
+                </nav>
+                <div className="flex flex-col gap-3 pt-4 border-t-2">
+                  <Button variant="outline" size="lg" onClick={scrollToAuth} className="font-semibold focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2">
+                    {t("common.login")}
+                  </Button>
+                  <Button size="lg" onClick={scrollToAuth} className="font-semibold bg-gradient-to-r from-primary to-accent shadow-lg shadow-primary/20 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2">
+                    {t("common.startFree")}
+                  </Button>
+                </div>
+              </div>
+            </SheetContent>
+          </Sheet>
+        </div>
+      </div>
+    </header>
+  );
+}
+
+================================================================================
+FILE: src/components/landing/LandingHero.tsx
+================================================================================
+import { useState, useEffect } from "react";
+import { useSearchParams, Link } from "react-router-dom";
+import { ArrowRight, CheckCircle2, Calendar, RotateCcw, TrendingUp, Mail, Shield, FileText, Sparkles } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { AuthCard } from "./AuthCard";
+import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
+import { Card, CardContent } from "@/components/ui/card";
+import { Progress } from "@/components/ui/progress";
+import { KickerBadge, HeadlineHighlight } from "./ui";
+import { useI18n } from "@/i18n";
+
+export type ProfileKey = "concurso" | "certificacao" | "faculdade";
+
+const STORAGE_KEY = "studai_perfil";
+
+export function getProfileData(t: (key: any) => string) {
+  return {
+    concurso: {
+      label: t("hero.profileConcurso"),
+      benefits: [
+        t("hero.concurso.benefit1"),
+        t("hero.concurso.benefit2"),
+        t("hero.concurso.benefit3"),
+      ],
+      microcopy: t("hero.concurso.microcopy"),
+      contextLine: t("hero.concurso.contextLine"),
+    },
+    certificacao: {
+      label: t("hero.profileCertificacao"),
+      benefits: [
+        t("hero.certificacao.benefit1"),
+        t("hero.certificacao.benefit2"),
+        t("hero.certificacao.benefit3"),
+      ],
+      microcopy: t("hero.certificacao.microcopy"),
+      contextLine: t("hero.certificacao.contextLine"),
+    },
+    faculdade: {
+      label: t("hero.profileFaculdade"),
+      benefits: [
+        t("hero.faculdade.benefit1"),
+        t("hero.faculdade.benefit2"),
+        t("hero.faculdade.benefit3"),
+      ],
+      microcopy: t("hero.faculdade.microcopy"),
+      contextLine: t("hero.faculdade.contextLine"),
+    },
+  };
+}
+
+// Keep static profiles for backward compatibility (used by components that don't have i18n yet)
+export const profiles: Record<ProfileKey, {
+  label: string;
+  benefits: string[];
+  microcopy: string;
+  contextLine: string;
+}> = {
+  concurso: {
+    label: "Concurso",
+    benefits: [
+      "Rotina diária pronta para executar",
+      "Revisão automática no tempo certo",
+      "Progresso semanal visível",
+    ],
+    microcopy: "Funciona para concursos federais, estaduais e municipais",
+    contextLine: "Foco em constância e revisão.",
+  },
+  certificacao: {
+    label: "Certificação",
+    benefits: [
+      "Trilha por tópicos e prioridades",
+      "Revisões para fixação",
+      "Cobertura do conteúdo por semana",
+    ],
+    microcopy: "CFA, CPA-10/20, CEA, CFP e outras certificações",
+    contextLine: "Cobertura e prática por tópico.",
+  },
+  faculdade: {
+    label: "Faculdade",
+    benefits: [
+      "Organização por disciplina",
+      "Revisões semanais sem esquecer",
+      "Visão clara do que fazer hoje",
+    ],
+    microcopy: "Para graduação, pós ou cursos livres",
+    contextLine: "Disciplina, revisões e entregas em dia.",
+  },
+};
+
+export function isValidProfile(value: string | null): value is ProfileKey {
+  return value === "concurso" || value === "certificacao" || value === "faculdade";
+}
+
+export function getStoredProfile(): ProfileKey {
+  if (typeof window === "undefined") return "concurso";
+  const stored = localStorage.getItem(STORAGE_KEY);
+  return isValidProfile(stored) ? stored : "concurso";
+}
+
+export function setStoredProfile(profile: ProfileKey): void {
+  if (typeof window !== "undefined") {
+    localStorage.setItem(STORAGE_KEY, profile);
+  }
+}
+
+// Mini Product Preview
+function MiniProductPreview() {
+  const { t } = useI18n();
+
+  const todayTasks = [
+    { label: t("preview.task1"), done: true },
+    { label: t("preview.task2"), done: true },
+    { label: t("preview.task3"), done: false },
+  ];
+
+  const reviewQueue = [
+    { subject: t("preview.review1"), dueIn: t("preview.reviewDueToday") },
+    { subject: t("preview.review2"), dueIn: t("preview.reviewDueTomorrow") },
+    { subject: t("preview.review3"), dueIn: t("preview.reviewDue3Days") },
+  ];
+
+  return (
+    <div className="relative w-full min-w-0">
+      <p className="text-xs text-muted-foreground text-center mb-2 font-medium">
+        {t("common.illustrativeExample")}
+      </p>
+      
+      <div className="flex gap-3 overflow-x-auto snap-x snap-mandatory overscroll-x-contain scrollbar-hide -mx-4 px-4 pb-4 pr-8 [scroll-padding-left:1rem] [scroll-padding-right:1rem] md:mx-0 md:px-0 md:pr-0 md:grid md:grid-cols-3 md:gap-4 md:overflow-visible md:pb-0">
+        {/* Card 1: Today */}
+        <Card className="w-[88vw] max-w-[340px] shrink-0 snap-start bg-card border-2 border-border hover:border-primary/40 transition-all duration-300 shadow-lg md:w-auto md:max-w-none md:shrink md:snap-none">
+          <CardContent className="p-3 sm:p-4">
+            <div className="flex items-center gap-2 mb-2 sm:mb-3">
+              <div className="p-1.5 rounded-lg bg-primary/10">
+                <Calendar className="h-3 w-3 sm:h-3.5 sm:w-3.5 text-primary" />
+              </div>
+              <span className="text-xs sm:text-sm font-bold text-foreground">{t("preview.today")}</span>
+              <span className="ml-auto text-[9px] sm:text-[10px] font-semibold bg-accent-warm/15 text-accent-warm px-1.5 sm:px-2 py-0.5 rounded-full truncate max-w-[72px]">
+                {t("preview.tasks")}
+              </span>
+            </div>
+            <ul className="space-y-1.5 sm:space-y-2">
+              {todayTasks.map((task, i) => (
+                <li key={i} className="flex items-center gap-1.5 sm:gap-2 text-[11px] sm:text-xs">
+                  <div className={`h-3 w-3 sm:h-3.5 sm:w-3.5 rounded-full border-2 flex items-center justify-center shrink-0 ${
+                    task.done ? "bg-success border-success" : "border-muted-foreground/30"
+                  }`}>
+                    {task.done && <CheckCircle2 className="h-2 w-2 text-success-foreground" />}
+                  </div>
+                  <span className={`truncate ${task.done ? "text-muted-foreground line-through" : "text-foreground font-medium"}`}>
+                    {task.label}
+                  </span>
+                </li>
+              ))}
+            </ul>
+            <p className="text-[10px] sm:text-xs text-muted-foreground mt-2 sm:mt-3 font-semibold">{t("preview.completedOf")}</p>
+          </CardContent>
+        </Card>
+
+        {/* Card 2: Reviews */}
+        <Card className="w-[88vw] max-w-[340px] shrink-0 snap-start bg-card border-2 border-border hover:border-accent-warm/40 transition-all duration-300 shadow-lg md:w-auto md:max-w-none md:shrink md:snap-none">
+          <CardContent className="p-3 sm:p-4">
+            <div className="flex items-center gap-2 mb-2 sm:mb-3">
+              <div className="p-1.5 rounded-lg bg-accent-warm/10">
+                <RotateCcw className="h-3 w-3 sm:h-3.5 sm:w-3.5 text-accent-warm" />
+              </div>
+              <span className="text-xs sm:text-sm font-bold text-foreground">{t("preview.reviews")}</span>
+            </div>
+            <ul className="space-y-1.5 sm:space-y-2">
+              {reviewQueue.map((item, i) => (
+                <li key={i} className="flex items-center justify-between text-[11px] sm:text-xs">
+                  <span className="text-foreground font-medium truncate max-w-[100px] sm:max-w-[120px]">{item.subject}</span>
+                  <span className={`text-[9px] sm:text-[10px] px-1.5 sm:px-2 py-0.5 rounded-full font-bold shrink-0 ${
+                    item.dueIn === t("preview.reviewDueToday")
+                      ? "bg-accent-warm/15 text-accent-warm" 
+                      : "bg-muted text-muted-foreground"
+                  }`}>
+                    {item.dueIn}
+                  </span>
+                </li>
+              ))}
+            </ul>
+            <p className="text-[10px] sm:text-xs text-muted-foreground mt-2 sm:mt-3 font-semibold">{t("preview.pending")}</p>
+          </CardContent>
+        </Card>
+
+        {/* Card 3: Week */}
+        <Card className="w-[88vw] max-w-[340px] shrink-0 snap-start bg-card border-2 border-border hover:border-success/40 transition-all duration-300 shadow-lg md:w-auto md:max-w-none md:shrink md:snap-none">
+          <CardContent className="p-3 sm:p-4">
+            <div className="flex items-center gap-2 mb-2 sm:mb-3">
+              <div className="p-1.5 rounded-lg bg-success/10">
+                <TrendingUp className="h-3 w-3 sm:h-3.5 sm:w-3.5 text-success" />
+              </div>
+              <span className="text-xs sm:text-sm font-bold text-foreground">{t("preview.week")}</span>
+            </div>
+            <div className="space-y-2 sm:space-y-2.5">
+              <div>
+                <div className="flex justify-between text-[11px] sm:text-xs mb-1">
+                  <span className="text-muted-foreground">{t("preview.progress")}</span>
+                  <span className="text-foreground font-bold">68%</span>
+                </div>
+                <Progress value={68} className="h-1.5 sm:h-2" />
+              </div>
+              <div className="flex justify-between text-[11px] sm:text-xs">
+                <span className="text-muted-foreground">{t("preview.hours")}</span>
+                <span className="text-foreground font-bold">8h 30min</span>
+              </div>
+              <div className="flex justify-between text-[11px] sm:text-xs">
+                <span className="text-muted-foreground">{t("preview.goal")}</span>
+                <span className="text-foreground font-bold">12h</span>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    </div>
+  );
+}
+
+export function LandingHero() {
+  const { t } = useI18n();
+  const [searchParams, setSearchParams] = useSearchParams();
+  
+  const [profile, setProfile] = useState<ProfileKey>(() => {
+    const urlProfile = searchParams.get("perfil");
+    if (isValidProfile(urlProfile)) return urlProfile;
+    return getStoredProfile();
+  });
+
+  const profileData = getProfileData(t);
+  const currentProfile = profileData[profile];
+
+  const handleProfileChange = (value: string) => {
+    if (!isValidProfile(value)) return;
+    setProfile(value);
+    setStoredProfile(value);
+    const newParams = new URLSearchParams(searchParams);
+    newParams.set("perfil", value);
+    setSearchParams(newParams, { replace: true });
+  };
+
+  useEffect(() => {
+    const urlProfile = searchParams.get("perfil");
+    if (isValidProfile(urlProfile) && urlProfile !== profile) {
+      setProfile(urlProfile);
+      setStoredProfile(urlProfile);
+    }
+  }, [searchParams]);
+
+  const scrollToId = (id: string) => {
+    const el = document.getElementById(id);
+    if (!el) return;
+    el.scrollIntoView({ behavior: "smooth", block: "start" });
+    window.requestAnimationFrame(() => {
+      setTimeout(() => {
+        const emailInput = el.querySelector('input[type="email"]') as HTMLInputElement;
+        emailInput?.focus();
+      }, 150);
+    });
+  };
+
+  return (
+    <section className="relative pt-16 pb-10 md:pt-24 md:pb-14 overflow-x-hidden noise-bg">
+      <div className="absolute inset-0 bg-gradient-to-br from-primary/8 via-background to-accent-warm/8 pointer-events-none" />
+      <div className="hidden md:block absolute top-0 right-0 w-[500px] h-[500px] bg-gradient-to-bl from-accent-warm/15 via-accent/10 to-transparent rounded-full blur-3xl pointer-events-none" />
+      <div className="hidden md:block absolute bottom-0 left-0 w-72 h-72 bg-primary/10 rounded-full blur-3xl pointer-events-none" />
+      
+      <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12 items-start">
+          <div className="min-w-0 text-center lg:text-left">
+            <div className="flex justify-center lg:justify-start mb-4">
+              <KickerBadge variant="warm" className="max-w-[calc(100vw-2rem)] sm:max-w-none">
+                <Sparkles className="h-3.5 w-3.5 shrink-0" />
+                <span className="min-w-0 whitespace-normal text-center">
+                  {t("hero.kicker")}
+                </span>
+              </KickerBadge>
+            </div>
+
+            <h1 className="display-h1 text-foreground">
+              {t("hero.headline")}
+              <HeadlineHighlight>{t("hero.headlineHighlight")}</HeadlineHighlight>
+            </h1>
+            
+            <p className="mt-4 text-base sm:text-lg text-muted-foreground max-w-xl mx-auto lg:mx-0 leading-relaxed">
+              {t("hero.subheadline")}
+            </p>
+
+            <div className="mt-6">
+              <p className="text-sm text-foreground font-semibold mb-2">{t("hero.studyingFor")}</p>
+              <ToggleGroup 
+                type="single" 
+                value={profile} 
+                onValueChange={handleProfileChange}
+                className="w-full max-w-[360px] mx-auto lg:mx-0 lg:max-w-none grid grid-cols-3 gap-2"
+              >
+                {(Object.keys(profileData) as ProfileKey[]).map((key) => (
+                  <ToggleGroupItem 
+                    key={key} 
+                    value={key}
+                    variant="outline"
+                    className="w-full px-2 sm:px-4 py-2 min-h-[44px] text-xs sm:text-sm whitespace-nowrap font-semibold border-2 rounded-xl data-[state=on]:bg-primary data-[state=on]:text-primary-foreground data-[state=on]:border-primary data-[state=on]:shadow-lg hover:border-primary/50 hover:bg-primary/5 transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
+                  >
+                    {key === "certificacao" ? (
+                      <>
+                        <span className="sm:hidden">{t("hero.profileCertificacaoShort")}</span>
+                        <span className="hidden sm:inline">{profileData[key].label}</span>
+                      </>
+                    ) : (
+                      profileData[key].label
+                    )}
+                  </ToggleGroupItem>
+                ))}
+              </ToggleGroup>
+            </div>
+
+            <ul className="mt-5 space-y-2 w-full max-w-[360px] mx-auto lg:mx-0 lg:max-w-lg text-left">
+              {currentProfile.benefits.map((benefit, index) => (
+                <li key={index} className="flex items-start gap-2.5 text-sm text-foreground">
+                  <CheckCircle2 className="h-4 w-4 text-success shrink-0 mt-0.5" />
+                  <span className="font-medium">{benefit}</span>
+                </li>
+              ))}
+            </ul>
+
+            <div className="flex flex-col gap-3 mt-6 w-full max-w-[360px] mx-auto lg:mx-0 lg:max-w-none lg:flex-row">
+              <Button 
+                size="lg" 
+                onClick={() => scrollToId("auth-card")}
+                className="w-full lg:w-auto text-base font-semibold min-h-[48px] bg-gradient-to-r from-primary to-accent hover:from-primary/90 hover:to-accent/90 shadow-xl shadow-primary/30 hover:shadow-2xl transition-all duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
+              >
+                {t("hero.ctaPrimary")}
+                <ArrowRight className="ml-2 h-4 w-4" />
+              </Button>
+              <Button 
+                variant="outline" 
+                size="lg"
+                onClick={() => scrollToId("como-funciona")}
+                className="w-full lg:w-auto text-base font-semibold min-h-[48px] border-2 hover:border-primary/50 hover:bg-primary/5 transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
+              >
+                {t("hero.ctaSecondary")}
+              </Button>
+            </div>
+
+            <p className="mt-3 text-sm text-muted-foreground text-center lg:text-left font-medium w-full max-w-[360px] mx-auto lg:mx-0 lg:max-w-lg">
+              {currentProfile.microcopy}
+            </p>
+
+            <div className="flex flex-wrap items-center justify-center lg:justify-start gap-x-3 gap-y-2 mt-5 text-sm text-muted-foreground w-full max-w-[360px] mx-auto lg:mx-0 lg:max-w-none">
+              <a 
+                href="mailto:support@studai.app" 
+                className="flex items-center gap-1.5 min-h-[44px] hover:text-foreground transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 rounded font-medium px-1"
+              >
+                <Mail className="h-4 w-4 text-primary/70 shrink-0" />
+                <span className="text-xs sm:text-sm">support@studai.app</span>
+              </a>
+              <Link 
+                to="/seguranca" 
+                className="flex items-center gap-1.5 min-h-[44px] hover:text-foreground transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 rounded font-medium px-1"
+              >
+                <Shield className="h-4 w-4 text-primary/70 shrink-0" />
+                <span className="text-xs sm:text-sm">{t("common.security")}</span>
+              </Link>
+              <Link 
+                to="/privacidade" 
+                className="flex items-center gap-1.5 min-h-[44px] hover:text-foreground transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 rounded font-medium px-1"
+              >
+                <FileText className="h-4 w-4 text-primary/70 shrink-0" />
+                <span className="text-xs sm:text-sm">{t("common.privacy")}</span>
+              </Link>
+            </div>
+
+            <div className="mt-8 lg:hidden max-w-full">
+              <MiniProductPreview />
+            </div>
+          </div>
+
+          <div className="min-w-0 flex flex-col gap-6">
+            <div id="auth-card" tabIndex={-1} className="outline-none flex justify-center lg:justify-end">
+              <AuthCard />
+            </div>
+            <div className="hidden lg:block">
+              <MiniProductPreview />
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+================================================================================
+FILE: src/components/landing/AuthCard.tsx
+================================================================================
+import { useMemo, useState } from "react";
+import { useNavigate, Link, useSearchParams } from "react-router-dom";
+import { Eye, EyeOff, Loader2, CheckCircle2, Circle, HelpCircle } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { useAuth } from "@/hooks/use-auth";
+import { toast } from "sonner";
+import { type ProfileKey, isValidProfile, getStoredProfile, getProfileData } from "./LandingHero";
+import { useI18n } from "@/i18n";
+import { lovable } from "@/integrations/lovable/index";
+import { Separator } from "@/components/ui/separator";
+
+const SUPPORT_EMAIL = "support@studai.app";
+
+export function AuthCard() {
+  const { t } = useI18n();
+  const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const { signIn, signUp } = useAuth();
+  
+  const [isLoading, setIsLoading] = useState(false);
+  const [isGoogleLoading, setIsGoogleLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+  const [activeTab, setActiveTab] = useState<"login" | "register">("login");
+  
+  const [loginEmail, setLoginEmail] = useState("");
+  const [loginPassword, setLoginPassword] = useState("");
+  const [registerEmail, setRegisterEmail] = useState("");
+  const [registerPassword, setRegisterPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+
+  const currentProfile = useMemo((): ProfileKey => {
+    const urlProfile = searchParams.get("perfil");
+    if (isValidProfile(urlProfile)) return urlProfile;
+    return getStoredProfile();
+  }, [searchParams]);
+
+  const profileData = getProfileData(t);
+
+  const passwordChecks = useMemo(() => {
+    const hasMinLength = registerPassword.length >= 6;
+    const passwordsMatch = registerPassword.length > 0 && confirmPassword.length > 0 && registerPassword === confirmPassword;
+    return { hasMinLength, passwordsMatch };
+  }, [registerPassword, confirmPassword]);
+
+  const headerCopy = useMemo(() => {
+    const pd = profileData[currentProfile];
+    if (activeTab === "login") {
+      return { title: t("auth.loginTitle"), description: t("auth.loginDesc"), contextLine: pd.contextLine };
+    }
+    return { title: t("auth.registerTitle"), description: t("auth.registerDesc"), contextLine: pd.contextLine };
+  }, [activeTab, currentProfile, t]);
+
+  const handleLogin = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!loginEmail || !loginPassword) { toast.error(t("auth.toast.fillFields")); return; }
+    setIsLoading(true);
+    const { error } = await signIn(loginEmail, loginPassword);
+    setIsLoading(false);
+    if (error) {
+      const msg = error.message || "";
+      if (msg.includes("Invalid login credentials")) { toast.error(t("auth.toast.wrongCredentials")); }
+      else if (msg.includes("Email not confirmed")) { toast.error(t("auth.toast.confirmEmail")); }
+      else { toast.error(t("auth.toast.loginError")); }
+      return;
+    }
+    toast.success(t("auth.toast.welcomeBack"));
+    navigate("/dashboard");
+  };
+
+  const handleRegister = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!registerEmail || !registerPassword || !confirmPassword) { toast.error(t("auth.toast.fillAllFields")); return; }
+    if (registerPassword.length < 6) { toast.error(t("auth.toast.minPassword")); return; }
+    if (registerPassword !== confirmPassword) { toast.error(t("auth.toast.passwordsDontMatch")); return; }
+    setIsLoading(true);
+    const { error } = await signUp(registerEmail, registerPassword);
+    setIsLoading(false);
+    if (error) {
+      const msg = error.message || "";
+      if (msg.includes("already registered")) { toast.error(t("auth.toast.alreadyRegistered")); setActiveTab("login"); }
+      else { toast.error(t("auth.toast.registerError")); }
+      return;
+    }
+    toast.success(t("auth.toast.accountCreated"));
+    setActiveTab("login");
+  };
+
+  const handleGoogleSignIn = async () => {
+    setIsGoogleLoading(true);
+    const { error } = await lovable.auth.signInWithOAuth("google", {
+      redirect_uri: window.location.origin,
+    });
+    setIsGoogleLoading(false);
+    if (error) {
+      toast.error(t("auth.toast.loginError"));
+    }
+  };
+
+  const GoogleButton = () => (
+    <>
+      <div className="flex items-center gap-3 my-3">
+        <Separator className="flex-1" />
+        <span className="text-xs text-muted-foreground font-medium">ou</span>
+        <Separator className="flex-1" />
+      </div>
+      <Button
+        type="button"
+        variant="outline"
+        className="w-full min-h-[48px] font-semibold text-base border-2 gap-2"
+        onClick={handleGoogleSignIn}
+        disabled={isLoading || isGoogleLoading}
+      >
+        {isGoogleLoading ? (
+          <Loader2 className="h-5 w-5 animate-spin" />
+        ) : (
+          <svg className="h-5 w-5" viewBox="0 0 24 24">
+            <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 0 1-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z" fill="#4285F4"/>
+            <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
+            <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/>
+            <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
+          </svg>
+        )}
+        Continuar com Google
+      </Button>
+    </>
+  );
+
+  return (
+    <Card className="w-full max-w-md shadow-xl border-2 border-border/80">
+      <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as "login" | "register")}>
+        <CardHeader className="pb-3 px-4 sm:px-6">
+          <CardTitle className="text-lg font-bold">{headerCopy.title}</CardTitle>
+          <CardDescription className="text-xs sm:text-sm font-medium">{headerCopy.description}</CardDescription>
+          <p className="text-xs text-primary font-bold pt-1.5">{headerCopy.contextLine}</p>
+          <TabsList className="grid w-full grid-cols-2 mt-3">
+            <TabsTrigger value="login" className="font-semibold text-sm min-h-[40px]">{t("auth.tabLogin")}</TabsTrigger>
+            <TabsTrigger value="register" className="font-semibold text-sm min-h-[40px]">{t("auth.tabRegister")}</TabsTrigger>
+          </TabsList>
+        </CardHeader>
+        
+        <CardContent className="px-4 sm:px-6 pb-5">
+          <TabsContent value="login" className="mt-0">
+            <form onSubmit={handleLogin} className="space-y-3">
+              <div className="space-y-1.5">
+                <Label htmlFor="login-email" className="font-semibold text-sm">{t("auth.email")}</Label>
+                <Input id="login-email" type="email" placeholder={t("auth.emailPlaceholder")} value={loginEmail} onChange={(e) => setLoginEmail(e.target.value)} disabled={isLoading} autoComplete="email" required className="border-2 min-h-[44px] text-base" />
+              </div>
+              <div className="space-y-1.5">
+                <div className="flex items-center justify-between">
+                  <Label htmlFor="login-password" className="font-semibold text-sm">{t("auth.password")}</Label>
+                  <a href={`mailto:${SUPPORT_EMAIL}?subject=Ajuda%20para%20acessar%20minha%20conta`} className="inline-flex items-center gap-1 text-[10px] text-muted-foreground hover:text-foreground transition-colors font-medium min-h-[28px]">
+                    <HelpCircle className="h-3 w-3" />
+                    {t("auth.needHelp")}
+                  </a>
+                </div>
+                <div className="relative">
+                  <Input id="login-password" type={showPassword ? "text" : "password"} placeholder={t("auth.passwordPlaceholder")} value={loginPassword} onChange={(e) => setLoginPassword(e.target.value)} disabled={isLoading} autoComplete="current-password" className="pr-12 border-2 min-h-[44px] text-base" required />
+                  <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-2 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 rounded p-2 min-w-[40px] min-h-[40px] flex items-center justify-center" aria-label={showPassword ? t("auth.hidePassword") : t("auth.showPassword")} disabled={isLoading}>
+                    {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                  </button>
+                </div>
+              </div>
+              <Button type="submit" className="w-full font-semibold min-h-[48px] text-base bg-gradient-to-r from-primary to-accent hover:from-primary/90 hover:to-accent/90 shadow-lg" disabled={isLoading}>
+                {isLoading ? (<><Loader2 className="mr-2 h-4 w-4 animate-spin" />{t("auth.loggingIn")}</>) : t("auth.loginButton")}
+              </Button>
+              <p className="text-[10px] text-muted-foreground text-center pt-1 font-medium">
+                {t("auth.cantAccess")}{" "}
+                <a href={`mailto:${SUPPORT_EMAIL}?subject=Problema%20de%20acesso`} className="text-primary font-bold hover:underline">{SUPPORT_EMAIL}</a>
+              </p>
+              <GoogleButton />
+            </form>
+          </TabsContent>
+
+          <TabsContent value="register" className="mt-0">
+            <form onSubmit={handleRegister} className="space-y-3">
+              <div className="space-y-1.5">
+                <Label htmlFor="register-email" className="font-semibold text-sm">{t("auth.email")}</Label>
+                <Input id="register-email" type="email" placeholder={t("auth.emailPlaceholder")} value={registerEmail} onChange={(e) => setRegisterEmail(e.target.value)} disabled={isLoading} autoComplete="email" required className="border-2 min-h-[44px] text-base" />
+              </div>
+              <div className="space-y-1.5">
+                <Label htmlFor="register-password" className="font-semibold text-sm">{t("auth.password")}</Label>
+                <div className="relative">
+                  <Input id="register-password" type={showPassword ? "text" : "password"} placeholder={t("auth.minPasswordPlaceholder")} value={registerPassword} onChange={(e) => setRegisterPassword(e.target.value)} disabled={isLoading} autoComplete="new-password" className="pr-12 border-2 min-h-[44px] text-base" required />
+                  <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-2 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 rounded p-2 min-w-[40px] min-h-[40px] flex items-center justify-center" aria-label={showPassword ? t("auth.hidePassword") : t("auth.showPassword")} disabled={isLoading}>
+                    {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                  </button>
+                </div>
+              </div>
+              <div className="space-y-1.5">
+                <Label htmlFor="confirm-password" className="font-semibold text-sm">{t("auth.confirmPassword")}</Label>
+                <Input id="confirm-password" type="password" placeholder={t("auth.passwordPlaceholder")} value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} disabled={isLoading} autoComplete="new-password" required className="border-2 min-h-[44px] text-base" />
+              </div>
+              <div className="space-y-1.5 text-xs">
+                <div className={`flex items-center gap-2 ${passwordChecks.hasMinLength ? "text-success" : "text-muted-foreground"}`}>
+                  {passwordChecks.hasMinLength ? <CheckCircle2 className="h-3.5 w-3.5" /> : <Circle className="h-3.5 w-3.5" />}
+                  <span className="font-medium">{t("auth.minChars")}</span>
+                </div>
+                <div className={`flex items-center gap-2 ${passwordChecks.passwordsMatch ? "text-success" : "text-muted-foreground"}`}>
+                  {passwordChecks.passwordsMatch ? <CheckCircle2 className="h-3.5 w-3.5" /> : <Circle className="h-3.5 w-3.5" />}
+                  <span className="font-medium">{t("auth.passwordsMatch")}</span>
+                </div>
+              </div>
+              <Button type="submit" className="w-full font-semibold min-h-[48px] text-base bg-gradient-to-r from-primary to-accent hover:from-primary/90 hover:to-accent/90 shadow-lg" disabled={isLoading}>
+                {isLoading ? (<><Loader2 className="mr-2 h-4 w-4 animate-spin" />{t("auth.registering")}</>) : t("auth.registerButton")}
+              </Button>
+              <p className="text-[10px] text-muted-foreground text-center pt-1 font-medium leading-relaxed">
+                {t("auth.agreeTerms")}{" "}
+                <Link to="/termos" className="text-primary font-bold hover:underline">{t("common.terms")}</Link>
+                {" "}{t("auth.andPrivacy")}{" "}
+                <Link to="/privacidade" className="text-primary font-bold hover:underline">{t("common.privacy")}</Link>.
+              </p>
+              <GoogleButton />
+            </form>
+          </TabsContent>
+        </CardContent>
+      </Tabs>
+    </Card>
+  );
+}
+
+================================================================================
+FILE: src/components/landing/ui/index.ts
+================================================================================
+export { SectionWrapper } from "./SectionWrapper";
+export { KickerBadge } from "./KickerBadge";
+export { HeadlineHighlight } from "./HeadlineHighlight";
+export { SectionDivider } from "./SectionDivider";
+
+================================================================================
+FILE: src/components/landing/ui/KickerBadge.tsx
+================================================================================
+import { cn } from "@/lib/utils";
+import type { ReactNode } from "react";
+
+interface KickerBadgeProps {
+  children: ReactNode;
+  variant?: "warm" | "primary" | "cool";
+  className?: string;
+}
+
+const variantStyles = {
+  warm: "border-accent-warm/40 bg-accent-warm/10 text-accent-warm shadow-sm",
+  primary: "border-primary/40 bg-primary/10 text-primary shadow-sm",
+  cool: "border-accent-cool/40 bg-accent-cool/10 text-accent-cool shadow-sm",
+};
+
+export function KickerBadge({ children, variant = "warm", className }: KickerBadgeProps) {
+  return (
+    <span
+      className={cn(
+        // Allow wrapping on very small screens to prevent horizontal overflow
+        "inline-flex flex-wrap items-center justify-center gap-1.5 px-3.5 py-1.5 text-xs font-semibold rounded-full border-2 tracking-wide uppercase leading-tight max-w-full min-w-0",
+        variantStyles[variant],
+        className
+      )}
+    >
+      {children}
+    </span>
+  );
+}
+
+================================================================================
+FILE: src/components/landing/ui/HeadlineHighlight.tsx
+================================================================================
+import { cn } from "@/lib/utils";
+import type { ReactNode } from "react";
+
+interface HeadlineHighlightProps {
+  children: ReactNode;
+  variant?: "warm" | "primary";
+  className?: string;
+}
+
+export function HeadlineHighlight({ 
+  children, 
+  variant = "warm", 
+  className 
+}: HeadlineHighlightProps) {
+  return (
+    <span
+      className={cn(
+        "relative inline-block",
+        className
+      )}
+    >
+      <span className="relative z-10">{children}</span>
+      {/* Organic marker/highlighter effect */}
+      <span
+        className={cn(
+          "absolute -bottom-0.5 left-0 right-0 h-[0.35em] -z-0 rounded-sm transform -rotate-[0.5deg]",
+          variant === "warm" 
+            ? "bg-accent-warm/25" 
+            : "bg-primary/20"
+        )}
+        aria-hidden="true"
+      />
+    </span>
+  );
+}
+
+================================================================================
+END OF BACKUP
+================================================================================
